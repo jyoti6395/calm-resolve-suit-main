@@ -1,23 +1,25 @@
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  User as FirebaseUser 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  User as FirebaseUser
 } from "firebase/auth";
-import { 
-  doc, 
-  setDoc, 
-  getDoc, 
-  serverTimestamp 
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp
 } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 
 export interface UserProfile {
+  uid?: string;
   email: string;
   role: "customer" | string;
   createdAt: any;
   fullName?: string;
   company?: string;
+  status?: string;
 }
 
 /**
@@ -30,8 +32,10 @@ export async function signUp(email: string, password: string, additionalData?: {
   // Create user document in Firestore users collection
   const userDocRef = doc(db, "users", user.uid);
   const userProfile: UserProfile = {
+    uid: user.uid,
     email: user.email || email,
     role: "customer",
+    status: "active",
     createdAt: serverTimestamp(),
     ...additionalData
   };
@@ -45,7 +49,16 @@ export async function signUp(email: string, password: string, additionalData?: {
  */
 export async function logIn(email: string, password: string): Promise<FirebaseUser> {
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
-  return userCredential.user;
+  const user = userCredential.user;
+
+  // Create/update user document in Firestore users collection
+  const userDocRef = doc(db, "users", user.uid);
+  await setDoc(userDocRef, {
+    uid: user.uid,
+    status: "active"
+  }, { merge: true });
+
+  return user;
 }
 
 /**
@@ -69,11 +82,11 @@ export async function getUserRole(uid: string): Promise<string | null> {
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   const userDocRef = doc(db, "users", uid);
   const userDocSnap = await getDoc(userDocRef);
-  
+
   if (userDocSnap.exists()) {
     return userDocSnap.data() as UserProfile;
   }
-  
+
   return null;
 }
 
