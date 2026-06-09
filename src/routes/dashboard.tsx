@@ -3,6 +3,7 @@ import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
 import { tickets, technicians, statusStyles, priorityStyles } from "@/lib/mock";
 import { Search, Bell, Plus, ChevronRight, Zap, AlertTriangle, FileWarning, CheckCircle2, ArrowUpRight, Clock } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -14,6 +15,22 @@ const summary = [
 ];
 
 function Dashboard() {
+  const { user, profile } = useAuth();
+
+  const getInitials = () => {
+    if (profile?.fullName) {
+      const parts = profile.fullName.trim().split(" ");
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return "AP";
+  };
+
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
@@ -24,13 +41,16 @@ function Dashboard() {
 
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center font-bold">AP</div>
+              <div className="h-11 w-11 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center font-bold">
+                {getInitials()}
+              </div>
               <div>
                 <p className="text-[11px] text-white/60 uppercase tracking-wider">Good afternoon</p>
-                <p className="text-[15px] font-semibold">Alex Petrov</p>
+                <p className="text-[15px] font-semibold">{profile?.fullName || "Guest"}</p>
               </div>
             </div>
             <Link to="/notifications" className="relative h-11 w-11 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center">
+
               <Bell className="h-4 w-4" />
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive ring-2 ring-[oklch(0.18_0.12_263)]" />
             </Link>

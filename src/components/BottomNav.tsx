@@ -13,7 +13,7 @@ export function BottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] z-40 pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-3 mb-3 glass rounded-3xl shadow-elevated px-2 py-2 flex items-center justify-between">
+      <div className=" glass px-2 py-2 flex items-center justify-between">
         {items.map(({ to, icon: Icon, label }) => {
           const active = path === to || (to !== "/dashboard" && path.startsWith(to));
           return (

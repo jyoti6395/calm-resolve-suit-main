@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
 import { AppHeader } from "@/components/AppHeader";
 import { Building2, Bell, Lock, Smartphone, Palette, History, HelpCircle, LogOut, ChevronRight, Pencil, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { logOut as firebaseLogOut } from "@/services/authService";
 
 export const Route = createFileRoute("/profile")({ component: Profile });
 
@@ -33,6 +35,32 @@ const sections = [
 ];
 
 function Profile() {
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await firebaseLogOut();
+      navigate({ to: "/login" });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  };
+
+  const getInitials = () => {
+    if (profile?.fullName) {
+      const parts = profile.fullName.trim().split(" ");
+      if (parts.length > 1) {
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      }
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return "US";
+  };
+
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
@@ -44,15 +72,19 @@ function Profile() {
         <div className="mx-5 rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
           <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary-glow/40 blur-3xl" />
           <div className="relative flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center text-[22px] font-extrabold">AP</div>
+            <div className="h-16 w-16 rounded-2xl bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center text-[22px] font-extrabold">
+              {getInitials()}
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[17px] font-bold">Alex Petrov</p>
-              <p className="text-[12px] text-white/70">alex@acme.co</p>
-              <p className="text-[10px] text-white/60 mt-0.5">Acme Corp · Engineering Ops</p>
+              <p className="text-[17px] font-bold truncate">{profile?.fullName || "Guest User"}</p>
+              <p className="text-[12px] text-white/70 truncate">{user?.email || "Not logged in"}</p>
+              <p className="text-[10px] text-white/60 mt-0.5 truncate">
+                {profile?.company || "Personal"} · Customer
+              </p>
             </div>
           </div>
           <div className="relative grid grid-cols-3 gap-3 mt-5">
-            {[{ k: "Tickets", v: "128" }, { k: "Resolved", v: "112" }, { k: "Avg. rating", v: "4.9" }].map((s) => (
+            {[{ k: "Tickets", v: "12" }, { k: "Resolved", v: "8" }, { k: "Avg. rating", v: "4.9" }].map((s) => (
               <div key={s.k} className="rounded-2xl bg-white/10 backdrop-blur p-3 text-center">
                 <p className="text-[16px] font-extrabold">{s.v}</p>
                 <p className="text-[10px] text-white/60">{s.k}</p>
@@ -87,9 +119,12 @@ function Profile() {
         </div>
 
         <div className="px-5 mt-6">
-          <Link to="/login" className="flex items-center justify-center gap-2 h-14 rounded-2xl bg-destructive/10 text-destructive font-semibold">
+          <button 
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 h-14 rounded-2xl bg-destructive/10 text-destructive font-semibold hover:bg-destructive/15 transition-colors focus:outline-none"
+          >
             <LogOut className="h-4 w-4" /> Log out
-          </Link>
+          </button>
           <p className="text-center text-[11px] text-muted-foreground/70 mt-4">AdviseTech v3.4.1 · SOC 2 Type II</p>
         </div>
       </div>
@@ -97,3 +132,4 @@ function Profile() {
     </MobileShell>
   );
 }
+

@@ -24,7 +24,7 @@ function Onboarding() {
   return (
     <MobileShell>
       <div className="min-h-screen flex flex-col bg-background">
-        <div className="px-5 pt-[env(safe-area-inset-top)] pt-6 flex justify-between items-center">
+          <div className="px-5 pt-[calc(env(safe-area-inset-top,0px)+28px)] flex justify-between items-center">
           <div className="flex gap-1.5">
             {slides.map((_, idx) => (
               <span key={idx} className={`h-1.5 rounded-full transition-all ${idx === i ? "w-8 bg-primary" : "w-1.5 bg-muted-foreground/25"}`} />
@@ -51,19 +51,19 @@ function Onboarding() {
           </p>
         </div>
 
-        <div className="px-6 pb-10 pt-4 flex items-center gap-3">
-          {!last && (
-            <button onClick={() => nav({ to: "/login" })} className="h-14 px-6 rounded-2xl bg-secondary text-secondary-foreground font-semibold">
-              Skip
-            </button>
-          )}
+        <div className="px-6 pb-[calc(env(safe-area-inset-bottom,0px)+24px)] pt-4 flex flex-col items-center gap-3">
           <button
             onClick={next}
-            className="flex-1 h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated flex items-center justify-center gap-2 hover:shadow-glow transition-all"
+            className="w-full h-12 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated flex items-center justify-center gap-2 hover:shadow-glow transition-all"
           >
             {last ? "Get started" : "Continue"}
             <ArrowRight className="h-4 w-4" />
           </button>
+          {/* {!last && (
+            <button onClick={() => nav({ to: "/login" })} className="h-12 px-6 rounded-2xl border border-border text-muted-foreground font-medium hover:bg-secondary transition-colors">
+              Skip
+            </button>
+          )} */}
         </div>
       </div>
     </MobileShell>
