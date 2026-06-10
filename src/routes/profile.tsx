@@ -2,7 +2,19 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
 import { AppHeader } from "@/components/AppHeader";
-import { Building2, Bell, Lock, Smartphone, Palette, History, HelpCircle, LogOut, ChevronRight, Pencil, ShieldCheck } from "lucide-react";
+import {
+  Building2,
+  Bell,
+  Lock,
+  Smartphone,
+  Palette,
+  History,
+  HelpCircle,
+  LogOut,
+  ChevronRight,
+  Pencil,
+  ShieldCheck,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { logOut as firebaseLogOut } from "@/services/authService";
 
@@ -64,9 +76,14 @@ function Profile() {
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader title="Profile" right={
-          <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center"><Pencil className="h-4 w-4" /></button>
-        } />
+        <AppHeader
+          title="Profile"
+          right={
+            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <Pencil className="h-4 w-4" />
+            </button>
+          }
+        />
 
         {/* Profile card */}
         <div className="mx-5 rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
@@ -84,7 +101,11 @@ function Profile() {
             </div>
           </div>
           <div className="relative grid grid-cols-3 gap-3 mt-5">
-            {[{ k: "Tickets", v: "12" }, { k: "Resolved", v: "8" }, { k: "Avg. rating", v: "4.9" }].map((s) => (
+            {[
+              { k: "Tickets", v: "12" },
+              { k: "Resolved", v: "8" },
+              { k: "Avg. rating", v: "4.9" },
+            ].map((s) => (
               <div key={s.k} className="rounded-2xl bg-white/10 backdrop-blur p-3 text-center">
                 <p className="text-[16px] font-extrabold">{s.v}</p>
                 <p className="text-[10px] text-white/60">{s.k}</p>
@@ -96,12 +117,17 @@ function Profile() {
         <div className="px-5 mt-6 space-y-6">
           {sections.map((sec) => (
             <div key={sec.title}>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">{sec.title}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                {sec.title}
+              </p>
               <div className="mt-3 rounded-2xl bg-card border border-border overflow-hidden">
                 {sec.items.map((it, i) => {
                   const Icon = it.icon;
                   return (
-                    <button key={it.label} className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors ${i !== sec.items.length - 1 ? "border-b border-border" : ""}`}>
+                    <button
+                      key={it.label}
+                      className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-muted/50 transition-colors ${i !== sec.items.length - 1 ? "border-b border-border" : ""}`}
+                    >
                       <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
                         <Icon className="h-4 w-4" />
                       </div>
@@ -119,17 +145,18 @@ function Profile() {
         </div>
 
         <div className="px-5 mt-6">
-          <button 
+          <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 h-14 rounded-2xl bg-destructive/10 text-destructive font-semibold hover:bg-destructive/15 transition-colors focus:outline-none"
           >
             <LogOut className="h-4 w-4" /> Log out
           </button>
-          <p className="text-center text-[11px] text-muted-foreground/70 mt-4">AdviseTech v3.4.1 · SOC 2 Type II</p>
+          <p className="text-center text-[11px] text-muted-foreground/70 mt-4">
+            AdviseTech v3.4.1 · SOC 2 Type II
+          </p>
         </div>
       </div>
       <BottomNav />
     </MobileShell>
   );
 }
-

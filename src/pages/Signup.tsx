@@ -1,7 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
 import { MobileShell } from "../components/MobileShell";
-import { ChevronLeft, Mail, Lock, User, Building2, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
+import {
+  ChevronLeft,
+  Mail,
+  Lock,
+  User,
+  Building2,
+  AlertCircle,
+  Loader2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { signUp } from "../services/authService";
 
 export function SignupPage() {
@@ -39,11 +49,12 @@ export function SignupPage() {
     try {
       await signUp(email.trim(), password, {
         fullName: fullName.trim(),
-        company: company.trim()
+        company: company.trim(),
       });
       // Redirect to dashboard
       navigate({ to: "/dashboard" });
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
       console.error("Signup error:", err);
       // User-friendly error message mapping
       switch (err.code) {
@@ -83,8 +94,12 @@ export function SignupPage() {
 
           {/* Title & Subtitle */}
           <div className="px-6 text-center pt-2">
-            <h1 className="text-[30px] font-extrabold tracking-tight text-balance">Create your account</h1>
-            <p className="mt-1.5 text-[14px] text-muted-foreground">Onboard in less than a minute.</p>
+            <h1 className="text-[30px] font-extrabold tracking-tight text-balance">
+              Create your account
+            </h1>
+            <p className="mt-1.5 text-[14px] text-muted-foreground">
+              Onboard in less than a minute.
+            </p>
           </div>
 
           {/* Error Banner */}
@@ -99,7 +114,9 @@ export function SignupPage() {
           <form onSubmit={handleSubmit} className="px-6 mt-6 space-y-4">
             {/* Full Name */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Full Name</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">
+                Full Name
+              </label>
               <div className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card focus-within:shadow-soft transition-all">
                 <User className="h-4 w-4 text-muted-foreground shrink-0" />
                 <input
@@ -116,7 +133,9 @@ export function SignupPage() {
 
             {/* Company Name */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Company</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">
+                Company
+              </label>
               <div className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card focus-within:shadow-soft transition-all">
                 <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                 <input
@@ -133,7 +152,9 @@ export function SignupPage() {
 
             {/* Email Address */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Work Email</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">
+                Work Email
+              </label>
               <div className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card focus-within:shadow-soft transition-all">
                 <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
                 <input
@@ -150,7 +171,9 @@ export function SignupPage() {
 
             {/* Password */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Password</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">
+                Password
+              </label>
               <div className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card focus-within:shadow-soft transition-all">
                 <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
                 <input
@@ -175,7 +198,9 @@ export function SignupPage() {
 
             {/* Confirm Password */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">Confirm Password</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 px-1">
+                Confirm Password
+              </label>
               <div className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card focus-within:shadow-soft transition-all">
                 <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
                 <input
@@ -193,13 +218,25 @@ export function SignupPage() {
                   className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
                   tabIndex={-1}
                 >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
 
             <p className="text-[11px] text-muted-foreground/80 px-1 pt-1">
-              By creating an account, you agree to AdviseTech's <span className="underline text-foreground/75 cursor-pointer hover:text-foreground">Terms of Service</span> and <span className="underline text-foreground/75 cursor-pointer hover:text-foreground">Privacy Policy</span>.
+              By creating an account, you agree to AdviseTech's{" "}
+              <span className="underline text-foreground/75 cursor-pointer hover:text-foreground">
+                Terms of Service
+              </span>{" "}
+              and{" "}
+              <span className="underline text-foreground/75 cursor-pointer hover:text-foreground">
+                Privacy Policy
+              </span>
+              .
             </p>
 
             {/* Register Button */}
@@ -222,7 +259,10 @@ export function SignupPage() {
 
         {/* Existing Account Link */}
         <div className="px-6 pb-8 pt-6 text-center text-[13px] text-muted-foreground">
-          Already have an account? <Link to="/login" className="text-primary font-semibold hover:underline">Sign in</Link>
+          Already have an account?{" "}
+          <Link to="/login" className="text-primary font-semibold hover:underline">
+            Sign in
+          </Link>
         </div>
       </div>
     </MobileShell>

@@ -17,7 +17,9 @@ export function AppHeader({
 }) {
   const router = useRouter();
   return (
-    <header className={`sticky top-0 z-30 px-5 pt-[env(safe-area-inset-top)] ${transparent ? "" : "bg-background/80 backdrop-blur-xl"}`}>
+    <header
+      className={`sticky top-0 z-30 px-5 pt-[env(safe-area-inset-top)] ${transparent ? "" : "bg-background/80 backdrop-blur-xl"}`}
+    >
       <div className="h-14 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
           {back && (
@@ -30,7 +32,11 @@ export function AppHeader({
             </button>
           )}
           <div className="min-w-0">
-            {title && <h1 className="text-[17px] font-bold text-foreground truncate leading-tight">{title}</h1>}
+            {title && (
+              <h1 className="text-[17px] font-bold text-foreground truncate leading-tight">
+                {title}
+              </h1>
+            )}
             {subtitle && <p className="text-[11px] text-muted-foreground truncate">{subtitle}</p>}
           </div>
         </div>

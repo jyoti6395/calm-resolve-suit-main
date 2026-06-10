@@ -5,6 +5,7 @@ export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Field({ icon: Icon, trailing, ...props }: any) {
   return (
     <label className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card transition-all">
@@ -17,4 +18,3 @@ export function Field({ icon: Icon, trailing, ...props }: any) {
     </label>
   );
 }
-

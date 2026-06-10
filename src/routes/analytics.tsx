@@ -20,9 +20,15 @@ function Analytics() {
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader title="Insights" subtitle="Last 30 days" right={
-          <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center"><Download className="h-4 w-4" /></button>
-        } />
+        <AppHeader
+          title="Insights"
+          subtitle="Last 30 days"
+          right={
+            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <Download className="h-4 w-4" />
+            </button>
+          }
+        />
 
         <div className="px-5 grid grid-cols-2 gap-3">
           <Stat label="Avg. resolution" value="3h 12m" delta="-18%" good />
@@ -38,7 +44,9 @@ function Analytics() {
               <p className="text-[12px] text-muted-foreground">Ticket volume</p>
               <p className="text-[22px] font-extrabold tracking-tight">412</p>
             </div>
-            <span className="text-[11px] font-semibold text-success bg-success/15 px-2 py-1 rounded-full">+12% MoM</span>
+            <span className="text-[11px] font-semibold text-success bg-success/15 px-2 py-1 rounded-full">
+              +12% MoM
+            </span>
           </div>
           <svg viewBox="0 0 320 120" className="mt-4 w-full h-32">
             <defs>
@@ -48,22 +56,48 @@ function Analytics() {
               </linearGradient>
             </defs>
             {(() => {
-              const pts = trend.map((v, i) => [i * (320 / (trend.length - 1)), 110 - (v / max) * 95]);
+              const pts = trend.map((v, i) => [
+                i * (320 / (trend.length - 1)),
+                110 - (v / max) * 95,
+              ]);
               const line = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`).join(" ");
               const area = `${line} L 320 120 L 0 120 Z`;
               return (
                 <>
                   <path d={area} fill="url(#area)" />
-                  <path d={line} stroke="oklch(0.45 0.2 263)" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                  {pts.map((p, i) => i === pts.length - 1 && (
-                    <circle key={i} cx={p[0]} cy={p[1]} r="4.5" fill="oklch(0.55 0.22 263)" stroke="white" strokeWidth="2" />
-                  ))}
+                  <path
+                    d={line}
+                    stroke="oklch(0.45 0.2 263)"
+                    strokeWidth="2.5"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {pts.map(
+                    (p, i) =>
+                      i === pts.length - 1 && (
+                        <circle
+                          key={i}
+                          cx={p[0]}
+                          cy={p[1]}
+                          r="4.5"
+                          fill="oklch(0.55 0.22 263)"
+                          stroke="white"
+                          strokeWidth="2"
+                        />
+                      ),
+                  )}
                 </>
               );
             })()}
           </svg>
           <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-            <span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span>
+            <span>Jan</span>
+            <span>Mar</span>
+            <span>May</span>
+            <span>Jul</span>
+            <span>Sep</span>
+            <span>Nov</span>
           </div>
         </div>
 
@@ -78,7 +112,10 @@ function Analytics() {
                   <span className="text-muted-foreground">{c.v}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${c.v}%`, backgroundColor: c.color }} />
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{ width: `${c.v}%`, backgroundColor: c.color }}
+                  />
                 </div>
               </div>
             ))}
@@ -98,12 +135,18 @@ function Analytics() {
               { n: "Marco Diaz", t: 71, r: 4.7, s: "97% SLA" },
             ].map((x, i) => (
               <div key={x.n} className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-gradient-brand text-white flex items-center justify-center text-[12px] font-bold">{i + 1}</div>
+                <div className="h-9 w-9 rounded-xl bg-gradient-brand text-white flex items-center justify-center text-[12px] font-bold">
+                  {i + 1}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold truncate">{x.n}</p>
-                  <p className="text-[11px] text-muted-foreground">{x.t} resolved · ★ {x.r}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {x.t} resolved · ★ {x.r}
+                  </p>
                 </div>
-                <span className="text-[11px] font-semibold text-success bg-success/15 px-2 py-1 rounded-full">{x.s}</span>
+                <span className="text-[11px] font-semibold text-success bg-success/15 px-2 py-1 rounded-full">
+                  {x.s}
+                </span>
               </div>
             ))}
           </div>
@@ -111,9 +154,15 @@ function Analytics() {
 
         <div className="mx-5 mt-5 rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
           <div className="absolute -top-10 -right-8 h-32 w-32 rounded-full bg-primary-glow/40 blur-3xl" />
-          <p className="relative text-[11px] uppercase tracking-wider text-white/70 font-bold">Monthly insight</p>
-          <p className="relative mt-1 text-[16px] font-bold leading-snug">Network tickets dropped 23% after the VPN profile rollout.</p>
-          <button className="relative mt-3 h-9 px-4 rounded-full bg-white text-primary font-semibold text-[12px]">Read brief</button>
+          <p className="relative text-[11px] uppercase tracking-wider text-white/70 font-bold">
+            Monthly insight
+          </p>
+          <p className="relative mt-1 text-[16px] font-bold leading-snug">
+            Network tickets dropped 23% after the VPN profile rollout.
+          </p>
+          <button className="relative mt-3 h-9 px-4 rounded-full bg-white text-primary font-semibold text-[12px]">
+            Read brief
+          </button>
         </div>
       </div>
       <BottomNav />
@@ -121,13 +170,25 @@ function Analytics() {
   );
 }
 
-function Stat({ label, value, delta, good }: { label: string; value: string; delta: string; good?: boolean }) {
+function Stat({
+  label,
+  value,
+  delta,
+  good,
+}: {
+  label: string;
+  value: string;
+  delta: string;
+  good?: boolean;
+}) {
   const Icon = good ? TrendingDown : TrendingUp;
   return (
     <div className="rounded-3xl bg-card border border-border p-4 shadow-soft">
       <p className="text-[11px] text-muted-foreground font-medium">{label}</p>
       <p className="mt-1 text-[22px] font-extrabold tracking-tight leading-none">{value}</p>
-      <p className={`mt-2 text-[11px] font-semibold flex items-center gap-1 ${good ? "text-success" : "text-primary"}`}>
+      <p
+        className={`mt-2 text-[11px] font-semibold flex items-center gap-1 ${good ? "text-success" : "text-primary"}`}
+      >
         <Icon className="h-3 w-3" /> {delta}
       </p>
     </div>

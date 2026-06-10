@@ -22,10 +22,16 @@ export function BottomNav() {
               to={to}
               className="flex-1 flex flex-col items-center gap-0.5 py-2 rounded-2xl transition-all"
             >
-              <div className={`flex items-center justify-center h-9 w-12 rounded-2xl transition-all ${active ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground"}`}>
+              <div
+                className={`flex items-center justify-center h-9 w-12 rounded-2xl transition-all ${active ? "bg-primary text-primary-foreground shadow-glow" : "text-muted-foreground"}`}
+              >
                 <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.5 : 2} />
               </div>
-              <span className={`text-[10px] font-medium ${active ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+              <span
+                className={`text-[10px] font-medium ${active ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                {label}
+              </span>
             </Link>
           );
         })}

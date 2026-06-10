@@ -24,7 +24,10 @@ function Otp() {
     <MobileShell>
       <div className="min-h-screen bg-background flex flex-col">
         <div className="px-5 pt-[env(safe-area-inset-top)] pt-4">
-          <Link to="/forgot-password" className="h-10 w-10 -ml-2 rounded-full hover:bg-muted flex items-center justify-center">
+          <Link
+            to="/forgot-password"
+            className="h-10 w-10 -ml-2 rounded-full hover:bg-muted flex items-center justify-center"
+          >
             <ChevronLeft className="h-5 w-5" />
           </Link>
         </div>
@@ -34,7 +37,8 @@ function Otp() {
           </div>
           <h1 className="mt-5 text-[28px] font-extrabold tracking-tight">Verify it's you</h1>
           <p className="mt-1.5 text-[14px] text-muted-foreground">
-            We sent a 6-digit code to <span className="text-foreground font-semibold">alex@acme.co</span>
+            We sent a 6-digit code to{" "}
+            <span className="text-foreground font-semibold">alex@acme.co</span>
           </p>
         </div>
 
@@ -42,10 +46,14 @@ function Otp() {
           {code.map((c, i) => (
             <input
               key={i}
-              ref={(el) => { refs.current[i] = el; }}
+              ref={(el) => {
+                refs.current[i] = el;
+              }}
               value={c}
               onChange={(e) => set(i, e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Backspace" && !c && i > 0) refs.current[i - 1]?.focus(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Backspace" && !c && i > 0) refs.current[i - 1]?.focus();
+              }}
               inputMode="numeric"
               maxLength={1}
               className={`h-14 w-12 rounded-2xl text-center text-xl font-bold outline-none transition-all ${c ? "bg-primary/8 border-2 border-primary text-foreground" : "bg-secondary border-2 border-transparent"}`}

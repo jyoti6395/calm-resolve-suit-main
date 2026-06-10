@@ -11,7 +11,10 @@ function Forgot() {
     <MobileShell>
       <div className="min-h-screen bg-background flex flex-col">
         <div className="px-5 pt-[env(safe-area-inset-top)] pt-4">
-          <Link to="/login" className="h-10 w-10 -ml-2 rounded-full hover:bg-muted flex items-center justify-center">
+          <Link
+            to="/login"
+            className="h-10 w-10 -ml-2 rounded-full hover:bg-muted flex items-center justify-center"
+          >
             <ChevronLeft className="h-5 w-5" />
           </Link>
         </div>
@@ -24,9 +27,17 @@ function Forgot() {
             Enter the email associated with your account and we'll send a verification code.
           </p>
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); nav({ to: "/otp" }); }} className="px-6 mt-8 space-y-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            nav({ to: "/otp" });
+          }}
+          className="px-6 mt-8 space-y-3"
+        >
           <Field icon={Mail} type="email" placeholder="Work email" />
-          <button className="h-14 w-full rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated">Send code</button>
+          <button className="h-14 w-full rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated">
+            Send code
+          </button>
         </form>
       </div>
     </MobileShell>

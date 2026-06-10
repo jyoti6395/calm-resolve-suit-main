@@ -3,7 +3,15 @@ import { useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { AppHeader } from "@/components/AppHeader";
 import { categories } from "@/lib/mock";
-import { Camera, Image as ImageIcon, Mic, Paperclip, Sparkles, ChevronRight, Save } from "lucide-react";
+import {
+  Camera,
+  Image as ImageIcon,
+  Mic,
+  Paperclip,
+  Sparkles,
+  ChevronRight,
+  Save,
+} from "lucide-react";
 
 export const Route = createFileRoute("/tickets/new")({ component: NewTicket });
 
@@ -22,26 +30,32 @@ function NewTicket() {
   const [description, setDescription] = useState("");
 
   const canNext =
-    (step === 1 && !!category) ||
-    (step === 2 && description.length > 10) ||
-    step === 3;
+    (step === 1 && !!category) || (step === 2 && description.length > 10) || step === 3;
 
   return (
     <MobileShell>
       <div className="min-h-screen bg-background flex flex-col">
-        <AppHeader title="Raise a ticket" back right={
-          <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
-            <Save className="h-3.5 w-3.5" /> Draft
-          </button>
-        } />
+        <AppHeader
+          title="Raise a ticket"
+          back
+          right={
+            <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
+              <Save className="h-3.5 w-3.5" /> Draft
+            </button>
+          }
+        />
 
         {/* Stepper */}
         <div className="px-5">
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((n) => (
               <div key={n} className="flex-1">
-                <div className={`h-1.5 rounded-full transition-all ${n <= step ? "bg-primary" : "bg-muted"}`} />
-                <p className={`mt-1.5 text-[10px] font-semibold ${n <= step ? "text-foreground" : "text-muted-foreground"}`}>
+                <div
+                  className={`h-1.5 rounded-full transition-all ${n <= step ? "bg-primary" : "bg-muted"}`}
+                />
+                <p
+                  className={`mt-1.5 text-[10px] font-semibold ${n <= step ? "text-foreground" : "text-muted-foreground"}`}
+                >
                   Step {n}
                 </p>
               </div>
@@ -53,7 +67,9 @@ function NewTicket() {
           {step === 1 && (
             <div className="animate-slide-up">
               <h2 className="text-[22px] font-extrabold tracking-tight">What's the issue about?</h2>
-              <p className="mt-1 text-[13px] text-muted-foreground">Pick a category — we'll tailor the form.</p>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                Pick a category — we'll tailor the form.
+              </p>
               <div className="mt-5 grid grid-cols-2 gap-3">
                 {categories.map((c) => (
                   <button
@@ -72,7 +88,9 @@ function NewTicket() {
           {step === 2 && (
             <div className="animate-slide-up">
               <h2 className="text-[22px] font-extrabold tracking-tight">Describe the problem</h2>
-              <p className="mt-1 text-[13px] text-muted-foreground">{category} · Be as specific as you can.</p>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                {category} · Be as specific as you can.
+              </p>
 
               <input
                 placeholder="Title (e.g. VPN keeps disconnecting)"
@@ -95,12 +113,21 @@ function NewTicket() {
                 <div className="mt-4 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-4 animate-scale-in">
                   <div className="flex items-center gap-2 text-primary">
                     <Sparkles className="h-4 w-4" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider">AI suggestion</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      AI suggestion
+                    </span>
                   </div>
                   <p className="mt-2 text-[13px] font-semibold">3 related KB articles found</p>
                   <div className="mt-3 space-y-2">
-                    {["Reset VPN profile on macOS", "Allowlist AnyConnect in firewall", "Common Cisco AnyConnect issues"].map(s => (
-                      <button key={s} className="w-full flex items-center justify-between rounded-xl bg-card px-3 py-2 text-left text-[12.5px] font-medium">
+                    {[
+                      "Reset VPN profile on macOS",
+                      "Allowlist AnyConnect in firewall",
+                      "Common Cisco AnyConnect issues",
+                    ].map((s) => (
+                      <button
+                        key={s}
+                        className="w-full flex items-center justify-between rounded-xl bg-card px-3 py-2 text-left text-[12.5px] font-medium"
+                      >
                         {s}
                         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                       </button>
@@ -110,7 +137,9 @@ function NewTicket() {
               )}
 
               <div className="mt-5">
-                <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">Priority</p>
+                <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Priority
+                </p>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {priorities.map((p) => (
                     <button
@@ -126,10 +155,20 @@ function NewTicket() {
               </div>
 
               <div className="mt-5">
-                <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">Attachments</p>
+                <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Attachments
+                </p>
                 <div className="mt-2 grid grid-cols-4 gap-2">
-                  {[{ I: Camera, l: "Camera" }, { I: ImageIcon, l: "Photo" }, { I: Paperclip, l: "File" }, { I: Mic, l: "Voice" }].map(({ I, l }) => (
-                    <button key={l} className="aspect-square rounded-2xl bg-secondary flex flex-col items-center justify-center gap-1.5">
+                  {[
+                    { I: Camera, l: "Camera" },
+                    { I: ImageIcon, l: "Photo" },
+                    { I: Paperclip, l: "File" },
+                    { I: Mic, l: "Voice" },
+                  ].map(({ I, l }) => (
+                    <button
+                      key={l}
+                      className="aspect-square rounded-2xl bg-secondary flex flex-col items-center justify-center gap-1.5"
+                    >
                       <I className="h-5 w-5 text-foreground/70" />
                       <span className="text-[10.5px] font-semibold">{l}</span>
                     </button>
@@ -142,18 +181,25 @@ function NewTicket() {
           {step === 3 && (
             <div className="animate-slide-up">
               <h2 className="text-[22px] font-extrabold tracking-tight">Review & submit</h2>
-              <p className="mt-1 text-[13px] text-muted-foreground">Confirm details before raising the ticket.</p>
+              <p className="mt-1 text-[13px] text-muted-foreground">
+                Confirm details before raising the ticket.
+              </p>
 
               <div className="mt-5 space-y-2 rounded-2xl bg-card border border-border p-4">
                 <Row k="Category" v={category!} />
-                <Row k="Priority" v={priorities.find(p => p.key === priority)!.label} />
-                <Row k="Description" v={`${description.slice(0, 60)}${description.length > 60 ? "…" : ""}`} />
+                <Row k="Priority" v={priorities.find((p) => p.key === priority)!.label} />
+                <Row
+                  k="Description"
+                  v={`${description.slice(0, 60)}${description.length > 60 ? "…" : ""}`}
+                />
                 <Row k="Attachments" v="0 files" />
               </div>
 
               <div className="mt-5 rounded-2xl bg-success/10 border border-success/20 p-4 text-[12.5px] text-foreground/80">
                 <p className="font-semibold text-success">Estimated response: under 30 minutes</p>
-                <p className="mt-1 text-muted-foreground">Your ticket will be auto-routed to the {category} team.</p>
+                <p className="mt-1 text-muted-foreground">
+                  Your ticket will be auto-routed to the {category} team.
+                </p>
               </div>
             </div>
           )}
@@ -162,11 +208,18 @@ function NewTicket() {
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] p-5 bg-gradient-to-t from-background via-background to-transparent">
           <div className="flex gap-3">
             {step > 1 && (
-              <button onClick={() => setStep(step - 1)} className="h-14 px-6 rounded-2xl bg-secondary font-semibold">Back</button>
+              <button
+                onClick={() => setStep(step - 1)}
+                className="h-14 px-6 rounded-2xl bg-secondary font-semibold"
+              >
+                Back
+              </button>
             )}
             <button
               disabled={!canNext}
-              onClick={() => step === 3 ? nav({ to: "/tickets/confirmation" }) : setStep(step + 1)}
+              onClick={() =>
+                step === 3 ? nav({ to: "/tickets/confirmation" }) : setStep(step + 1)
+              }
               className="flex-1 h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated disabled:opacity-40 disabled:shadow-none"
             >
               {step === 3 ? "Submit ticket" : "Continue"}

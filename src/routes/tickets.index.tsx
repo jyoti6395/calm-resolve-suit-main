@@ -19,19 +19,24 @@ const tabs: { key: "all" | TicketStatus; label: string }[] = [
 function Tickets() {
   const [tab, setTab] = useState<(typeof tabs)[number]["key"]>("all");
   const [q, setQ] = useState("");
-  const list = tickets.filter(t =>
-    (tab === "all" || t.status === tab) &&
-    (q === "" || (t.title + t.id + t.category).toLowerCase().includes(q.toLowerCase()))
+  const list = tickets.filter(
+    (t) =>
+      (tab === "all" || t.status === tab) &&
+      (q === "" || (t.title + t.id + t.category).toLowerCase().includes(q.toLowerCase())),
   );
 
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader title="Tickets" subtitle={`${list.length} matching`} right={
-          <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-            <SlidersHorizontal className="h-4 w-4" />
-          </button>
-        } />
+        <AppHeader
+          title="Tickets"
+          subtitle={`${list.length} matching`}
+          right={
+            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+              <SlidersHorizontal className="h-4 w-4" />
+            </button>
+          }
+        />
 
         <div className="px-5">
           <label className="flex items-center gap-2 h-12 px-4 rounded-2xl bg-secondary">
@@ -63,24 +68,39 @@ function Tickets() {
             const ps = priorityStyles[t.priority];
             const ss = statusStyles[t.status];
             return (
-              <Link key={t.id} to="/tickets/$id" params={{ id: t.id }} className="block rounded-2xl bg-card border border-border p-4 shadow-soft active:scale-[0.99] transition-transform">
+              <Link
+                key={t.id}
+                to="/tickets/$id"
+                params={{ id: t.id }}
+                className="block rounded-2xl bg-card border border-border p-4 shadow-soft active:scale-[0.99] transition-transform"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <CategoryIcon category={t.category} />
-                    <span className="text-[10px] font-bold text-muted-foreground tracking-wider">{t.id}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
+                      {t.id}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ss.bg} ${ss.text}`}>{ss.label}</span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ss.bg} ${ss.text}`}
+                  >
+                    {ss.label}
+                  </span>
                 </div>
                 <p className="mt-2 text-[14.5px] font-semibold leading-snug">{t.title}</p>
 
                 <div className="mt-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ps.bg} ${ps.text} flex items-center gap-1`}>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ps.bg} ${ps.text} flex items-center gap-1`}
+                    >
                       <span className={`h-1.5 w-1.5 rounded-full ${ps.dot}`} />
                       {ps.label}
                     </span>
                     <div className="flex items-center gap-1.5">
-                      <div className="h-6 w-6 rounded-full bg-gradient-brand text-white text-[10px] font-bold flex items-center justify-center">{t.assignee.initials}</div>
+                      <div className="h-6 w-6 rounded-full bg-gradient-brand text-white text-[10px] font-bold flex items-center justify-center">
+                        {t.assignee.initials}
+                      </div>
                       <span className="text-[11px] text-muted-foreground">{t.assignee.name}</span>
                     </div>
                   </div>
@@ -96,7 +116,9 @@ function Tickets() {
             );
           })}
           {list.length === 0 && (
-            <div className="text-center py-16 text-muted-foreground text-sm">No tickets match your search.</div>
+            <div className="text-center py-16 text-muted-foreground text-sm">
+              No tickets match your search.
+            </div>
           )}
         </div>
       </div>
@@ -115,6 +137,18 @@ function Tickets() {
 }
 
 function CategoryIcon({ category }: { category: string }) {
-  const map: Record<string, string> = { Network: "🌐", Email: "✉️", Hardware: "🖥️", Access: "🔑", Software: "💿", Infrastructure: "⚙️", Compliance: "🛡️" };
-  return <span className="h-7 w-7 rounded-xl bg-secondary flex items-center justify-center text-[14px]">{map[category] ?? "✨"}</span>;
+  const map: Record<string, string> = {
+    Network: "🌐",
+    Email: "✉️",
+    Hardware: "🖥️",
+    Access: "🔑",
+    Software: "💿",
+    Infrastructure: "⚙️",
+    Compliance: "🛡️",
+  };
+  return (
+    <span className="h-7 w-7 rounded-xl bg-secondary flex items-center justify-center text-[14px]">
+      {map[category] ?? "✨"}
+    </span>
+  );
 }

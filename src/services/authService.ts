@@ -2,20 +2,16 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  User as FirebaseUser
+  User as FirebaseUser,
 } from "firebase/auth";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp
-} from "firebase/firestore";
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 
 export interface UserProfile {
   uid?: string;
   email: string;
   role: "customer" | string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createdAt: any;
   fullName?: string;
   company?: string;
@@ -25,7 +21,11 @@ export interface UserProfile {
 /**
  * Creates a new user with Email/Password and registers a custom profile document in Firestore.
  */
-export async function signUp(email: string, password: string, additionalData?: { fullName?: string; company?: string }): Promise<FirebaseUser> {
+export async function signUp(
+  email: string,
+  password: string,
+  additionalData?: { fullName?: string; company?: string },
+): Promise<FirebaseUser> {
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
@@ -37,7 +37,7 @@ export async function signUp(email: string, password: string, additionalData?: {
     role: "customer",
     status: "active",
     createdAt: serverTimestamp(),
-    ...additionalData
+    ...additionalData,
   };
 
   await setDoc(userDocRef, userProfile);
@@ -53,10 +53,14 @@ export async function logIn(email: string, password: string): Promise<FirebaseUs
 
   // Create/update user document in Firestore users collection
   const userDocRef = doc(db, "users", user.uid);
-  await setDoc(userDocRef, {
-    uid: user.uid,
-    status: "active"
-  }, { merge: true });
+  await setDoc(
+    userDocRef,
+    {
+      uid: user.uid,
+      status: "active",
+    },
+    { merge: true },
+  );
 
   return user;
 }
@@ -89,4 +93,3 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 
   return null;
 }
-
