@@ -93,3 +93,10 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 
   return null;
 }
+/**
+ * Updates the user profile document in Firestore.
+ */
+export async function updateUserProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
+  const userDocRef = doc(db, "users", uid);
+  await setDoc(userDocRef, updates, { merge: true });
+}

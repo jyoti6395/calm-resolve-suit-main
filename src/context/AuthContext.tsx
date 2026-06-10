@@ -9,6 +9,7 @@ export interface AuthContextType {
   role: string | null;
   loading: boolean;
   isAuthenticated: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,12 +47,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  const refreshProfile = async () => {
+    if (user) {
+      try {
+        const userProfile = await getUserProfile(user.uid);
+        setProfile(userProfile);
+        setRole(userProfile?.role || null);
+      } catch (error) {
+        console.error("Error refreshing user profile from Firestore:", error);
+      }
+    }
+  };
+
   const value: AuthContextType = {
     user,
     profile,
     role,
     loading,
     isAuthenticated: !!user,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

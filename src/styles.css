@@ -226,19 +226,14 @@
     transform: rotate(360deg);
   }
 }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 
-.animate-float-orb {
-  animation: float-orb 8s ease-in-out infinite;
-}
-.animate-pulse-ring {
-  animation: pulse-ring 2s ease-out infinite;
-}
-.animate-slide-up {
-  animation: slide-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.animate-scale-in {
-  animation: scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.animate-orbit {
-  animation: orbit 12s linear infinite;
-}
+.animate-float-orb { animation: float-orb 8s ease-in-out infinite; }
+.animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+.animate-slide-up { animation: slide-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-scale-in { animation: scale-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.animate-orbit { animation: orbit 12s linear infinite; }
+.animate-fade-in { animation: fade-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both; }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { logOut as firebaseLogOut } from "@/services/authService";
+import { EditProfileSheet } from "@/components/EditProfileSheet";
 
 export const Route = createFileRoute("/profile")({ component: Profile });
 
@@ -49,6 +51,7 @@ const sections = [
 function Profile() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -76,14 +79,14 @@ function Profile() {
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader
-          title="Profile"
-          right={
-            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-              <Pencil className="h-4 w-4" />
-            </button>
-          }
-        />
+        <AppHeader title="Profile" right={
+          <button 
+            onClick={() => setIsEditOpen(true)}
+            className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center cursor-pointer focus:outline-none"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        } />
 
         {/* Profile card */}
         <div className="mx-5 rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
@@ -157,6 +160,7 @@ function Profile() {
         </div>
       </div>
       <BottomNav />
+      <EditProfileSheet isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
     </MobileShell>
   );
 }
