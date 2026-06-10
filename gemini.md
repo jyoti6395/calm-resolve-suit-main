@@ -42,4 +42,6 @@ The front-end client is actively wrapped inside an embedded mobile Flutter WebVi
 
 - **No Incomplete Snippets:** When generating or modifying any code artifact, output the complete file from end to end. Placeholders or shorthand markers such as `// rest of code remains unchanged` are strictly forbidden.
 - **Type Rigor:** The use of loose `any` types is banned. Every network response, data model mapping, component prop, and asynchronous return must be explicitly typed via TypeScript interfaces or types.
+- **Form & Validation Protocol:** All user input forms must be controlled via `react-hook-form` and strictly validated at runtime using `zod` schemas. Avoid using primitive `useState` bindings for complex form state.
+- **URL State Persistence:** Any view state that dictates filtering, sorting, pagination, or active tabs must be persisted to the URL via TanStack Router's `useSearch` or search parameters. This ensures deep-linking stability and refresh safety.
 - **Design Consistency:** Hardcoded color spaces or inline hex strings are blacklisted. Always pull values dynamically via Tailwind CSS semantic design tokens (`bg-background`, `text-foreground`, `bg-primary`, `text-destructive`).
