@@ -79,14 +79,17 @@ function Profile() {
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader title="Profile" right={
-          <button 
-            onClick={() => setIsEditOpen(true)}
-            className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center cursor-pointer focus:outline-none"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        } />
+        <AppHeader
+          title="Profile"
+          right={
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center cursor-pointer focus:outline-none"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          }
+        />
 
         {/* Profile card */}
         <div className="mx-5 rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">

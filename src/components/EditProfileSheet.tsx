@@ -57,9 +57,11 @@ export function EditProfileSheet({ isOpen, onClose }: EditProfileSheetProps) {
 
       toast.success("Profile updated successfully!");
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating profile:", error);
-      toast.error(error.message || "Failed to update profile. Please try again.");
+      const message =
+        error instanceof Error ? error.message : "Failed to update profile. Please try again.";
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -72,15 +74,18 @@ export function EditProfileSheet({ isOpen, onClose }: EditProfileSheetProps) {
 
       {/* Drawer content */}
       <div className="relative w-full rounded-t-[2.5rem] bg-card border-t border-border p-6 pb-[calc(env(safe-area-inset-bottom,0px)+2rem)] flex flex-col shadow-elevated animate-slide-up h-auto max-h-[85vh] overflow-y-auto">
-        
         {/* Header indicator bar */}
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-muted" />
 
         {/* Title */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-[19px] font-extrabold text-foreground tracking-tight">Edit Profile</h3>
-            <p className="text-[11.5px] text-muted-foreground">Keep your account details up to date.</p>
+            <h3 className="text-[19px] font-extrabold text-foreground tracking-tight">
+              Edit Profile
+            </h3>
+            <p className="text-[11.5px] text-muted-foreground">
+              Keep your account details up to date.
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -93,7 +98,6 @@ export function EditProfileSheet({ isOpen, onClose }: EditProfileSheetProps) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          
           {/* Inputs container */}
           <div className="space-y-4">
             {/* Full Name */}
@@ -160,7 +164,6 @@ export function EditProfileSheet({ isOpen, onClose }: EditProfileSheetProps) {
               )}
             </button>
           </div>
-
         </form>
       </div>
     </div>
