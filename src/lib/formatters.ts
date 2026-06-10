@@ -132,3 +132,27 @@ export function formatSLAWithCountdown(dueDateIso: string): { text: string; isBr
     isBreached: false,
   };
 }
+export function getStatusBadgeClass(status: string): string {
+  const s = status?.toLowerCase() || "";
+  if (s === "open") return "bg-primary/10 text-primary";
+  if (s === "in_progress") return "bg-warning/15 text-warning";
+  if (s === "resolved") return "bg-success/15 text-success";
+  if (s === "closed") return "bg-muted text-muted-foreground";
+  return "bg-secondary text-secondary-foreground";
+}
+
+export function getPriorityBadgeClass(priority: string): { bg: string; text: string; dot: string } {
+  const p = priority?.toLowerCase() || "";
+  if (p === "low")
+    return { bg: "bg-muted", text: "text-muted-foreground", dot: "bg-muted-foreground" };
+  if (p === "medium") return { bg: "bg-warning/15", text: "text-warning", dot: "bg-warning" };
+  if (p === "high")
+    return {
+      bg: "bg-[oklch(0.7_0.18_45)/15%]",
+      text: "text-[oklch(0.55_0.22_40)]",
+      dot: "bg-[oklch(0.6_0.22_40)]",
+    };
+  if (p === "urgent" || p === "critical")
+    return { bg: "bg-destructive/12", text: "text-destructive", dot: "bg-destructive" };
+  return { bg: "bg-secondary", text: "text-secondary-foreground", dot: "bg-transparent" };
+}

@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { initializeAuthListener } from "../store/authSlice";
+import { startTicketSyncListener } from "../store/ticketSlice";
 import { useIsMobile } from "../hooks/use-mobile";
 import { MobileShell } from "../components/MobileShell";
 import { SidebarProvider } from "../components/ui/sidebar";
@@ -75,7 +76,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
-  const { loading } = useAppSelector((state) => state.auth);
+  const { loading, isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // Run the real-time background listener stream immediately on mount
@@ -85,6 +86,16 @@ function RootComponent() {
       if (typeof unsubscribe === "function") unsubscribe();
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    // Start ticket sync once authenticated
+    if (isAuthenticated && user) {
+      const unsubscribe = dispatch(startTicketSyncListener());
+      return () => {
+        if (typeof unsubscribe === "function") unsubscribe();
+      };
+    }
+  }, [dispatch, isAuthenticated, user]);
 
   if (loading) {
     return (

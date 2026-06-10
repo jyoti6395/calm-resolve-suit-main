@@ -7,19 +7,7 @@ import type { RootState } from "./index";
 export type TicketStatus = "open" | "in_progress" | "resolved" | "closed";
 export type TicketPriority = "low" | "medium" | "high" | "urgent";
 
-export interface Ticket {
-  id: string;
-  title: string;
-  description: string;
-  status: TicketStatus;
-  priority: TicketPriority;
-  category: string;
-  createdBy: string;
-  assignedTo: string | null;
-  createdAt: string;
-  updatedAt: string;
-  dueDate: string | null;
-}
+import type { Ticket } from "../types/store";
 
 export interface TicketFilters {
   searchQuery: string;
@@ -56,6 +44,14 @@ const ticketSlice = createSlice({
       state.loading = false;
       state.error = null;
     },
+    updateTicket(state, action: PayloadAction<Ticket>) {
+      const index = state.tickets.findIndex((t) => t.id === action.payload.id);
+      if (index !== -1) {
+        state.tickets[index] = action.payload;
+      } else {
+        state.tickets.push(action.payload);
+      }
+    },
     setTicketFilters(state, action: PayloadAction<Partial<TicketFilters>>) {
       state.filters = { ...state.filters, ...action.payload };
     },
@@ -82,6 +78,7 @@ const ticketSlice = createSlice({
 
 export const {
   setTickets,
+  updateTicket,
   setTicketFilters,
   clearTicketState,
   setTicketsLoading,
@@ -113,14 +110,16 @@ export const startTicketSyncListener = () => (dispatch: any, getState: () => any
     q = query(ticketsRef);
   } else {
     // Technicians or regular users only listen to rows matching their assigned UID
-    q = query(ticketsRef, where("assignedTo", "==", user.uid));
+    q = query(ticketsRef, where("assignedToId", "==", user.uid));
   }
 
   const unsubscribe = onSnapshot(
     q,
     (snapshot) => {
+      console.log(`[DEBUG:Firebase] onSnapshot fired! Received ${snapshot.docs.length} documents.`);
       try {
         const mappedTickets = sanitizeQuerySnapshot<Ticket>(snapshot);
+        console.log(`[DEBUG:Firebase] mappedTickets:`, mappedTickets);
         dispatch(setTickets(mappedTickets));
       } catch (err: unknown) {
         const error = err as Error;

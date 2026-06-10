@@ -34,7 +34,7 @@ const createTicketSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long").max(100),
   description: z.string().min(10, "Description must be at least 10 characters long").max(800),
   category: z.string().min(1, "Category is required"),
-  priority: z.enum(['low', 'medium', 'high', 'critical']),
+  priority: z.enum(["low", "medium", "high", "critical"]),
 });
 
 type CreateTicketInput = z.infer<typeof createTicketSchema>;
@@ -44,7 +44,14 @@ function NewTicket() {
   const [step, setStep] = useState(1);
   const user = useAppSelector((state) => state.auth.user);
 
-  const { register, handleSubmit, watch, setValue, getValues, formState: { isSubmitting } } = useForm<CreateTicketInput>({
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    formState: { isSubmitting },
+  } = useForm<CreateTicketInput>({
     resolver: zodResolver(createTicketSchema),
     defaultValues: {
       title: "",
@@ -60,8 +67,8 @@ function NewTicket() {
   const watchPriority = watch("priority");
 
   const canNext =
-    (step === 1 && !!watchCategory) || 
-    (step === 2 && watchTitle.length >= 5 && watchDescription.length >= 10) || 
+    (step === 1 && !!watchCategory) ||
+    (step === 2 && watchTitle.length >= 5 && watchDescription.length >= 10) ||
     step === 3;
 
   const onSubmit = async (data: CreateTicketInput) => {
@@ -73,7 +80,7 @@ function NewTicket() {
         createdAt: serializeTimestamp(new Date()),
         updatedAt: serializeTimestamp(new Date()),
       };
-      
+
       await addDoc(collection(db, "tickets"), payload);
       toast.success("Ticket created successfully");
       nav({ to: "/tickets/confirmation" });
@@ -238,7 +245,10 @@ function NewTicket() {
 
               <div className="mt-5 space-y-2 rounded-2xl bg-card border border-border p-4">
                 <Row k="Category" v={getValues("category") || ""} />
-                <Row k="Priority" v={priorities.find((p) => p.key === getValues("priority"))?.label || ""} />
+                <Row
+                  k="Priority"
+                  v={priorities.find((p) => p.key === getValues("priority"))?.label || ""}
+                />
                 <Row
                   k="Description"
                   v={`${getValues("description")?.slice(0, 60) || ""}${getValues("description")?.length > 60 ? "…" : ""}`}
@@ -268,9 +278,7 @@ function NewTicket() {
             )}
             <button
               disabled={!canNext || isSubmitting}
-              onClick={() =>
-                step === 3 ? handleSubmit(onSubmit)() : setStep(step + 1)
-              }
+              onClick={() => (step === 3 ? handleSubmit(onSubmit)() : setStep(step + 1))}
               className="flex-1 h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated disabled:opacity-40 disabled:shadow-none"
             >
               {step === 3 ? (isSubmitting ? "Submitting..." : "Submit ticket") : "Continue"}
