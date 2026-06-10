@@ -14,7 +14,7 @@ import {
   ArrowUpRight,
   Clock,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAppSelector } from "@/store/hooks";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -58,11 +58,11 @@ const summary = [
 ];
 
 function Dashboard() {
-  const { user, profile } = useAuth();
+  const { user } = useAppSelector((state) => state.auth);
 
   const getInitials = () => {
-    if (profile?.fullName) {
-      const parts = profile.fullName.trim().split(" ");
+    if (user?.displayName) {
+      const parts = user.displayName.trim().split(" ");
       if (parts.length > 1) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
       }
@@ -89,7 +89,7 @@ function Dashboard() {
               </div>
               <div>
                 <p className="text-[11px] text-white/60 uppercase tracking-wider">Good afternoon</p>
-                <p className="text-[15px] font-semibold">{profile?.fullName || "Guest"}</p>
+                <p className="text-[15px] font-semibold">{user?.displayName || "Guest"}</p>
               </div>
             </div>
             <Link

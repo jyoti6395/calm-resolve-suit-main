@@ -16,7 +16,7 @@ import {
   Pencil,
   ShieldCheck,
 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAppSelector } from "@/store/hooks";
 import { logOut as firebaseLogOut } from "@/services/authService";
 import { EditProfileSheet } from "@/components/EditProfileSheet";
 
@@ -49,7 +49,7 @@ const sections = [
 ];
 
 function Profile() {
-  const { user, profile } = useAuth();
+  const { user } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -63,8 +63,8 @@ function Profile() {
   };
 
   const getInitials = () => {
-    if (profile?.fullName) {
-      const parts = profile.fullName.trim().split(" ");
+    if (user?.displayName) {
+      const parts = user.displayName.trim().split(" ");
       if (parts.length > 1) {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
       }
@@ -99,10 +99,10 @@ function Profile() {
               {getInitials()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[17px] font-bold truncate">{profile?.fullName || "Guest User"}</p>
+              <p className="text-[17px] font-bold truncate">{user?.displayName || "Guest User"}</p>
               <p className="text-[12px] text-white/70 truncate">{user?.email || "Not logged in"}</p>
               <p className="text-[10px] text-white/60 mt-0.5 truncate">
-                {profile?.company || "Personal"} · Customer
+                Personal · {user?.role || "Customer"}
               </p>
             </div>
           </div>

@@ -1,7 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
-import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { initializeAuthListener } from "../store/authSlice";
+import { useIsMobile } from "../hooks/use-mobile";
+import { MobileShell } from "../components/MobileShell";
+import { SidebarProvider } from "../components/ui/sidebar";
 
 function NotFoundComponent() {
   return (
@@ -68,13 +73,44 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const dispatch = useAppDispatch();
+  const isMobile = useIsMobile();
+  const { loading } = useAppSelector((state) => state.auth);
+
+  useEffect(() => {
+    // Run the real-time background listener stream immediately on mount
+    const unsubscribe = dispatch(initializeAuthListener());
+    return () => {
+      // Clean up the listener stream on unmount to prevent memory leaks
+      if (typeof unsubscribe === "function") unsubscribe();
+    };
+  }, [dispatch]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <Outlet />
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      {isMobile ? (
+        <MobileShell>
+          <Outlet />
+        </MobileShell>
+      ) : (
+        <SidebarProvider>
+          <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+            {/* Desktop sidebar/layouts go here */}
+            <main className="flex-1 overflow-y-auto">
+              <Outlet />
+            </main>
+          </div>
+        </SidebarProvider>
+      )}
+      <Toaster />
+    </QueryClientProvider>
   );
 }

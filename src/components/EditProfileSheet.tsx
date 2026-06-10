@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { X, User, Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { updateUserProfile } from "@/services/authService";
-import { useAuth } from "@/context/AuthContext";
+import { getUserProfile } from "@/services/authService";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setAuthUser } from "@/store/authSlice";
 
 interface EditProfileSheetProps {
   isOpen: boolean;
@@ -10,18 +12,27 @@ interface EditProfileSheetProps {
 }
 
 export function EditProfileSheet({ isOpen, onClose }: EditProfileSheetProps) {
-  const { user, profile, refreshProfile } = useAuth();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
   const [fullName, setFullName] = useState("");
   const [company, setCompany] = useState("");
   const [saving, setSaving] = useState(false);
 
   // Initialize form fields when the sheet opens
   useEffect(() => {
-    if (isOpen && profile) {
-      setFullName(profile.fullName || "");
-      setCompany(profile.company || "");
-    }
-  }, [isOpen, profile]);
+    const loadProfile = async () => {
+      if (isOpen && user?.uid) {
+        try {
+          const prof = await getUserProfile(user.uid);
+          setFullName(prof?.fullName || user.displayName || "");
+          setCompany(prof?.company || "");
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    loadProfile();
+  }, [isOpen, user]);
 
   if (!isOpen) return null;
 
@@ -53,7 +64,12 @@ export function EditProfileSheet({ isOpen, onClose }: EditProfileSheetProps) {
       });
 
       // Synchronize context state
-      await refreshProfile();
+      dispatch(
+        setAuthUser({
+          ...user,
+          displayName: trimmedName,
+        }),
+      );
 
       toast.success("Profile updated successfully!");
       onClose();
