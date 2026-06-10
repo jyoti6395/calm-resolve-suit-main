@@ -35,7 +35,7 @@ function Dashboard() {
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
         {/* Hero */}
-        <div className="relative px-5 pt-[env(safe-area-inset-top)] pt-4 pb-6 bg-gradient-hero text-white rounded-b-[2rem] overflow-hidden">
+        <div className="relative px-5 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] pb-6 bg-gradient-hero text-white rounded-b-[2rem] overflow-hidden">
           <div className="absolute -top-20 -right-10 h-56 w-56 rounded-full bg-primary-glow/40 blur-3xl" />
           <div className="absolute inset-0 bg-gradient-mesh opacity-50" />
 
