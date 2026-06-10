@@ -54,7 +54,7 @@ export const autoAssignTicket = functions.firestore
             tech,
             load: loadSnapshot.data().count,
           };
-        })
+        }),
       );
 
       // Sort ascending by load so the technician with the least tickets is at index 0
@@ -62,7 +62,7 @@ export const autoAssignTicket = functions.firestore
       const selectedTechnician = workloads[0].tech;
 
       console.log(
-        `Assigning ticket ${ticketId} to technician ${selectedTechnician.name} (${selectedTechnician.id})`
+        `Assigning ticket ${ticketId} to technician ${selectedTechnician.name} (${selectedTechnician.id})`,
       );
 
       // Securely patch the ticket document with the assigned technician
