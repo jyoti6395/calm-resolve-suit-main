@@ -2,44 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { MobileShell } from "@/components/MobileShell";
 import { ChevronLeft, Mail, AlertCircle, Loader2, CheckCircle } from "lucide-react";
 import { sendPasswordReset } from "../services/authService";
 import { toast } from "sonner";
-import React, { forwardRef } from "react";
-
-const forgotPasswordSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "Please enter your email address." })
-    .email({ message: "Please enter a valid email address." }),
-});
-
-type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
-
-interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  icon?: React.ComponentType<{ className?: string }>;
-  trailing?: React.ReactNode;
-}
-
-const Field = forwardRef<HTMLInputElement, FieldProps>(
-  ({ icon: Icon, trailing, ...props }, ref) => {
-    return (
-      <div className="flex items-center gap-3 h-14 px-4 rounded-2xl bg-secondary border border-transparent focus-within:border-primary focus-within:bg-card focus-within:shadow-soft transition-all">
-        {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
-        <input
-          ref={ref}
-          {...props}
-          className="flex-1 bg-transparent outline-none text-[15px] text-foreground placeholder:text-muted-foreground/50 disabled:opacity-50"
-        />
-        {trailing}
-      </div>
-    );
-  },
-);
-
-Field.displayName = "Field";
+import { forgotPasswordSchema, type ForgotPasswordFormValues } from "@/schemas/authSchema";
+import { Field } from "@/components/ui/field";
 
 export const Route = createFileRoute("/forgot-password")({ component: Forgot });
 
