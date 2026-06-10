@@ -6,11 +6,11 @@ import { db } from "@/firebase/firebase";
 import { updateTicket } from "@/store/ticketSlice";
 import { sanitizeQuerySnapshot, formatUSDateTime, serializeTimestamp } from "@/lib/formatters";
 import { MobileShell } from "@/components/MobileShell";
-import { AppHeader } from "@/components/AppHeader";
+import { useHeaderSetup } from "@/components/HeaderContext";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Send } from "lucide-react";
+import { Send, MoreVertical } from "lucide-react";
 import { Ticket, Message } from "@/types/store";
 
 export const Route = createFileRoute("/tickets/$id")({
@@ -100,12 +100,24 @@ function TicketWorkspace() {
     }
   };
 
+  useHeaderSetup(
+    {
+      title: ticket?.subject || "Ticket Details",
+      subtitle: ticket?.id || id || "",
+      back: true,
+      right: (
+        <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+          <MoreVertical className="h-4 w-4" />
+        </button>
+      ),
+    },
+    [ticket?.subject, ticket?.id],
+  );
+
   return (
     <MobileShell>
       {/* Mobile WebView Guardrail constraints */}
       <div className="h-[calc(100vh-64px)] flex flex-col justify-between w-full max-w-md mx-auto md:max-w-4xl bg-background">
-        <AppHeader title={ticket?.subject || ticket?.title || "Loading..."} back />
-
         {/* Scrollable Message Box */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {ticket && (

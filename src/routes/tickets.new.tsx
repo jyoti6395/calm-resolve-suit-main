@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
-import { AppHeader } from "@/components/AppHeader";
+import { useHeaderSetup } from "@/components/HeaderContext";
 import { categories } from "@/lib/mock";
 import {
   Camera,
@@ -44,6 +44,18 @@ function NewTicket() {
   const [step, setStep] = useState(1);
   const user = useAppSelector((state) => state.auth.user);
 
+  useHeaderSetup(
+    {
+      title: "Raise a ticket",
+      back: true,
+      right: (
+        <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
+          <Save className="h-3.5 w-3.5" /> Draft
+        </button>
+      ),
+    },
+    [],
+  );
   const {
     register,
     handleSubmit,
@@ -93,16 +105,6 @@ function NewTicket() {
   return (
     <MobileShell>
       <div className="min-h-screen bg-background flex flex-col">
-        <AppHeader
-          title="Raise a ticket"
-          back
-          right={
-            <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
-              <Save className="h-3.5 w-3.5" /> Draft
-            </button>
-          }
-        />
-
         {/* Stepper */}
         <div className="px-5">
           <div className="flex items-center gap-2">

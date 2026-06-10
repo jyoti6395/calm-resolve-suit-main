@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
-import { AppHeader } from "@/components/AppHeader";
+import { useHeaderSetup } from "@/components/HeaderContext";
 import { TrendingUp, TrendingDown, Download } from "lucide-react";
 
 export const Route = createFileRoute("/analytics")({ component: Analytics });
@@ -17,19 +17,22 @@ const categoriesData = [
 ];
 
 function Analytics() {
+  useHeaderSetup(
+    {
+      title: "Insights",
+      subtitle: "Last 30 days",
+      right: (
+        <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+          <Download className="h-4 w-4" />
+        </button>
+      ),
+    },
+    [],
+  );
+
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader
-          title="Insights"
-          subtitle="Last 30 days"
-          right={
-            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-              <Download className="h-4 w-4" />
-            </button>
-          }
-        />
-
         <div className="px-5 grid grid-cols-2 gap-3">
           <Stat label="Avg. resolution" value="3h 12m" delta="-18%" good />
           <Stat label="SLA compliance" value="96.4%" delta="+2.1%" good />

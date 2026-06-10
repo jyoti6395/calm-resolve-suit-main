@@ -2,9 +2,19 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
+  sendPasswordResetEmail,
   User as FirebaseUser,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 
 export interface UserProfile {
@@ -99,4 +109,15 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
 export async function updateUserProfile(uid: string, updates: Partial<UserProfile>): Promise<void> {
   const userDocRef = doc(db, "users", uid);
   await setDoc(userDocRef, updates, { merge: true });
+}
+
+/**
+ * Sends a password reset link using Firebase Auth.
+ */
+export async function sendPasswordReset(email: string): Promise<void> {
+  const trimmedEmail = email.trim().toLowerCase();
+
+  // Send the password reset email using Firebase Auth.
+  // It handles sending the email if the account exists.
+  await sendPasswordResetEmail(auth, trimmedEmail);
 }

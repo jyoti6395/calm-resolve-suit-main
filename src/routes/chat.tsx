@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
-import { AppHeader } from "@/components/AppHeader";
+import { useHeaderSetup } from "@/components/HeaderContext";
 import { Paperclip, Send, Mic } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({ component: Chat });
@@ -59,11 +59,17 @@ const conversations = [
 ];
 
 function Chat() {
+  useHeaderSetup(
+    {
+      title: "Support chat",
+      subtitle: "5 active threads",
+    },
+    [],
+  );
+
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader title="Support chat" subtitle="5 active threads" />
-
         <div className="px-5 space-y-2">
           {conversations.map((c) => (
             <Link

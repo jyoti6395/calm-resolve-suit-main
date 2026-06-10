@@ -14,8 +14,16 @@ import {
 } from "@/lib/formatters";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
-import { AppHeader } from "@/components/AppHeader";
+import { useHeaderSetup } from "@/components/HeaderContext";
 import type { Ticket } from "@/types/store";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // =========================================
 // 1. URL SEARCH STATE PARAMETERS SCHEMA (ZOD)
@@ -82,6 +90,19 @@ function MobileTicketsQueue() {
     });
   }, [tickets, searchParams]);
 
+  useHeaderSetup(
+    {
+      title: "Tickets",
+      subtitle: `${filteredList.length} matching`,
+      right: (
+        <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center cursor-pointer hover:bg-muted transition-colors">
+          <SlidersHorizontal className="h-4 w-4" />
+        </button>
+      ),
+    },
+    [filteredList.length],
+  );
+
   const tabs = [
     { key: "all", label: "All" },
     { key: "open", label: "Open" },
@@ -106,16 +127,6 @@ function MobileTicketsQueue() {
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-24 flex flex-col w-full max-w-md mx-auto">
-        <AppHeader
-          title="Tickets"
-          subtitle={`${filteredList.length} matching`}
-          right={
-            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center cursor-pointer hover:bg-muted transition-colors shrink-0">
-              <SlidersHorizontal className="h-4 w-4" />
-            </button>
-          }
-        />
-
         {/* Controlled Search Form */}
         <div className="px-4 mt-2">
           <form onSubmit={(e) => e.preventDefault()}>

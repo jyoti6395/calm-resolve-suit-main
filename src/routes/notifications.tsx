@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
-import { AppHeader } from "@/components/AppHeader";
+import { useHeaderSetup } from "@/components/HeaderContext";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -69,19 +69,22 @@ const tones: Record<string, { bg: string; text: string }> = {
 };
 
 function Notifications() {
+  useHeaderSetup(
+    {
+      title: "Notifications",
+      subtitle: "5 new",
+      right: (
+        <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
+          <Settings2 className="h-4 w-4" />
+        </button>
+      ),
+    },
+    [],
+  );
+
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-32">
-        <AppHeader
-          title="Notifications"
-          subtitle="5 new"
-          right={
-            <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-              <Settings2 className="h-4 w-4" />
-            </button>
-          }
-        />
-
         <div className="px-5 space-y-6">
           {groups.map((g) => (
             <div key={g.title}>

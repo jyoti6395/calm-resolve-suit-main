@@ -1,6 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export function AppHeader({
   title,
@@ -16,9 +17,16 @@ export function AppHeader({
   transparent?: boolean;
 }) {
   const router = useRouter();
-  return (
+  const [container, setContainer] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const el = document.getElementById("global-header-container");
+    if (el) setContainer(el);
+  }, []);
+
+  const headerContent = (
     <header
-      className={`sticky top-0 z-30 px-5 pt-[env(safe-area-inset-top)] ${transparent ? "" : "bg-background/80 backdrop-blur-xl"}`}
+      className={`px-5 pt-[env(safe-area-inset-top)] w-full transition-colors ${transparent ? "bg-transparent" : "bg-background/80 backdrop-blur-xl"}`}
     >
       <div className="h-14 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
@@ -44,6 +52,9 @@ export function AppHeader({
       </div>
     </header>
   );
+
+  if (!container) return headerContent;
+  return createPortal(headerContent, container);
 }
 
 export { Link };

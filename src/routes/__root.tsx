@@ -2,12 +2,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Outlet, Link, createRootRouteWithContext, useRouter } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { initializeAuthListener } from "../store/authSlice";
-import { startTicketSyncListener } from "../store/ticketSlice";
-import { useIsMobile } from "../hooks/use-mobile";
-import { MobileShell } from "../components/MobileShell";
-import { SidebarProvider } from "../components/ui/sidebar";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { initializeAuthListener } from "@/store/authSlice";
+import { startTicketSyncListener } from "@/store/ticketSlice";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { HeaderProvider, useHeader } from "@/components/HeaderContext";
+import { AppHeader } from "@/components/AppHeader";
+import { MobileShell } from "@/components/MobileShell";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 function NotFoundComponent() {
   return (
@@ -66,6 +68,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
+function GlobalHeaderRenderer() {
+  const { config } = useHeader();
+  if (!config.show) return null;
+  return (
+    <AppHeader
+      title={config.title}
+      subtitle={config.subtitle}
+      right={config.right}
+      back={config.back}
+      transparent={config.transparent}
+    />
+  );
+}
+
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -107,21 +123,29 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {isMobile ? (
-        <MobileShell>
-          <Outlet />
-        </MobileShell>
-      ) : (
-        <SidebarProvider>
-          <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
-            {/* Desktop sidebar/layouts go here */}
-            <main className="flex-1 overflow-y-auto">
-              <Outlet />
-            </main>
+      <HeaderProvider>
+        {isMobile ? (
+          <div className="h-screen w-full bg-background flex justify-center overflow-hidden">
+            <div className="relative w-full max-w-[440px] h-full flex flex-col">
+              <GlobalHeaderRenderer />
+              <div className="flex-1 overflow-y-auto no-scrollbar">
+                <Outlet />
+              </div>
+            </div>
           </div>
-        </SidebarProvider>
-      )}
-      <Toaster />
+        ) : (
+          <SidebarProvider>
+            <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+              {/* Desktop sidebar/layouts go here */}
+              <main className="flex-1 overflow-y-auto">
+                <GlobalHeaderRenderer />
+                <Outlet />
+              </main>
+            </div>
+          </SidebarProvider>
+        )}
+        <Toaster />
+      </HeaderProvider>
     </QueryClientProvider>
   );
 }
