@@ -25,6 +25,9 @@ export const Route = createFileRoute("/privacy-terms")({
 
 function PrivacyTermsPage() {
   // Expandable sections state
+  const handleFeedback = (type: "yes" | "no") => {
+    console.log("Feedback type recorded:", type);
+  };
   const [privacyExpanded, setPrivacyExpanded] = useState(true);
   const [termsExpanded, setTermsExpanded] = useState(false);
 
@@ -269,80 +272,8 @@ function PrivacyTermsPage() {
             </ul>
           </div>
         </div>
-        {/* Contact & Legal Information */}
-        {/* <div className="px-5 mb-5">
-          <div className="rounded-[20px] bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
-            <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary-glow/40 blur-3xl" />
-            <h3 className="text-[14px] font-bold text-white mb-4 relative z-10 flex items-center gap-2">
-              Contact & Legal Information
-            </h3>
-            <div className="relative z-10 space-y-3.5">
-              <div className="flex items-start gap-3">
-                <Mail className="h-4 w-4 text-white/70 shrink-0 mt-0.5" />
-                <div className="min-w-0">
-                  <span className="text-[10px] text-white/50 block font-extrabold uppercase leading-none">
-                    Privacy & Data Team
-                  </span>
-                  <a
-                    href="mailto:privacy@company.com"
-                    className="text-[13px] font-semibold hover:underline mt-1 block"
-                  >
-                    privacy@company.com
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Mail className="h-4 w-4 text-white/70 shrink-0 mt-0.5" />
-                <div className="min-w-0">
-                  <span className="text-[10px] text-white/50 block font-extrabold uppercase leading-none">
-                    Customer Support
-                  </span>
-                  <a
-                    href="mailto:support@company.com"
-                    className="text-[13px] font-semibold hover:underline mt-1 block"
-                  >
-                    support@company.com
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <MapPin className="h-4 w-4 text-white/70 shrink-0 mt-0.5" />
-                <div className="min-w-0">
-                  <span className="text-[10px] text-white/50 block font-extrabold uppercase leading-none">
-                    Corporate Address
-                  </span>
-                  <p className="text-[12.5px] font-medium leading-tight mt-1 text-white/95">
-                    AdviseTech Corporate Headquarters,
-                    <br />
-                    100 Innovation Way, Suite 400,
-                    <br />
-                    Tech City, CA 94016
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-white/10 flex items-start gap-3">
-                <div className="min-w-0">
-                  <span className="text-[10px] text-white/50 block font-extrabold uppercase leading-none">
-                    Legal Contact Inquiry
-                  </span>
-                  <a
-                    href="mailto:legal@company.com"
-                    className="text-[12.5px] font-semibold hover:underline mt-1 block"
-                  >
-                    legal@company.com
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> */}
         {/* Version Information (Footer) */}
         <div className="px-6 py-6 text-center border-t border-border/40 mt-8 text-[11px] text-muted-foreground/75 space-y-1">
-          {/* <p>Privacy Policy Version: 1.0</p>
-          <p>Terms of Service Version: 1.0</p> */}
           <p className="font-semibold text-muted-foreground/90 mt-1">Last Updated: June 2026</p>
         </div>
       </div>

@@ -141,6 +141,7 @@ function SupportPage() {
   };
 
   const handleFeedback = (type: "yes" | "no") => {
+    console.log("Feedback type recorded:", type);
     setFeedbackState("submitted");
   };
 
