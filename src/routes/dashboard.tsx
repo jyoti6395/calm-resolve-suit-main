@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   ArrowUpRight,
   Clock,
+  User,
+  X,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 
@@ -62,16 +64,20 @@ function Dashboard() {
   const { technicians: dbTechnicians } = useAppSelector((state) => state.technicians);
   const dbTickets = useAppSelector((state) => state.tickets.tickets);
 
-  const displayTechnicians = dbTechnicians.map((t) => {
-    const activeLoad = dbTickets.filter(
-      (ticket) =>
-        ticket.assignedToId === t.uid && ticket.status !== "resolved" && ticket.status !== "closed",
-    ).length;
-    return {
-      ...t,
-      load: activeLoad,
-    };
-  });
+  const displayTechnicians = dbTechnicians
+    .filter((t) => t.online)
+    .map((t) => {
+      const activeLoad = dbTickets.filter(
+        (ticket) =>
+          ticket.assignedToId === t.uid &&
+          ticket.status !== "resolved" &&
+          ticket.status !== "closed",
+      ).length;
+      return {
+        ...t,
+        load: activeLoad,
+      };
+    });
 
   const getInitials = () => {
     if (user?.displayName) {
@@ -196,29 +202,48 @@ function Dashboard() {
             View team
           </Link> */}
         </div>
-        <div className="px-5 mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {displayTechnicians.map((t) => (
-            <div
-              key={t.uid}
-              className="shrink-0 w-[140px] rounded-2xl bg-card border border-border p-3"
-            >
-              <div className="relative h-11 w-11 rounded-2xl bg-gradient-brand text-white flex items-center justify-center font-bold">
-                {t.initials}
-                <span
-                  className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${t.online ? "bg-success" : "bg-muted-foreground"}`}
-                />
+
+        {displayTechnicians.length === 0 ? (
+          <div className="px-5 mt-3">
+            <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-3xl p-6 bg-card/50 text-center">
+              <div className="relative h-16 w-16 rounded-full bg-secondary flex items-center justify-center">
+                <div className="h-10 w-10 rounded-full bg-card/60 flex items-center justify-center text-muted-foreground">
+                  <User className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-full bg-primary border-2 border-card flex items-center justify-center text-primary-foreground">
+                  <X className="h-3 w-3 stroke-[3]" />
+                </div>
               </div>
-              <p className="mt-2 text-[13px] font-semibold truncate">{t.name}</p>
-              <p className="text-[11px] text-muted-foreground truncate">{t.role}</p>
-              <p className="mt-2 text-[10px] font-semibold text-primary">{t.load} active</p>
+              <h3 className="mt-4 text-[14px] font-bold text-foreground">
+                No Technicians Available
+              </h3>
+              <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed max-w-[280px]">
+                There are currently no technicians on shift.
+                <br />
+                Tickets will be assigned automatically when a technician becomes available.
+              </p>
             </div>
-          ))}
-          {displayTechnicians.length === 0 && (
-            <div className="text-center py-4 text-[12px] text-muted-foreground w-full">
-              No technicians on shift.
-            </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="px-5 mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-1">
+            {displayTechnicians.map((t) => (
+              <div
+                key={t.uid}
+                className="shrink-0 w-[140px] rounded-2xl bg-card border border-border p-3"
+              >
+                <div className="relative h-11 w-11 rounded-2xl bg-gradient-brand text-white flex items-center justify-center font-bold">
+                  {t.initials}
+                  <span
+                    className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${t.online ? "bg-success" : "bg-muted-foreground"}`}
+                  />
+                </div>
+                <p className="mt-2 text-[13px] font-semibold truncate">{t.name}</p>
+                <p className="text-[11px] text-muted-foreground truncate">{t.role}</p>
+                {/* <p className="mt-2 text-[10px] font-semibold text-primary">{t.load} active</p> */}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Recent tickets */}
         <div className="px-5 mt-7 flex items-center justify-between">
