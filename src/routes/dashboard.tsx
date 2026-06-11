@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
-import { tickets, technicians, statusStyles, priorityStyles } from "@/lib/mock";
+import { tickets, statusStyles, priorityStyles } from "@/lib/mock";
 import {
   Search,
   Bell,
@@ -59,6 +59,19 @@ const summary = [
 
 function Dashboard() {
   const { user } = useAppSelector((state) => state.auth);
+  const { technicians: dbTechnicians } = useAppSelector((state) => state.technicians);
+  const dbTickets = useAppSelector((state) => state.tickets.tickets);
+
+  const displayTechnicians = dbTechnicians.map((t) => {
+    const activeLoad = dbTickets.filter(
+      (ticket) =>
+        ticket.assignedToId === t.uid && ticket.status !== "resolved" && ticket.status !== "closed",
+    ).length;
+    return {
+      ...t,
+      load: activeLoad,
+    };
+  });
 
   const getInitials = () => {
     if (user?.displayName) {
@@ -179,14 +192,14 @@ function Dashboard() {
         {/* Technicians */}
         <div className="px-5 mt-7 flex items-center justify-between">
           <h2 className="text-[15px] font-bold">Technicians on shift</h2>
-          <Link to="/profile" className="text-[12px] text-primary font-semibold">
+          {/* <Link to="/profile" className="text-[12px] text-primary font-semibold">
             View team
-          </Link>
+          </Link> */}
         </div>
         <div className="px-5 mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {technicians.map((t) => (
+          {displayTechnicians.map((t) => (
             <div
-              key={t.name}
+              key={t.uid}
               className="shrink-0 w-[140px] rounded-2xl bg-card border border-border p-3"
             >
               <div className="relative h-11 w-11 rounded-2xl bg-gradient-brand text-white flex items-center justify-center font-bold">
@@ -200,6 +213,11 @@ function Dashboard() {
               <p className="mt-2 text-[10px] font-semibold text-primary">{t.load} active</p>
             </div>
           ))}
+          {displayTechnicians.length === 0 && (
+            <div className="text-center py-4 text-[12px] text-muted-foreground w-full">
+              No technicians on shift.
+            </div>
+          )}
         </div>
 
         {/* Recent tickets */}

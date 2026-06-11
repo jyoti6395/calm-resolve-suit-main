@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { initializeAuthListener } from "@/store/authSlice";
 import { startTicketSyncListener } from "@/store/ticketSlice";
+import { startTechnicianSyncListener } from "@/store/technicianSlice";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderProvider, useHeader } from "@/components/HeaderContext";
 import { AppHeader } from "@/components/AppHeader";
@@ -104,11 +105,14 @@ function RootComponent() {
   }, [dispatch]);
 
   useEffect(() => {
-    // Start ticket sync once authenticated
+    // Start ticket and technician sync once authenticated
     if (isAuthenticated && user) {
-      const unsubscribe = dispatch(startTicketSyncListener());
+      const unsubscribeTickets = dispatch(startTicketSyncListener());
+      const unsubscribeTechs = dispatch(startTechnicianSyncListener());
+
       return () => {
-        if (typeof unsubscribe === "function") unsubscribe();
+        if (typeof unsubscribeTickets === "function") unsubscribeTickets();
+        if (typeof unsubscribeTechs === "function") unsubscribeTechs();
       };
     }
   }, [dispatch, isAuthenticated, user]);

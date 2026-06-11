@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
 import ticketReducer from "./ticketSlice";
+import technicianReducer from "./technicianSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     tickets: ticketReducer,
+    technicians: technicianReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
