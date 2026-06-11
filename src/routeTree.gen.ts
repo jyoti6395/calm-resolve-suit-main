@@ -9,15 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as PrivacyTermsRouteImport } from './routes/privacy-terms'
 import { Route as OtpRouteImport } from './routes/otp'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CompanyInfoRouteImport } from './routes/company-info'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
@@ -26,6 +29,11 @@ import { Route as TicketsNewRouteImport } from './routes/tickets.new'
 import { Route as TicketsConfirmationRouteImport } from './routes/tickets.confirmation'
 import { Route as TicketsIdRouteImport } from './routes/tickets.$id'
 
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -39,6 +47,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyTermsRoute = PrivacyTermsRouteImport.update({
+  id: '/privacy-terms',
+  path: '/privacy-terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OtpRoute = OtpRouteImport.update({
@@ -69,6 +82,11 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompanyInfoRoute = CompanyInfoRouteImport.update({
+  id: '/company-info',
+  path: '/company-info',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -111,15 +129,18 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
+  '/company-info': typeof CompanyInfoRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/otp': typeof OtpRoute
+  '/privacy-terms': typeof PrivacyTermsRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/tickets/$id': typeof TicketsIdRoute
   '/tickets/confirmation': typeof TicketsConfirmationRoute
   '/tickets/new': typeof TicketsNewRoute
@@ -129,15 +150,18 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
+  '/company-info': typeof CompanyInfoRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/otp': typeof OtpRoute
+  '/privacy-terms': typeof PrivacyTermsRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/tickets/$id': typeof TicketsIdRoute
   '/tickets/confirmation': typeof TicketsConfirmationRoute
   '/tickets/new': typeof TicketsNewRoute
@@ -148,15 +172,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
   '/chat': typeof ChatRoute
+  '/company-info': typeof CompanyInfoRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/notifications': typeof NotificationsRoute
   '/onboarding': typeof OnboardingRoute
   '/otp': typeof OtpRoute
+  '/privacy-terms': typeof PrivacyTermsRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/support': typeof SupportRoute
   '/tickets/$id': typeof TicketsIdRoute
   '/tickets/confirmation': typeof TicketsConfirmationRoute
   '/tickets/new': typeof TicketsNewRoute
@@ -168,15 +195,18 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/chat'
+    | '/company-info'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/notifications'
     | '/onboarding'
     | '/otp'
+    | '/privacy-terms'
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/support'
     | '/tickets/$id'
     | '/tickets/confirmation'
     | '/tickets/new'
@@ -186,15 +216,18 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/chat'
+    | '/company-info'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/notifications'
     | '/onboarding'
     | '/otp'
+    | '/privacy-terms'
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/support'
     | '/tickets/$id'
     | '/tickets/confirmation'
     | '/tickets/new'
@@ -204,15 +237,18 @@ export interface FileRouteTypes {
     | '/'
     | '/analytics'
     | '/chat'
+    | '/company-info'
     | '/dashboard'
     | '/forgot-password'
     | '/login'
     | '/notifications'
     | '/onboarding'
     | '/otp'
+    | '/privacy-terms'
     | '/profile'
     | '/reset-password'
     | '/signup'
+    | '/support'
     | '/tickets/$id'
     | '/tickets/confirmation'
     | '/tickets/new'
@@ -223,15 +259,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
   ChatRoute: typeof ChatRoute
+  CompanyInfoRoute: typeof CompanyInfoRoute
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   NotificationsRoute: typeof NotificationsRoute
   OnboardingRoute: typeof OnboardingRoute
   OtpRoute: typeof OtpRoute
+  PrivacyTermsRoute: typeof PrivacyTermsRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  SupportRoute: typeof SupportRoute
   TicketsIdRoute: typeof TicketsIdRoute
   TicketsConfirmationRoute: typeof TicketsConfirmationRoute
   TicketsNewRoute: typeof TicketsNewRoute
@@ -240,6 +279,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -259,6 +305,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-terms': {
+      id: '/privacy-terms'
+      path: '/privacy-terms'
+      fullPath: '/privacy-terms'
+      preLoaderRoute: typeof PrivacyTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/otp': {
@@ -301,6 +354,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/company-info': {
+      id: '/company-info'
+      path: '/company-info'
+      fullPath: '/company-info'
+      preLoaderRoute: typeof CompanyInfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -359,15 +419,18 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
   ChatRoute: ChatRoute,
+  CompanyInfoRoute: CompanyInfoRoute,
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   NotificationsRoute: NotificationsRoute,
   OnboardingRoute: OnboardingRoute,
   OtpRoute: OtpRoute,
+  PrivacyTermsRoute: PrivacyTermsRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  SupportRoute: SupportRoute,
   TicketsIdRoute: TicketsIdRoute,
   TicketsConfirmationRoute: TicketsConfirmationRoute,
   TicketsNewRoute: TicketsNewRoute,
