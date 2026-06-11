@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
-import { tickets, statusStyles, priorityStyles } from "@/lib/mock";
 import {
   Search,
   Bell,
@@ -17,6 +17,8 @@ import {
   X,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
+import { getStatusBadgeClass, getPriorityBadgeClass, formatUSDateTime } from "@/lib/formatters";
+import type { Ticket } from "@/types/store";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -62,7 +64,17 @@ const summary = [
 function Dashboard() {
   const { user } = useAppSelector((state) => state.auth);
   const { technicians: dbTechnicians } = useAppSelector((state) => state.technicians);
-  const dbTickets = useAppSelector((state) => state.tickets.tickets);
+  const dbTickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
+
+  const recentTickets = useMemo(() => {
+    return [...dbTickets]
+      .sort((a, b) => {
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      })
+      .slice(0, 5);
+  }, [dbTickets]);
 
   const displayTechnicians = dbTechnicians
     .filter((t) => t.online)
@@ -246,42 +258,54 @@ function Dashboard() {
         )}
 
         {/* Recent tickets */}
-        <div className="px-5 mt-7 flex items-center justify-between">
+        <div className="px-5  mt-7 flex items-center justify-between">
           <h2 className="text-[15px] font-bold">Recent tickets</h2>
           <Link to="/tickets" className="text-[12px] text-primary font-semibold">
             See all
           </Link>
         </div>
-        <div className="px-5 mt-3 space-y-2.5">
-          {tickets.slice(0, 4).map((t) => (
-            <Link
-              key={t.id}
-              to="/tickets/$id"
-              params={{ id: t.id }}
-              className="block rounded-2xl bg-card border border-border p-4 active:scale-[0.99] transition-transform"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
-                  {t.id}
-                </span>
-                <span
-                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${statusStyles[t.status].bg} ${statusStyles[t.status].text}`}
-                >
-                  {statusStyles[t.status].label}
-                </span>
-              </div>
-              <p className="mt-1.5 text-[14px] font-semibold leading-snug">{t.title}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className={`h-1.5 w-1.5 rounded-full ${priorityStyles[t.priority].dot}`} />
-                  <span className="text-[11px] text-muted-foreground">
-                    {priorityStyles[t.priority].label} · {t.category}
+        <div className="px-5 mt-3 pb-30 space-y-2.5">
+          {recentTickets.length === 0 ? (
+            <div className="text-center py-8 px-4 rounded-2xl bg-card border border-border text-muted-foreground text-[13px] font-medium">
+              No recent tickets
+            </div>
+          ) : (
+            recentTickets.map((t) => (
+              <Link
+                key={t.id}
+                to="/tickets/$id"
+                params={{ id: t.id }}
+                className="block rounded-2xl bg-card border border-border p-4 active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
+                    {t.ticketSequenceId || t.id.slice(0, 10)}
+                  </span>
+                  <span
+                    className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(t.status)} capitalize`}
+                  >
+                    {t.status.replace("_", " ")}
                   </span>
                 </div>
-                <span className="text-[11px] text-muted-foreground">{t.updated}</span>
-              </div>
-            </Link>
-          ))}
+                <p className="mt-1.5 text-[14px] font-semibold leading-snug">
+                  {(t as Ticket & { title?: string }).title || t.subject}
+                </p>
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${getPriorityBadgeClass(t.priority).dot}`}
+                    />
+                    <span className="text-[11px] text-muted-foreground capitalize">
+                      {t.priority} · {t.category}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
+                    {formatUSDateTime(t.updatedAt || t.createdAt)}
+                  </span>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
       </div>
 

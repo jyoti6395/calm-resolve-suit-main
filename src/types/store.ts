@@ -22,6 +22,7 @@ export interface Ticket {
   priority: string;
   assignedToId: string | null;
   assignedToName: string | null;
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
   slaDeadline: string;
@@ -33,7 +34,6 @@ export interface Message {
   senderId: string;
   senderName: string;
   content: string;
-  type: "public" | "internal";
   createdAt: string;
   isSending?: boolean;
 }

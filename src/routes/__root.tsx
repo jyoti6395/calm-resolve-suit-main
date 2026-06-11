@@ -132,7 +132,7 @@ function RootComponent() {
           <div className="h-screen w-full bg-background flex justify-center overflow-hidden">
             <div className="relative w-full max-w-[440px] h-full flex flex-col">
               <GlobalHeaderRenderer />
-              <div className="flex-1 overflow-y-auto no-scrollbar">
+              <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <Outlet />
               </div>
             </div>
@@ -141,9 +141,11 @@ function RootComponent() {
           <SidebarProvider>
             <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
               {/* Desktop sidebar/layouts go here */}
-              <main className="flex-1 overflow-y-auto">
+              <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <GlobalHeaderRenderer />
-                <Outlet />
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                  <Outlet />
+                </div>
               </main>
             </div>
           </SidebarProvider>
