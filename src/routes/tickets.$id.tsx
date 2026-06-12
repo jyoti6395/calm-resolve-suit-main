@@ -330,7 +330,6 @@ function TicketWorkspace() {
               )}
             </div>
           </div>
-        </div>
       </div>
     </div>
   );

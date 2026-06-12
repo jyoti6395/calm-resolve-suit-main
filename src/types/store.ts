@@ -10,6 +10,9 @@ export interface AuthUser {
   photoURL?: string | null;
   status?: "active" | "inactive";
   createdAt?: string;
+  totalTickets?: number;
+  avgCsat?: number;
+  tenureDays?: number;
 }
 
 export interface Ticket {
@@ -20,11 +23,17 @@ export interface Ticket {
   category: string;
   status: string;
   priority: string;
+  requesterId?: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  department?: string;
   assignedToId: string | null;
   assignedToName: string | null;
   createdAt: string;
   updatedAt: string;
   slaDeadline: string;
+  tags?: string[];
+  csatScore?: number;
 }
 
 export interface Message {
@@ -36,6 +45,7 @@ export interface Message {
   type: "public" | "internal";
   createdAt: string;
   isSending?: boolean;
+  attachments?: string[];
 }
 
 // Ensure formatting utility type-signatures use proper unknown/strict abstractions instead of 'any':
