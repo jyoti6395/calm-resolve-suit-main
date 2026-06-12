@@ -104,7 +104,7 @@ function TicketWorkspace() {
     <MobileShell>
       {/* Mobile WebView Guardrail constraints */}
       <div className="h-[calc(100vh-64px)] flex flex-col justify-between w-full max-w-md mx-auto md:max-w-4xl bg-background">
-        <AppHeader title={ticket?.subject || ticket?.title || "Loading..."} back />
+        <AppHeader title={ticket?.subject || "Loading..."} back />
 
         {/* Scrollable Message Box */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
