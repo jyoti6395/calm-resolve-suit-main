@@ -197,13 +197,13 @@ function Dashboard() {
                 <div>
                   <p className="text-[11px] text-muted-foreground font-medium mb-1">Your Open Tickets</p>
                   <p className="text-[28px] font-extrabold text-foreground leading-none">
-                    {tickets.filter((t) => t.status === "open").length}
+                    {dbTickets.filter((t) => t.status === "open").length}
                   </p>
                 </div>
                 <div>
                   <p className="text-[11px] text-muted-foreground font-medium mb-1">Your Pending Actions</p>
                   <p className="text-[28px] font-extrabold text-warning leading-none">
-                    {tickets.filter((t) => t.status === "pending").length}
+                    {dbTickets.filter((t) => t.status === "pending").length}
                   </p>
                 </div>
               </div>
