@@ -168,7 +168,9 @@ function Dashboard() {
                     className="rounded-3xl bg-card border border-border p-4 shadow-soft hover:shadow-elevated transition-all"
                   >
                     <div className="flex items-start justify-between">
-                      <div className={`h-9 w-9 rounded-xl ${s.bg} flex items-center justify-center`}>
+                      <div
+                        className={`h-9 w-9 rounded-xl ${s.bg} flex items-center justify-center`}
+                      >
                         <Icon className={`h-4 w-4 ${s.color}`} />
                       </div>
                       <span className="text-[11px] font-semibold text-success flex items-center gap-0.5">
@@ -195,13 +197,17 @@ function Dashboard() {
               </h3>
               <div className="grid grid-cols-2 gap-3 border-t border-border/50 pt-4">
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-medium mb-1">Your Open Tickets</p>
+                  <p className="text-[11px] text-muted-foreground font-medium mb-1">
+                    Your Open Tickets
+                  </p>
                   <p className="text-[28px] font-extrabold text-foreground leading-none">
                     {dbTickets.filter((t) => t.status === "open").length}
                   </p>
                 </div>
                 <div>
-                  <p className="text-[11px] text-muted-foreground font-medium mb-1">Your Pending Actions</p>
+                  <p className="text-[11px] text-muted-foreground font-medium mb-1">
+                    Your Pending Actions
+                  </p>
                   <p className="text-[28px] font-extrabold text-warning leading-none">
                     {dbTickets.filter((t) => t.status === "pending").length}
                   </p>

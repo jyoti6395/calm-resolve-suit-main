@@ -96,7 +96,9 @@ function NewTicket() {
         description: data.description,
         category: data.category,
         priority: data.priority,
-        ticketSequenceId: `TK-${now.getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`,
+        ticketSequenceId: `TK-${now.getFullYear()}-${Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0")}`,
         createdBy: user?.uid || null,
         requesterId: user?.uid || null,
         requesterName: user?.displayName || "Unknown User",
