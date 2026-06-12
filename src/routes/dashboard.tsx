@@ -124,34 +124,61 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Summary cards */}
-        <div className="px-5 mt-5">
-          <div className="grid grid-cols-2 gap-3">
-            {summary.map((s) => {
-              const Icon = s.icon;
-              return (
-                <Link
-                  to="/tickets"
-                  key={s.key}
-                  className="rounded-3xl bg-card border border-border p-4 shadow-soft hover:shadow-elevated transition-all"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className={`h-9 w-9 rounded-xl ${s.bg} flex items-center justify-center`}>
-                      <Icon className={`h-4 w-4 ${s.color}`} />
+        {/* Summary cards or Field Agent Workspace */}
+        {user?.role === "super_admin" ? (
+          <div className="px-5 mt-5">
+            <div className="grid grid-cols-2 gap-3">
+              {summary.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <Link
+                    to="/tickets"
+                    key={s.key}
+                    className="rounded-3xl bg-card border border-border p-4 shadow-soft hover:shadow-elevated transition-all"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className={`h-9 w-9 rounded-xl ${s.bg} flex items-center justify-center`}>
+                        <Icon className={`h-4 w-4 ${s.color}`} />
+                      </div>
+                      <span className="text-[11px] font-semibold text-success flex items-center gap-0.5">
+                        <ArrowUpRight className="h-3 w-3" /> {s.delta}
+                      </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-success flex items-center gap-0.5">
-                      <ArrowUpRight className="h-3 w-3" /> {s.delta}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-[28px] font-extrabold tracking-tight leading-none">
-                    {s.value}
-                  </p>
-                  <p className="mt-1 text-[12px] text-muted-foreground font-medium">{s.label}</p>
-                </Link>
-              );
-            })}
+                    <p className="mt-3 text-[28px] font-extrabold tracking-tight leading-none">
+                      {s.value}
+                    </p>
+                    <p className="mt-1 text-[12px] text-muted-foreground font-medium">{s.label}</p>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="px-5 mt-5">
+            <div className="rounded-[24px] bg-card border border-border p-5 shadow-soft">
+              <p className="text-[12px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                Field Agent Workspace
+              </p>
+              <h3 className="text-[18px] font-extrabold tracking-tight leading-snug mb-5">
+                Welcome Back, {user?.displayName?.split(" ")[0] || "Technician"}
+              </h3>
+              <div className="grid grid-cols-2 gap-3 border-t border-border/50 pt-4">
+                <div>
+                  <p className="text-[11px] text-muted-foreground font-medium mb-1">Your Open Tickets</p>
+                  <p className="text-[28px] font-extrabold text-foreground leading-none">
+                    {tickets.filter((t) => t.status === "open").length}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground font-medium mb-1">Your Pending Actions</p>
+                  <p className="text-[28px] font-extrabold text-warning leading-none">
+                    {tickets.filter((t) => t.status === "pending").length}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Quick actions */}
         <div className="px-5 mt-6">
@@ -177,30 +204,34 @@ function Dashboard() {
         </div>
 
         {/* Technicians */}
-        <div className="px-5 mt-7 flex items-center justify-between">
-          <h2 className="text-[15px] font-bold">Technicians on shift</h2>
-          <Link to="/profile" className="text-[12px] text-primary font-semibold">
-            View team
-          </Link>
-        </div>
-        <div className="px-5 mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-1">
-          {technicians.map((t) => (
-            <div
-              key={t.name}
-              className="shrink-0 w-[140px] rounded-2xl bg-card border border-border p-3"
-            >
-              <div className="relative h-11 w-11 rounded-2xl bg-gradient-brand text-white flex items-center justify-center font-bold">
-                {t.initials}
-                <span
-                  className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${t.online ? "bg-success" : "bg-muted-foreground"}`}
-                />
-              </div>
-              <p className="mt-2 text-[13px] font-semibold truncate">{t.name}</p>
-              <p className="text-[11px] text-muted-foreground truncate">{t.role}</p>
-              <p className="mt-2 text-[10px] font-semibold text-primary">{t.load} active</p>
+        {user?.role === "super_admin" && (
+          <>
+            <div className="px-5 mt-7 flex items-center justify-between">
+              <h2 className="text-[15px] font-bold">Technicians on shift</h2>
+              <Link to="/profile" className="text-[12px] text-primary font-semibold">
+                View team
+              </Link>
             </div>
-          ))}
-        </div>
+            <div className="px-5 mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-1">
+              {technicians.map((t) => (
+                <div
+                  key={t.name}
+                  className="shrink-0 w-[140px] rounded-2xl bg-card border border-border p-3"
+                >
+                  <div className="relative h-11 w-11 rounded-2xl bg-gradient-brand text-white flex items-center justify-center font-bold">
+                    {t.initials}
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${t.online ? "bg-success" : "bg-muted-foreground"}`}
+                    />
+                  </div>
+                  <p className="mt-2 text-[13px] font-semibold truncate">{t.name}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{t.role}</p>
+                  <p className="mt-2 text-[10px] font-semibold text-primary">{t.load} active</p>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Recent tickets */}
         <div className="px-5 mt-7 flex items-center justify-between">

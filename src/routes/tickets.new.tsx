@@ -20,6 +20,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { toast } from "sonner";
 import { serializeTimestamp } from "@/lib/formatters";
+import { SLA_HOURS_MAP } from "@/constants/ticket";
 
 export const Route = createFileRoute("/tickets/new")({ component: NewTicket });
 
@@ -85,12 +86,22 @@ function NewTicket() {
 
   const onSubmit = async (data: CreateTicketInput) => {
     try {
+      const now = new Date();
+      const hoursToAdd = SLA_HOURS_MAP[data.priority] || 48;
+      const slaDeadline = new Date(now.getTime() + hoursToAdd * 60 * 60 * 1000);
+
+      // Map 'title' to 'subject' to match the universal enterprise Ticket schema
       const payload = {
-        ...data,
+        subject: data.title,
+        description: data.description,
+        category: data.category,
+        priority: data.priority,
+        ticketSequenceId: `TK-${now.getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, "0")}`,
         createdBy: user?.uid || null,
         status: "open",
-        createdAt: serializeTimestamp(new Date()),
-        updatedAt: serializeTimestamp(new Date()),
+        createdAt: serializeTimestamp(now),
+        updatedAt: serializeTimestamp(now),
+        slaDeadline: serializeTimestamp(slaDeadline),
       };
 
       await addDoc(collection(db, "tickets"), payload);

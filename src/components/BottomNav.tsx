@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Ticket, BarChart3, Bell, User } from "lucide-react";
+import { useAppSelector } from "@/store/hooks";
 
 const items = [
   { to: "/dashboard", icon: Home, label: "Home" },
@@ -11,10 +12,17 @@ const items = [
 
 export function BottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { user } = useAppSelector((state) => state.auth);
+
+  const visibleItems = items.filter((item) => {
+    if (item.to === "/analytics" && user?.role === "technician") return false;
+    return true;
+  });
+
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] z-40 pb-[env(safe-area-inset-bottom)]">
       <div className=" glass px-2 py-2 flex items-center justify-between">
-        {items.map(({ to, icon: Icon, label }) => {
+        {visibleItems.map(({ to, icon: Icon, label }) => {
           const active = path === to || (to !== "/dashboard" && path.startsWith(to));
           return (
             <Link

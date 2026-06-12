@@ -1,10 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
 import { useHeaderSetup } from "@/components/HeaderContext";
 import { TrendingUp, TrendingDown, Download } from "lucide-react";
 
-export const Route = createFileRoute("/analytics")({ component: Analytics });
+import { store } from "@/store/index";
+
+export const Route = createFileRoute("/analytics")({
+  beforeLoad: () => {
+    const state = store.getState();
+    if (state.auth.user?.role === "technician") {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
+  component: Analytics,
+});
 
 const trend = [22, 28, 19, 34, 30, 42, 38, 46, 41, 52, 48, 58];
 const max = Math.max(...trend);
