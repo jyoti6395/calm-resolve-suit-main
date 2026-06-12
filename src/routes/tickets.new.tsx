@@ -49,11 +49,11 @@ function NewTicket() {
     {
       title: "Raise a ticket",
       back: true,
-      right: (
-        <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
-          <Save className="h-3.5 w-3.5" /> Draft
-        </button>
-      ),
+      // right: (
+      //   <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
+      //     <Save className="h-3.5 w-3.5" /> Draft
+      //   </button>
+      // ),
     },
     [],
   );

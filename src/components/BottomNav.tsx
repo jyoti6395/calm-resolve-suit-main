@@ -5,7 +5,7 @@ import { useAppSelector } from "@/store/hooks";
 const items = [
   { to: "/dashboard", icon: Home, label: "Home" },
   { to: "/tickets", icon: Ticket, label: "Tickets" },
-  { to: "/analytics", icon: BarChart3, label: "Insights" },
+  // { to: "/analytics", icon: BarChart3, label: "Insights" },
   { to: "/notifications", icon: Bell, label: "Alerts" },
   { to: "/profile", icon: User, label: "Profile" },
 ] as const;
@@ -20,7 +20,7 @@ export function BottomNav() {
   });
 
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] z-40 pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 bg-white w-full max-w-[440px] z-40 pb-[env(safe-area-inset-bottom)]">
       <div className=" glass px-2 py-2 flex items-center justify-between">
         {visibleItems.map(({ to, icon: Icon, label }) => {
           const active = path === to || (to !== "/dashboard" && path.startsWith(to));
