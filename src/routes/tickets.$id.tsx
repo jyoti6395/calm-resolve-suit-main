@@ -101,10 +101,10 @@ function TicketWorkspace() {
   };
 
   return (
-    <MobileShell>
+    <MobileShell scrollable={false}>
       {/* Mobile WebView Guardrail constraints */}
-      <div className="h-[calc(100vh-64px)] flex flex-col justify-between w-full max-w-md mx-auto md:max-w-4xl bg-background">
-        <AppHeader title={ticket?.subject || ticket?.title || "Loading..."} back />
+      <div className="h-full flex flex-col justify-between w-full bg-background">
+        <AppHeader title={ticket?.subject || "Loading..."} back />
 
         {/* Scrollable Message Box */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -166,7 +166,7 @@ function TicketWorkspace() {
         </div>
 
         {/* Fixed Input Layer controlled via react-hook-form */}
-        <div className="p-4 bg-background border-t border-border shrink-0">
+        <div className="p-4 bg-background border-t border-border shrink-0 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="flex items-center gap-2 bg-secondary rounded-[24px] p-1 border border-border/50 focus-within:border-primary/50 transition-colors"
