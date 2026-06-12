@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, or } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { sanitizeQuerySnapshot } from "../lib/formatters";
 import type { RootState } from "./index";
@@ -104,13 +104,19 @@ export const startTicketSyncListener = () => (dispatch: any, getState: () => any
   const ticketsRef = collection(db, "tickets");
   let q;
 
-  // Construct optimized, compound multi-index queries depending on access rights
+  // Construct optimized queries depending on access rights
   if (user.role === "super_admin") {
     // Admins track the full corporate scope
     q = query(ticketsRef);
+  } else if (user.role === "technician") {
+    // Technicians track tickets assigned to them or created by them
+    q = query(
+      ticketsRef,
+      or(where("assignedToId", "==", user.uid), where("createdBy", "==", user.uid)),
+    );
   } else {
-    // Technicians or regular users only listen to rows matching their assigned UID
-    q = query(ticketsRef, where("assignedToId", "==", user.uid));
+    // Customers and other standard users only see tickets they raised/created
+    q = query(ticketsRef, where("createdBy", "==", user.uid));
   }
 
   const unsubscribe = onSnapshot(

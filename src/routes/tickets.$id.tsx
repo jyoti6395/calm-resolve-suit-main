@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+<<<<<<< HEAD
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { doc, collection, onSnapshot, addDoc, query, orderBy } from "firebase/firestore";
@@ -10,6 +11,13 @@ import { Send, Lock, Clock, Paperclip, ChevronLeft } from "lucide-react";
 import { Ticket, Message } from "@/types/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+=======
+import { MobileShell } from "@/components/MobileShell";
+import { useHeaderSetup } from "@/components/HeaderContext";
+import { useTicketWorkspace } from "@/hooks/useTicketWorkspace";
+import { MessageTimeline } from "@/components/MessageTimeline";
+import { MessageInputForm } from "@/components/MessageInputForm";
+>>>>>>> 6ecfc7b6d14c5f2afb8a4501776dc60b8b7d8c77
 
 export const Route = createFileRoute("/tickets/$id")({
   component: TicketWorkspace,
@@ -17,6 +25,7 @@ export const Route = createFileRoute("/tickets/$id")({
 
 function TicketWorkspace() {
   const { id } = Route.useParams();
+<<<<<<< HEAD
   const navigate = Route.useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
@@ -103,6 +112,9 @@ function TicketWorkspace() {
       setIsSending(false);
     }
   };
+=======
+  const { ticket, messages, user, sendMessage } = useTicketWorkspace(id);
+>>>>>>> 6ecfc7b6d14c5f2afb8a4501776dc60b8b7d8c77
 
   useHeaderSetup(
     {
@@ -117,6 +129,7 @@ function TicketWorkspace() {
   const priorityBadge = ticket ? getPriorityBadgeClass(ticket.priority) : null;
 
   return (
+<<<<<<< HEAD
     <div className="h-full w-full max-w-7xl mx-auto bg-background p-4 xl:p-6 flex flex-col overflow-hidden">
       
       {ticket && (
@@ -330,6 +343,13 @@ function TicketWorkspace() {
               )}
             </div>
           </div>
+=======
+    <MobileShell scrollable={false}>
+      {/* Mobile WebView Guardrail constraints */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden w-full max-w-md mx-auto md:max-w-4xl bg-background">
+        <MessageTimeline ticket={ticket} messages={messages} currentUserUid={user?.uid} />
+        <MessageInputForm onSendMessage={sendMessage} />
+>>>>>>> 6ecfc7b6d14c5f2afb8a4501776dc60b8b7d8c77
       </div>
     </div>
   );
