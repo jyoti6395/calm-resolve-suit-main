@@ -111,6 +111,33 @@ function NewTicket() {
       };
 
       await addDoc(collection(db, "tickets"), payload);
+
+      // Save a corresponding ticket creation notification in Firestore
+      const notificationPayload = {
+        title: "Ticket raised",
+        body: `Your ticket ${payload.ticketSequenceId} has been successfully raised.`,
+        tone: "success" as const,
+        createdAt: serializeTimestamp(now),
+        userId: user?.uid || "",
+        read: false,
+      };
+
+      try {
+        await addDoc(collection(db, "notifications"), notificationPayload);
+      } catch (err) {
+        console.warn(
+          "Failed to write to root notifications, trying subcollection fallback...",
+          err,
+        );
+        try {
+          if (user?.uid) {
+            await addDoc(collection(db, "users", user.uid, "notifications"), notificationPayload);
+          }
+        } catch (subErr) {
+          console.error("Failed to save ticket creation notification in both locations:", subErr);
+        }
+      }
+
       toast.success("Ticket created successfully");
       nav({ to: "/tickets/confirmation" });
     } catch (error: unknown) {

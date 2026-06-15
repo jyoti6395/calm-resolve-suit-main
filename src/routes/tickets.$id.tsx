@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { doc, collection, onSnapshot, addDoc, query, orderBy, where } from "firebase/firestore";
+import {
+  doc,
+  collection,
+  onSnapshot,
+  addDoc,
+  query,
+  orderBy,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { updateTicket } from "@/store/ticketSlice";
 import { sanitizeQuerySnapshot, formatUSDateTime, serializeTimestamp } from "@/lib/formatters";
@@ -12,6 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Send } from "lucide-react";
 import { Ticket, Message } from "@/types/store";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/tickets/$id")({
   component: TicketWorkspace,
@@ -43,10 +53,10 @@ function TicketWorkspace() {
     defaultValues: { content: "" },
   });
 
-  // Smooth scroll to bottom when messages array changes
+  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages]);
 
   // Dual Real-Time Subscriptions
   useEffect(() => {
@@ -81,6 +91,49 @@ function TicketWorkspace() {
     };
   }, [id, dispatch]);
 
+  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!ticket || !user) return;
+    const newStatus = e.target.value;
+
+    try {
+      const ticketRef = doc(db, "tickets", ticket.id);
+      await updateDoc(ticketRef, {
+        status: newStatus,
+        updatedAt: serializeTimestamp(new Date()),
+      });
+
+      // Construct status change notification
+      const isResolved = newStatus === "resolved";
+      const statusText = newStatus.replace("_", " ");
+      const statusNotif = {
+        title: isResolved ? "Ticket resolved" : "Ticket status updated",
+        body: `Your ticket "${ticket.subject}" status has been updated to "${statusText}".`,
+        tone: isResolved ? ("success" as const) : ("warning" as const),
+        createdAt: new Date().toISOString(),
+        userId: ticket.createdBy || "",
+        read: false,
+      };
+
+      try {
+        await addDoc(collection(db, "notifications"), statusNotif);
+      } catch (err) {
+        console.warn("Failed to write status notification to root, trying subcollection...", err);
+        try {
+          if (ticket.createdBy) {
+            await addDoc(collection(db, "users", ticket.createdBy, "notifications"), statusNotif);
+          }
+        } catch (subErr) {
+          console.error("Failed to save status notification in both locations:", subErr);
+        }
+      }
+
+      toast.success(`Ticket status updated to ${statusText}`);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      toast.error("Failed to update status.");
+    }
+  };
+
   const onSubmit = async (data: MessageInput) => {
     if (!user) return;
 
@@ -95,6 +148,32 @@ function TicketWorkspace() {
 
     try {
       await addDoc(collection(db, "tickets", id, "messages"), payload);
+
+      // Determine message notification recipient
+      const recipientId = user.uid === ticket?.createdBy ? ticket?.assignedToId : ticket?.createdBy;
+
+      if (recipientId) {
+        const replyNotif = {
+          title: `New reply on ${ticket?.subject || "ticket"}`,
+          body: `${payload.senderName}: ${payload.content}`,
+          tone: "primary" as const,
+          createdAt: new Date().toISOString(),
+          userId: recipientId,
+          read: false,
+        };
+
+        try {
+          await addDoc(collection(db, "notifications"), replyNotif);
+        } catch (err) {
+          console.warn("Failed to write reply notification to root, trying subcollection...", err);
+          try {
+            await addDoc(collection(db, "users", recipientId, "notifications"), replyNotif);
+          } catch (subErr) {
+            console.error("Failed to save reply notification in both locations:", subErr);
+          }
+        }
+      }
+
       reset(); // Reset input field instantly without triggering layout jitter
     } catch (error) {
       console.error("Failed to send message:", error);
@@ -114,9 +193,23 @@ function TicketWorkspace() {
               <h2 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Ticket Details
               </h2>
-              <div className="space-y-1">
-                <p className="text-[13px]">
-                  <strong>Status:</strong> <span className="capitalize">{ticket.status}</span>
+              <div className="space-y-2">
+                <p className="text-[13px] flex items-center gap-1.5">
+                  <strong>Status:</strong>{" "}
+                  {user?.role === "super_admin" || user?.role === "technician" ? (
+                    <select
+                      value={ticket.status}
+                      onChange={handleStatusChange}
+                      className="bg-secondary text-foreground text-[12px] font-semibold rounded-lg px-2 py-0.5 border border-border outline-none cursor-pointer focus:border-primary transition-colors capitalize"
+                    >
+                      <option value="open">Open</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  ) : (
+                    <span className="capitalize">{ticket.status.replace("_", " ")}</span>
+                  )}
                 </p>
                 <p className="text-[13px]">
                   <strong>Priority:</strong> <span className="capitalize">{ticket.priority}</span>

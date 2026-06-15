@@ -143,7 +143,7 @@ function MobileTicketsQueue() {
     <MobileShell>
       <div className="min-h-screen bg-background pb-24 flex flex-col w-full max-w-md mx-auto">
         {/* Controlled Search Form */}
-        <div className="px-4 mt-2">
+        <div className="px-4 mt-2 shrink-0">
           <form onSubmit={(e) => e.preventDefault()}>
             <label className="flex items-center gap-2 h-12 px-4 rounded-2xl bg-secondary focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 focus-within:bg-card focus-within:shadow-soft transition-all border border-transparent">
               <Search className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -166,16 +166,16 @@ function MobileTicketsQueue() {
         </div>
 
         {/* Status Tabs mapped to Hook Form */}
-        <div className="mt-4 px-4 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="mt-4 px-4 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
           {tabs.map((t) => (
             <button
               key={t.key}
               onClick={() => handleTabClick(t.key)}
               type="button"
-              className={`shrink-0 px-4 h-9 rounded-full text-[13px] font-semibold transition-all cursor-pointer ${
+              className={`shrink-0 px-5 h-10 rounded-full text-[13px] font-bold transition-all cursor-pointer ${
                 activeTab === t.key
-                  ? "bg-primary text-primary-foreground shadow-elevated"
-                  : "bg-secondary text-muted-foreground hover:bg-muted"
+                  ? "bg-[oklch(0.28_0.14_263)] text-white shadow-sm"
+                  : "bg-[oklch(0.95_0.012_250)] text-[oklch(0.35_0.05_260)] hover:bg-[oklch(0.91_0.02_250)]"
               }`}
             >
               {t.label}
