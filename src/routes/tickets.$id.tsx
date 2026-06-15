@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { doc, collection, onSnapshot, addDoc, query, orderBy } from "firebase/firestore";
+import { doc, collection, onSnapshot, addDoc, query, orderBy, where } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
 import { updateTicket } from "@/store/ticketSlice";
 import { sanitizeQuerySnapshot, formatUSDateTime, serializeTimestamp } from "@/lib/formatters";
@@ -65,6 +65,7 @@ function TicketWorkspace() {
     // Stream 2: Conversational Timeline
     const messagesQuery = query(
       collection(db, "tickets", id, "messages"),
+      where("type", "==", "public"),
       orderBy("createdAt", "asc"),
     );
 
