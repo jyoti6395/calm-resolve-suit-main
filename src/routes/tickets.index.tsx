@@ -56,33 +56,63 @@ function MobileTicketsQueue() {
     },
   });
 
+  const searchValue = form.watch("search");
+  const statusValue = form.watch("status");
+  const priorityValue = form.watch("priority");
+
+  // Sync status and priority immediately to URL state
+  useEffect(() => {
+    if (searchParams.status !== statusValue || searchParams.priority !== priorityValue) {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          status: statusValue,
+          priority: priorityValue,
+        }),
+        replace: true,
+      });
+    }
+  }, [statusValue, priorityValue, navigate, searchParams.status, searchParams.priority]);
+
   // Debounce search input to URL state (300ms)
   useEffect(() => {
-    const subscription = form.watch((value) => {
-      const timeoutId = setTimeout(() => {
+    const timeoutId = setTimeout(() => {
+      const searchVal = searchValue || undefined;
+      if (searchParams.search !== searchVal) {
         navigate({
           search: (prev) => ({
             ...prev,
-            ...value,
+            search: searchVal,
           }),
           replace: true,
         });
-      }, 300);
-      return () => clearTimeout(timeoutId);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, navigate]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchValue, navigate, searchParams.search]);
 
   // Sync state back to form fields if URL changes (e.g. Back/Forward navigation)
   useEffect(() => {
-    form.reset(
-      {
-        search: searchParams.search || "",
-        status: searchParams.status,
-        priority: searchParams.priority,
-      },
-      { keepDefaultValues: true },
-    );
+    const currentValues = form.getValues();
+    const searchVal = searchParams.search || "";
+    const statusVal = searchParams.status;
+    const priorityVal = searchParams.priority;
+
+    if (
+      currentValues.search !== searchVal ||
+      currentValues.status !== statusVal ||
+      currentValues.priority !== priorityVal
+    ) {
+      form.reset(
+        {
+          search: searchVal,
+          status: statusVal,
+          priority: priorityVal,
+        },
+        { keepDefaultValues: true },
+      );
+    }
   }, [searchParams, form]);
 
   // Client-side filtering
@@ -105,7 +135,7 @@ function MobileTicketsQueue() {
   useHeaderSetup(
     {
       title: "Tickets",
-      subtitle: `${filteredList.length} matching`,
+      subtitle: `${filteredList.length} request`,
     },
     [filteredList.length],
   );

@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useHeaderSetup } from "@/components/HeaderContext";
-import { categories } from "@/lib/mock";
 import {
   Camera,
   Image as ImageIcon,
@@ -10,7 +9,12 @@ import {
   Paperclip,
   Sparkles,
   ChevronRight,
-  Save,
+  Wifi,
+  CreditCard,
+  Laptop,
+  Key,
+  Terminal,
+  Shield,
 } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -22,7 +26,14 @@ import { toast } from "sonner";
 import { serializeTimestamp } from "@/lib/formatters";
 import { SLA_HOURS_MAP } from "@/constants/ticket";
 
-export const Route = createFileRoute("/tickets/new")({ component: NewTicket });
+const newTicketSearchSchema = z.object({
+  category: z.string().optional(),
+});
+
+export const Route = createFileRoute("/tickets/new")({
+  validateSearch: (search) => newTicketSearchSchema.parse(search),
+  component: NewTicket,
+});
 
 const priorities = [
   { key: "low", label: "Low", hint: "Minor inconvenience" },
@@ -40,20 +51,67 @@ const createTicketSchema = z.object({
 
 type CreateTicketInput = z.infer<typeof createTicketSchema>;
 
+const newCategoriesList = [
+  {
+    title: "Technical Support",
+    desc: "App issues, errors, bugs",
+    icon: Terminal,
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    categoryKey: "Software",
+  },
+  {
+    title: "Account Access",
+    desc: "Login, password, 2FA",
+    icon: Key,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    categoryKey: "Access",
+  },
+  {
+    title: "Connectivity",
+    desc: "Internet, Wi-Fi, VPN",
+    icon: Wifi,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    categoryKey: "Network",
+  },
+  {
+    title: "Billing Support",
+    desc: "Invoices, payments, refunds",
+    icon: CreditCard,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    categoryKey: "Email",
+  },
+  {
+    title: "Product Support",
+    desc: "Features and how-tos",
+    icon: Laptop,
+    color: "text-indigo-500",
+    bg: "bg-indigo-500/10",
+    categoryKey: "Hardware",
+  },
+  {
+    title: "General Enquiries",
+    desc: "Other queries",
+    icon: Sparkles,
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    categoryKey: "Other",
+  },
+];
+
 function NewTicket() {
+  const { category: preselectedCategory } = Route.useSearch();
   const nav = useNavigate();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(preselectedCategory ? 2 : 1);
   const user = useAppSelector((state) => state.auth.user);
 
   useHeaderSetup(
     {
       title: "Raise a ticket",
       back: true,
-      // right: (
-      //   <button className="text-[12px] font-semibold text-primary flex items-center gap-1">
-      //     <Save className="h-3.5 w-3.5" /> Draft
-      //   </button>
-      // ),
     },
     [],
   );
@@ -69,7 +127,7 @@ function NewTicket() {
     defaultValues: {
       title: "",
       description: "",
-      category: "",
+      category: preselectedCategory || "",
       priority: "medium",
     },
   });
@@ -110,7 +168,7 @@ function NewTicket() {
         slaDeadline: serializeTimestamp(slaDeadline),
       };
 
-      await addDoc(collection(db, "tickets"), payload);
+      const docRef = await addDoc(collection(db, "tickets"), payload);
 
       // Save a corresponding ticket creation notification in Firestore
       const notificationPayload = {
@@ -139,7 +197,13 @@ function NewTicket() {
       }
 
       toast.success("Ticket created successfully");
-      nav({ to: "/tickets/confirmation" });
+      nav({
+        to: "/tickets/confirmation",
+        search: {
+          ticketId: docRef.id,
+          ticketSequenceId: payload.ticketSequenceId,
+        },
+      });
     } catch (error: unknown) {
       console.error(error);
       toast.error("Failed to create ticket. Please try again.");
@@ -172,19 +236,39 @@ function NewTicket() {
             <div className="animate-slide-up">
               <h2 className="text-[22px] font-extrabold tracking-tight">What's the issue about?</h2>
               <p className="mt-1 text-[13px] text-muted-foreground">
-                Pick a category — we'll tailor the form.
+                Pick the category that fits best.
               </p>
               <div className="mt-5 grid grid-cols-2 gap-3">
-                {categories.map((c) => (
-                  <button
-                    key={c.key}
-                    onClick={() => setValue("category", c.key, { shouldValidate: true })}
-                    className={`rounded-2xl p-4 text-left border-2 transition-all ${watchCategory === c.key ? "border-primary bg-primary/5 shadow-elevated" : "border-border bg-card"}`}
-                  >
-                    <div className="text-2xl">{c.icon}</div>
-                    <p className="mt-2 text-[13px] font-semibold">{c.key}</p>
-                  </button>
-                ))}
+                {newCategoriesList.map((c) => {
+                  const IconComponent = c.icon;
+                  const isSelected = watchCategory === c.categoryKey;
+                  return (
+                    <button
+                      key={c.categoryKey}
+                      type="button"
+                      onClick={() => setValue("category", c.categoryKey, { shouldValidate: true })}
+                      className={`rounded-2xl p-4 text-left border-2 transition-all flex flex-col justify-between min-h-[140px] cursor-pointer ${
+                        isSelected
+                          ? "border-primary bg-primary/5 shadow-elevated"
+                          : "border-border bg-card hover:bg-muted/10"
+                      }`}
+                    >
+                      <div
+                        className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 self-start transition-all ${c.bg} ${c.color}`}
+                      >
+                        <IconComponent className="h-5 w-5" />
+                      </div>
+                      <div className="mt-4">
+                        <p className="text-[13px] font-bold text-foreground leading-snug">
+                          {c.title}
+                        </p>
+                        <p className="mt-1 text-[11px] text-muted-foreground leading-normal">
+                          {c.desc}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -193,7 +277,9 @@ function NewTicket() {
             <div className="animate-slide-up">
               <h2 className="text-[22px] font-extrabold tracking-tight">Describe the problem</h2>
               <p className="mt-1 text-[13px] text-muted-foreground">
-                {watchCategory} · Be as specific as you can.
+                {newCategoriesList.find((c) => c.categoryKey === watchCategory)?.title ||
+                  watchCategory}{" "}
+                · Be as specific as you can.
               </p>
 
               <input
@@ -248,6 +334,7 @@ function NewTicket() {
                   {priorities.map((p) => (
                     <button
                       key={p.key}
+                      type="button"
                       onClick={() => setValue("priority", p.key)}
                       className={`rounded-2xl p-3 text-left border-2 transition-all ${watchPriority === p.key ? "border-primary bg-primary/5" : "border-border bg-card"}`}
                     >
@@ -262,15 +349,16 @@ function NewTicket() {
                 <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Attachments
                 </p>
-                <div className="mt-2 grid grid-cols-4 gap-2">
+                <div className="mt-2 grid grid-cols-3 gap-2">
                   {[
                     { I: Camera, l: "Camera" },
                     { I: ImageIcon, l: "Photo" },
                     { I: Paperclip, l: "File" },
-                    { I: Mic, l: "Voice" },
+                    // { I: Mic, l: "Voice" },
                   ].map(({ I, l }) => (
                     <button
                       key={l}
+                      type="button"
                       className="aspect-square rounded-2xl bg-secondary flex flex-col items-center justify-center gap-1.5"
                     >
                       <I className="h-5 w-5 text-foreground/70" />
@@ -290,7 +378,14 @@ function NewTicket() {
               </p>
 
               <div className="mt-5 space-y-2 rounded-2xl bg-card border border-border p-4">
-                <Row k="Category" v={getValues("category") || ""} />
+                <Row
+                  k="Category"
+                  v={
+                    newCategoriesList.find((c) => c.categoryKey === getValues("category"))?.title ||
+                    getValues("category") ||
+                    ""
+                  }
+                />
                 <Row
                   k="Priority"
                   v={priorities.find((p) => p.key === getValues("priority"))?.label || ""}
@@ -305,7 +400,10 @@ function NewTicket() {
               <div className="mt-5 rounded-2xl bg-success/10 border border-success/20 p-4 text-[12.5px] text-foreground/80">
                 <p className="font-semibold text-success">Estimated response: under 30 minutes</p>
                 <p className="mt-1 text-muted-foreground">
-                  Your ticket will be auto-routed to the {getValues("category")} team.
+                  Your ticket will be auto-routed to the{" "}
+                  {newCategoriesList.find((c) => c.categoryKey === getValues("category"))?.title ||
+                    getValues("category")}{" "}
+                  team.
                 </p>
               </div>
             </div>
@@ -316,8 +414,9 @@ function NewTicket() {
           <div className="flex gap-3">
             {step > 1 && (
               <button
+                type="button"
                 onClick={() => setStep(step - 1)}
-                className="h-14 px-6 rounded-2xl bg-secondary font-semibold"
+                className="h-14 px-6 rounded-2xl bg-secondary font-semibold cursor-pointer"
               >
                 Back
               </button>
@@ -325,7 +424,7 @@ function NewTicket() {
             <button
               disabled={!canNext || isSubmitting}
               onClick={() => (step === 3 ? handleSubmit(onSubmit)() : setStep(step + 1))}
-              className="flex-1 h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated disabled:opacity-40 disabled:shadow-none"
+              className="flex-1 h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated disabled:opacity-40 disabled:shadow-none cursor-pointer"
             >
               {step === 3 ? (isSubmitting ? "Submitting..." : "Submit ticket") : "Continue"}
             </button>

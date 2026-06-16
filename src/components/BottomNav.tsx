@@ -15,7 +15,7 @@ export function BottomNav() {
   const { user } = useAppSelector((state) => state.auth);
 
   const visibleItems = items.filter((item) => {
-    if (item.to === "/analytics" && user?.role === "technician") return false;
+    // if (item.to === "/analytics" && user?.role === "technician") return false;
     return true;
   });
 

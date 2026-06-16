@@ -4,6 +4,7 @@ import {
   signOut,
   sendPasswordResetEmail,
   User as FirebaseUser,
+  deleteUser,
 } from "firebase/auth";
 import {
   doc,
@@ -120,4 +121,16 @@ export async function sendPasswordReset(email: string): Promise<void> {
   // Send the password reset email using Firebase Auth.
   // It handles sending the email if the account exists.
   await sendPasswordResetEmail(auth, trimmedEmail);
+}
+
+/**
+ * Deletes the currently signed-in user's Firebase Auth account.
+ * Note: This does NOT delete their Firestore profile document.
+ */
+export async function deleteAccount(): Promise<void> {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error("No authenticated user found.");
+  }
+  await deleteUser(user);
 }

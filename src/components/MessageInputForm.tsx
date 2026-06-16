@@ -25,16 +25,17 @@ export function MessageInputForm({ onSendMessage }: MessageInputFormProps) {
   });
 
   const onSubmit = async (data: MessageInput) => {
+    const content = data.content;
+    reset(); // Reset input field instantly for a fast, responsive UI feel
     try {
-      await onSendMessage(data.content);
-      reset(); // Reset input field instantly without triggering layout jitter
+      await onSendMessage(content);
     } catch (error) {
       console.error("Failed to send message:", error);
     }
   };
 
   return (
-    <div className="p-4 bg-background border-t border-border shrink-0">
+    <div className="p-4 bg-background border-t border-border shrink-0 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="flex items-center gap-2 bg-secondary rounded-[24px] p-1 border border-border/50 focus-within:border-primary/50 transition-colors"

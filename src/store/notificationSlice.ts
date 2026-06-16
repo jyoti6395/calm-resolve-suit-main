@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { sanitizeQuerySnapshot } from "../lib/formatters";
-import type { RootState } from "./index";
+import type { RootState, AppDispatch } from "./index";
 
 export interface DbNotification {
   id: string;
@@ -78,8 +78,6 @@ export const {
   clearNotificationState,
 } = notificationSlice.actions;
 
-import type { AppDispatch } from "./index";
-
 export const startNotificationSyncListener =
   () => (dispatch: AppDispatch, getState: () => RootState) => {
     dispatch(setNotificationsLoading(true));
@@ -140,6 +138,51 @@ export const startNotificationSyncListener =
         unsubscribeSub();
       }
     };
+  };
+
+export const deleteNotification =
+  (notificationId: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState() as RootState;
+    const user = state.auth.user;
+
+    if (!user) {
+      console.error("Cannot delete notification: No authenticated user session found.");
+      return;
+    }
+
+    try {
+      const rootDocRef = doc(db, "notifications", notificationId);
+      await deleteDoc(rootDocRef);
+    } catch (err) {
+      console.warn(
+        "Failed to delete from root notifications, trying subcollection fallback...",
+        err,
+      );
+      try {
+        const subDocRef = doc(db, "users", user.uid, "notifications", notificationId);
+        await deleteDoc(subDocRef);
+      } catch (subErr) {
+        console.error("Failed to delete notification in both locations:", subErr);
+        throw subErr;
+      }
+    }
+  };
+
+export const clearAllNotifications =
+  () => async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState() as RootState;
+    const user = state.auth.user;
+    const notifications = state.notifications.notifications;
+
+    if (!user) {
+      console.error("Cannot clear notifications: No authenticated user session found.");
+      return;
+    }
+
+    if (notifications.length === 0) return;
+
+    const promises = notifications.map((notif) => dispatch(deleteNotification(notif.id)));
+    await Promise.all(promises);
   };
 
 export default notificationSlice.reducer;
