@@ -180,8 +180,9 @@ function Profile() {
               Delete account?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[13px] text-muted-foreground text-center mt-2 leading-relaxed">
-              This action is permanent and cannot be undone. All your profile information will be
-              deleted.
+              Permanently delete the account{" "}
+              <span className="font-semibold text-foreground">{user?.email}</span>? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
 

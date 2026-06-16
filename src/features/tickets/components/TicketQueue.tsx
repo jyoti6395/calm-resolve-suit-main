@@ -1,7 +1,21 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { Search, SlidersHorizontal, Plus, Clock, X } from "lucide-react";
+import {
+  Search,
+  SlidersHorizontal,
+  Plus,
+  Clock,
+  X,
+  Lock,
+  CreditCard,
+  Wrench,
+  Globe,
+  Laptop,
+  Settings,
+  Shield,
+  Sparkles,
+} from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import {
   formatUSDateTime,
@@ -14,6 +28,142 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import type { Ticket } from "@/types/store";
 
+// =========================================
+// CARD DESIGN HELPERS
+// =========================================
+
+// Helper to match category to Lucide icon, colors, and background based on image design
+const getCategoryIconComponent = (category: string, subject: string) => {
+  const cat = category?.toLowerCase() || "";
+  const sub = subject?.toLowerCase() || "";
+
+  if (
+    sub.includes("checkout") ||
+    sub.includes("billing") ||
+    sub.includes("payment") ||
+    sub.includes("card") ||
+    cat === "billing" ||
+    cat === "email"
+  ) {
+    return {
+      Icon: CreditCard,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-950/20",
+    };
+  }
+  if (
+    cat.includes("access") ||
+    cat.includes("login") ||
+    sub.includes("password") ||
+    sub.includes("mfa") ||
+    sub.includes("account")
+  ) {
+    return {
+      Icon: Lock,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-950/20",
+    };
+  }
+  if (
+    cat.includes("hardware") ||
+    cat.includes("device") ||
+    sub.includes("phone") ||
+    sub.includes("printer") ||
+    sub.includes("mac") ||
+    sub.includes("calendar")
+  ) {
+    return {
+      Icon: Wrench,
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-950/20",
+    };
+  }
+  if (cat.includes("network") || cat.includes("vpn") || cat.includes("wifi")) {
+    return {
+      Icon: Globe,
+      color: "text-indigo-600 dark:text-indigo-400",
+      bg: "bg-indigo-50 dark:bg-indigo-950/20",
+    };
+  }
+  if (cat.includes("software")) {
+    return {
+      Icon: Laptop,
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-950/20",
+    };
+  }
+  if (cat.includes("infrastructure")) {
+    return {
+      Icon: Settings,
+      color: "text-slate-600 dark:text-slate-400",
+      bg: "bg-slate-50 dark:bg-slate-900/50",
+    };
+  }
+  if (cat.includes("security")) {
+    return {
+      Icon: Shield,
+      color: "text-rose-600 dark:text-rose-400",
+      bg: "bg-rose-50 dark:bg-rose-950/20",
+    };
+  }
+  return {
+    Icon: Sparkles,
+    color: "text-pink-600 dark:text-pink-400",
+    bg: "bg-pink-50 dark:bg-pink-950/20",
+  };
+};
+
+// Helper to calculate progress percentage and status label based on ticket state
+const getTicketProgress = (status: string, hasAssignee: boolean) => {
+  const s = status?.toLowerCase() || "";
+  if (s === "open") {
+    if (hasAssignee) {
+      return { percent: 40, label: "Being Reviewed" };
+    }
+    return { percent: 10, label: "Awaiting Assignment" };
+  }
+  if (s === "pending" || s === "waiting") {
+    return { percent: 20, label: "Assigned" };
+  }
+  if (s === "in_progress") {
+    return { percent: 60, label: "Resolution In Progress" };
+  }
+  if (s === "resolved") {
+    return { percent: 100, label: "Resolved" };
+  }
+  if (s === "closed") {
+    return { percent: 100, label: "Closed" };
+  }
+  return { percent: 0, label: "Submitted" };
+};
+
+// Helper for relative time display
+const getRelativeTime = (isoString: string) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  if (isNaN(diffMs) || diffMs < 0) return "just now";
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+};
+
+// Helper for technician initials
+const getInitials = (name: string | null) => {
+  if (!name || name === "Unassigned") return "??";
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
 export function TicketQueue({
   searchParams,
 }: {
@@ -21,6 +171,7 @@ export function TicketQueue({
 }) {
   const navigate = useNavigate({ from: "/tickets/" });
   const tickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
+  const technicians = useAppSelector((state) => state.technicians.technicians);
 
   const form = useForm({
     defaultValues: {
@@ -131,16 +282,6 @@ export function TicketQueue({
 
   const activeTab = form.watch("status") || "all";
 
-  const getInitials = (name: string | null) => {
-    if (!name) return "";
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-24 flex flex-col w-full max-w-md mx-auto">
@@ -185,95 +326,162 @@ export function TicketQueue({
 
         <div className="px-4 mt-4 pb-30 flex flex-col gap-3 flex-1">
           {filteredList.map((ticket) => {
-            const priorityBadge = getPriorityBadgeClass(ticket.priority);
-            const statusBadge = getStatusBadgeClass(ticket.status);
-            const sla = formatSLAWithCountdown(ticket.slaDeadline);
+            const hasAssignee = !!ticket.assignedToName;
+            const progress = getTicketProgress(ticket.status, hasAssignee);
+            const isPriority = ticket.priority === "critical" || ticket.priority === "urgent";
+
+            // Badge style mapping
+            let badgeText = ticket.status;
+            let badgeClass = "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300"; // default fallback
+
+            if (isPriority) {
+              badgeText = "Priority";
+              badgeClass = "bg-rose-50 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400";
+            } else if (ticket.status === "open") {
+              badgeText = "Open";
+              badgeClass = "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400";
+            } else if (ticket.status === "pending" || ticket.status === "waiting") {
+              badgeText = "Waiting";
+              badgeClass = "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400";
+            } else if (ticket.status === "in_progress") {
+              badgeText = "In Progress";
+              badgeClass =
+                "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400";
+            } else if (ticket.status === "resolved") {
+              badgeText = "Resolved";
+              badgeClass =
+                "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400";
+            } else if (ticket.status === "closed") {
+              badgeText = "Closed";
+              badgeClass = "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400";
+            }
+
+            // Find tech role
+            const tech = technicians.find(
+              (t) => t.name === ticket.assignedToName || t.uid === ticket.assignedToId,
+            );
+            const assignedRole = tech?.role || "Support Specialist";
+
+            // Resolve dynamic Lucide icon matching the category/subject
+            const {
+              Icon: CategoryIcon,
+              color: iconColor,
+              bg: iconBg,
+            } = getCategoryIconComponent(ticket.category, ticket.subject);
 
             return (
               <Link
                 key={ticket.id}
                 to="/tickets/$id"
                 params={{ id: ticket.id }}
-                className={`block rounded-2xl bg-card border border-border border-l-4 p-4 shadow-sm hover:shadow-soft active:scale-[0.99] transition-all hover:translate-y-[-1px] min-h-[48px] ${
-                  ticket.priority === "critical" || ticket.priority === "urgent"
-                    ? "border-l-destructive"
-                    : ticket.priority === "high"
-                      ? "border-l-[oklch(0.6_0.22_40)]"
-                      : ticket.priority === "medium"
-                        ? "border-l-warning"
-                        : "border-l-muted-foreground/30"
-                }`}
+                className="block rounded-3xl bg-card border border-border/60 p-4 px-5 shadow-sm hover:shadow-md active:scale-[0.99] transition-all duration-200"
               >
+                {/* Top Row: Icon, ID, Status Badge */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-muted-foreground tracking-wider uppercase">
+                  <div className="flex items-center gap-3">
+                    {/* Circle icon container using Lucide icons */}
+                    <div
+                      className={`h-9 w-9 rounded-full ${iconBg} flex items-center justify-center shrink-0 border border-slate-100/30 dark:border-slate-800/30`}
+                    >
+                      <CategoryIcon className={`h-4.5 w-4.5 ${iconColor}`} />
+                    </div>
+                    {/* Sequence ID */}
+                    <span className="text-[13px] font-semibold text-slate-500 dark:text-slate-400 tracking-wide uppercase">
                       {ticket.ticketSequenceId || ticket.id.slice(0, 10)}
                     </span>
-                    <span className="text-muted-foreground/45 text-[10px]">•</span>
-                    <div className="flex items-center gap-1 text-[10.5px] font-bold text-muted-foreground">
-                      <span>{ticket.category || "General"}</span>
-                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${statusBadge} capitalize`}
-                    >
-                      {ticket.status.replace("_", " ")}
-                    </span>
-                    <span
-                      className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${priorityBadge.bg} ${priorityBadge.text} flex items-center gap-1 capitalize`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${priorityBadge.dot}`} />
-                      {ticket.priority}
-                    </span>
+                  {/* Status Badge */}
+                  <span
+                    className={`text-[12px] font-bold px-3 py-1 rounded-full ${badgeClass} capitalize`}
+                  >
+                    {badgeText.replace("_", " ")}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="mt-2 text-[15px] font-semibold text-slate-900 dark:text-slate-100 tracking-tight leading-snug">
+                  {(ticket as Ticket & { title?: string }).title || ticket.subject}
+                </h3>
+
+                {/* Progress bar section */}
+                <div className="mt-2.5">
+                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-brand rounded-full transition-all duration-300"
+                      style={{ width: `${progress.percent}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center text-[12px] font-semibold text-slate-500 dark:text-slate-400 mt-1">
+                    <span>{progress.label}</span>
+                    <span>{progress.percent}%</span>
                   </div>
                 </div>
 
-                <p className="mt-2.5 text-[12.5px] font-semibold tracking-tight text-foreground leading-snug">
-                  {(ticket as Ticket & { title?: string }).title || ticket.subject}
-                </p>
+                {/* Conditional Assignee Row */}
+                {ticket.assignedToName && (
+                  <>
+                    {/* Divider Line */}
+                    <div className="border-t border-slate-100/80 dark:border-slate-800/80 my-3" />
 
-                {ticket.description && (
-                  <p className="mt-1 text-[12.5px] text-muted-foreground line-clamp-1 font-medium">
-                    {ticket.description}
-                  </p>
-                )}
-
-                <div className="mt-3.5 pt-3.5 border-t border-border flex flex-col gap-2">
-                  <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                    <span className="font-medium">
-                      Created {formatUSDateTime(ticket.createdAt)}
-                    </span>
-
-                    {ticket.assignedToName ? (
-                      <div className="flex items-center gap-1.5">
-                        <div className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[9px] font-bold border border-primary/20">
+                    {/* Assignee Row */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        {/* Avatar circle */}
+                        <div className="h-9 w-9 rounded-full bg-[oklch(0.28_0.14_263)] text-white flex items-center justify-center font-bold text-[13px] shrink-0">
                           {getInitials(ticket.assignedToName)}
                         </div>
-                        <span className="text-[11px] text-muted-foreground font-semibold">
-                          {ticket.assignedToName}
-                        </span>
+                        {/* Assignee Text Stack */}
+                        <div className="flex flex-col">
+                          <span className="text-[13px] font-bold text-slate-800 dark:text-slate-200">
+                            {ticket.assignedToName}
+                          </span>
+                          <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                            {assignedRole}
+                          </span>
+                        </div>
                       </div>
-                    ) : null}
-                  </div>
 
-                  {ticket.slaDeadline && (
-                    <div
-                      className={`flex items-center gap-1.5 text-[11px] font-bold w-fit px-2 py-0.5 rounded-full ${
-                        sla.isBreached
-                          ? "bg-destructive/10 text-destructive"
-                          : "bg-warning/10 text-warning"
-                      }`}
-                    >
-                      <Clock className="h-3 w-3" />
-                      <span>{sla.text}</span>
+                      {/* Relative time */}
+                      <div className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-400 dark:text-slate-500">
+                        <Clock className="h-3.5 w-3.5 text-slate-400/80" />
+                        <span>{getRelativeTime(ticket.updatedAt || ticket.createdAt)}</span>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </>
+                )}
+
+                {/* Priority dot at the bottom */}
+                {ticket.priority && (
+                  <div
+                    className={`flex items-center gap-1.5 mt-2 text-[12px] font-bold ${
+                      ticket.priority === "critical" ||
+                      ticket.priority === "urgent" ||
+                      ticket.priority === "high"
+                        ? "text-red-600"
+                        : ticket.priority === "medium"
+                          ? "text-amber-600"
+                          : "text-slate-500"
+                    }`}
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        ticket.priority === "critical" ||
+                        ticket.priority === "urgent" ||
+                        ticket.priority === "high"
+                          ? "bg-red-600"
+                          : ticket.priority === "medium"
+                            ? "bg-amber-600"
+                            : "bg-slate-500"
+                      }`}
+                    />
+                    <span className="capitalize">{ticket.priority}</span>
+                  </div>
+                )}
               </Link>
             );
           })}
 
+          {/* Upgraded Empty State */}
           {filteredList.length === 0 && (
             <div className="text-center py-12 px-6 flex flex-col items-center justify-center flex-1">
               <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-4">
