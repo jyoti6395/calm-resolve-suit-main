@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { MobileShell } from "@/components/MobileShell";
-import { BottomNav } from "@/components/BottomNav";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { BottomNav } from "@/components/layout/BottomNav";
 import {
   Bell,
   Plus,
@@ -25,64 +25,9 @@ import type { Ticket } from "@/types/store";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
-const categoriesList = [
-  {
-    title: "Technical Support",
-    desc: "App issues, errors, bugs",
-    icon: Terminal,
-    color: "text-purple-500",
-    bg: "bg-purple-500/10",
-    categoryKey: "Software",
-  },
-  {
-    title: "Account Access",
-    desc: "Login, password, 2FA",
-    icon: Key,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-    categoryKey: "Access",
-  },
-  {
-    title: "Connectivity",
-    desc: "Internet, Wi-Fi, VPN",
-    icon: Wifi,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-    categoryKey: "Network",
-  },
-  {
-    title: "Billing Support",
-    desc: "Invoices, payments, refunds",
-    icon: CreditCard,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-    categoryKey: "Email",
-  },
-  {
-    title: "Product Support",
-    desc: "Features and how-tos",
-    icon: Laptop,
-    color: "text-indigo-500",
-    bg: "bg-indigo-500/10",
-    categoryKey: "Hardware",
-  },
-  {
-    title: "General Enquiries",
-    desc: "Other queries",
-    icon: Sparkles,
-    color: "text-pink-500",
-    bg: "bg-pink-500/10",
-    categoryKey: "Other",
-  },
-  // {
-  //   title: "Security & Audits",
-  //   desc: "Compliance, spam, threats",
-  //   icon: Shield,
-  //   color: "text-rose-500",
-  //   bg: "bg-rose-500/10",
-  //   categoryKey: "Security",
-  // },
-];
+import { SummaryCards } from "@/features/dashboard/components/SummaryCards";
+import { CategoryGrid } from "@/features/dashboard/components/CategoryGrid";
+import { RecentTicketsList } from "@/features/dashboard/components/RecentTicketsList";
 
 function Dashboard() {
   const { user } = useAppSelector((state) => state.auth);
@@ -247,7 +192,7 @@ function Dashboard() {
             </Link>
             <Link
               to="/tickets"
-              search={{ search: "" }}
+              search={{ status: "all" }}
               className="flex-1 h-12 px-6 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-semibold text-[14px] flex items-center justify-center transition-all active:scale-95 cursor-pointer whitespace-nowrap"
             >
               Track request
@@ -256,130 +201,13 @@ function Dashboard() {
         </div>
 
         {/* Summary cards */}
-        <div className="px-5 mt-5">
-          <div className="grid grid-cols-2 gap-3">
-            {summary.map((s) => {
-              const Icon = s.icon;
-              return (
-                <Link
-                  to="/tickets"
-                  search={{ status: s.statusFilter }}
-                  key={s.key}
-                  className="rounded-[1.5rem] bg-card border border-border/80 p-3 shadow-sm hover:shadow-soft hover:-translate-y-0.5 active:scale-[0.98] transition-all flex flex-col justify-between"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div
-                      className={`h-9 w-9 rounded-full ${s.bg} flex items-center justify-center`}
-                    >
-                      <Icon className={`h-4 w-4 ${s.color}`} />
-                    </div>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/45" />
-                  </div>
-                  <div className="mt-2.5">
-                    <p className="text-[24px] font-bold text-foreground leading-none">{s.value}</p>
-                    <p className="mt-1 text-[11.5px] text-muted-foreground font-medium">
-                      {s.label}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        <SummaryCards summary={summary} />
 
         {/* How can we help? Section */}
-        <div className="px-5 mt-7 flex items-center justify-between">
-          <h2 className="text-[15px] font-bold">How can we help?</h2>
-          <Link to="/tickets/new" className="text-[12px] text-primary font-semibold">
-            See all
-          </Link>
-        </div>
-        <div className="px-5 mt-3">
-          <div className="grid grid-cols-2 gap-3">
-            {categoriesList.map((cat) => {
-              const Icon = cat.icon;
-              return (
-                <Link
-                  to="/tickets/new"
-                  search={{ category: cat.categoryKey }}
-                  key={cat.title}
-                  className="rounded-2xl bg-card border border-border/85 p-4 shadow-sm hover:shadow-soft hover:-translate-y-0.5 active:scale-[0.98] transition-all flex flex-col justify-between"
-                >
-                  <div
-                    className={`h-10 w-10 rounded-full ${cat.bg} flex items-center justify-center shrink-0 self-start`}
-                  >
-                    <Icon className={`h-5 w-5 ${cat.color}`} />
-                  </div>
-                  <div className="mt-4">
-                    <p className="text-[13px] font-bold text-foreground leading-snug">
-                      {cat.title}
-                    </p>
-                    <p className="mt-1 text-[11px] text-muted-foreground  leading-normal">
-                      {cat.desc}
-                    </p>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        <CategoryGrid />
 
         {/* Recent tickets */}
-        <div className="px-5 mt-7 flex items-center justify-between">
-          <h2 className="text-[15px] font-bold">Recent tickets</h2>
-          <Link to="/tickets" className="text-[12px] text-primary font-semibold">
-            See all
-          </Link>
-        </div>
-        <div className="px-5 mt-3 pb-30 space-y-2.5">
-          {recentTickets.length === 0 ? (
-            <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-3xl p-6 bg-card/50 text-center">
-              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-3">
-                <CheckCircle2 className="h-5 w-5 text-muted-foreground/60" />
-              </div>
-              <h3 className="text-[14px] font-bold text-foreground">No recent tickets</h3>
-              <p className="mt-1 text-[11px] text-muted-foreground max-w-[220px] leading-relaxed">
-                There are no recent tickets to display at this time.
-              </p>
-            </div>
-          ) : (
-            recentTickets.map((t) => (
-              <Link
-                key={t.id}
-                to="/tickets/$id"
-                params={{ id: t.id }}
-                className="block rounded-2xl bg-card border border-border p-4 active:scale-[0.99] transition-transform"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
-                    {t.ticketSequenceId || t.id.slice(0, 10)}
-                  </span>
-                  <span
-                    className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(t.status)} capitalize`}
-                  >
-                    {t.status.replace("_", " ")}
-                  </span>
-                </div>
-                <p className="mt-1.5 text-[14px] font-semibold leading-snug">
-                  {(t as Ticket & { title?: string }).title || t.subject}
-                </p>
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`h-1.5 w-1.5 rounded-full ${getPriorityBadgeClass(t.priority).dot}`}
-                    />
-                    <span className="text-[11px] text-muted-foreground capitalize">
-                      {t.priority} · {t.category}
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground">
-                    {formatUSDateTime(t.updatedAt || t.createdAt)}
-                  </span>
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
+        <RecentTicketsList tickets={recentTickets} />
       </div>
 
       {/* FAB */}

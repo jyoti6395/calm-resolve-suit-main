@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { Ticket, Message } from "../types/store";
-import { formatUSDateTime } from "../lib/formatters";
+import { useAppSelector } from "@/store/hooks";
+import type { Ticket, Message } from "@/types/store";
+import { formatUSDateTime } from "@/lib/formatters";
 import { TicketDetailsCard } from "./TicketDetailsCard";
 
 interface MessageTimelineProps {

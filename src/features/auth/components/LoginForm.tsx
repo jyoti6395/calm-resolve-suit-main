@@ -1,9 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
-import { MobileShell } from "../components/MobileShell";
-import { Logo } from "../components/Logo";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { Logo } from "@/components/layout/Logo";
 import { Mail, Lock, Eye, EyeOff, ChevronLeft, AlertCircle, Loader2 } from "lucide-react";
-import { logIn } from "../services/authService";
+import { logIn } from "@/services/authService";
 
 export function LoginPage() {
   const navigate = useNavigate();

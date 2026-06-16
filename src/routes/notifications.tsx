@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { MobileShell } from "@/components/MobileShell";
-import { BottomNav } from "@/components/BottomNav";
-import { useHeaderSetup } from "@/components/HeaderContext";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import { Bell, Loader2, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {

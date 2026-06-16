@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { MobileShell } from "@/components/MobileShell";
-import { useHeaderSetup } from "@/components/HeaderContext";
+import { MobileShell } from "@/components/layout/MobileShell";
+import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import { Paperclip, Send, Mic } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({ component: Chat });

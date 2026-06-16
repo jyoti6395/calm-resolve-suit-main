@@ -1,4 +1,5 @@
-import { Ticket } from "../types/store";
+import type { Ticket } from "@/types/store";
+import { User, Calendar, Tag, AlertCircle } from "lucide-react";
 
 interface TicketDetailsCardProps {
   ticket: Ticket;

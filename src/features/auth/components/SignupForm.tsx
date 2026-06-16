@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState, FormEvent } from "react";
-import { MobileShell } from "../components/MobileShell";
+import { MobileShell } from "@/components/layout/MobileShell";
 import {
   ChevronLeft,
   Mail,
@@ -12,7 +12,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { signUp } from "../services/authService";
+import { signUp } from "@/services/authService";
 
 export function SignupPage() {
   const navigate = useNavigate();

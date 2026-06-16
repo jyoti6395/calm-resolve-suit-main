@@ -7,9 +7,9 @@ import { initializeAuthListener } from "@/store/authSlice";
 import { startTicketSyncListener } from "@/store/ticketSlice";
 import { startTechnicianSyncListener } from "@/store/technicianSlice";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { HeaderProvider, useHeader } from "@/components/HeaderContext";
-import { AppHeader } from "@/components/AppHeader";
-import { MobileShell } from "@/components/MobileShell";
+import { HeaderProvider, useHeader } from "@/components/layout/HeaderContext";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { MobileShell } from "@/components/layout/MobileShell";
 import { SidebarProvider } from "@/components/ui/sidebar";
 
 function NotFoundComponent() {

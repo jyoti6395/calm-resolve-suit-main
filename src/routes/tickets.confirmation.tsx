@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase/firebase";
-import { MobileShell } from "@/components/MobileShell";
+import { MobileShell } from "@/components/layout/MobileShell";
 import { CheckCircle2, Share2, ArrowRight, Clock, UserCircle2, Loader2 } from "lucide-react";
 import { Ticket } from "@/types/store";
 import { SLA_HOURS_MAP } from "@/constants/ticket";
