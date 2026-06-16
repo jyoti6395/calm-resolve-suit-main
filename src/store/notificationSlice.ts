@@ -78,66 +78,68 @@ export const {
   clearNotificationState,
 } = notificationSlice.actions;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const startNotificationSyncListener = () => (dispatch: any, getState: () => any) => {
-  dispatch(setNotificationsLoading(true));
+import type { AppDispatch } from "./index";
 
-  const state = getState() as RootState;
-  const user = state.auth.user;
+export const startNotificationSyncListener =
+  () => (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(setNotificationsLoading(true));
 
-  if (!user) {
-    dispatch(
-      setNotificationsError("Cannot sync notifications: No authenticated user session found."),
-    );
-    return () => {};
-  }
+    const state = getState() as RootState;
+    const user = state.auth.user;
 
-  let unsubscribeSub: (() => void) | null = null;
-
-  // 1. Try top-level "notifications" query
-  const unsubscribeTop = onSnapshot(
-    query(collection(db, "notifications"), where("userId", "==", user.uid)),
-    (snapshot) => {
-      try {
-        const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
-        dispatch(setNotifications(mapped));
-      } catch (err: unknown) {
-        console.error("Notification parsing error:", err);
-      }
-    },
-    (error) => {
-      console.warn(
-        "Top-level notifications query failed. Trying user subcollection fallback...",
-        error,
+    if (!user) {
+      dispatch(
+        setNotificationsError("Cannot sync notifications: No authenticated user session found."),
       );
-
-      // 2. Fallback to user-specific subcollection: users/{uid}/notifications
-      try {
-        unsubscribeSub = onSnapshot(
-          collection(db, "users", user.uid, "notifications"),
-          (snapshot) => {
-            const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
-            dispatch(setNotifications(mapped));
-          },
-          (subError) => {
-            console.error("Both notifications queries failed:", subError);
-            dispatch(setNotificationsError(subError.message || "Failed to load notifications."));
-            dispatch(setNotifications([]));
-          },
-        );
-      } catch (e) {
-        dispatch(setNotificationsError("Failed to initialize notifications fallback stream."));
-        dispatch(setNotifications([]));
-      }
-    },
-  );
-
-  return () => {
-    unsubscribeTop();
-    if (unsubscribeSub) {
-      unsubscribeSub();
+      return () => {};
     }
+
+    let unsubscribeSub: (() => void) | null = null;
+
+    // 1. Try top-level "notifications" query
+    const unsubscribeTop = onSnapshot(
+      query(collection(db, "notifications"), where("userId", "==", user.uid)),
+      (snapshot) => {
+        try {
+          const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
+          dispatch(setNotifications(mapped));
+        } catch (err: unknown) {
+          console.error("Notification parsing error:", err);
+        }
+      },
+      (error) => {
+        console.warn(
+          "Top-level notifications query failed. Trying user subcollection fallback...",
+          error,
+        );
+
+        // 2. Fallback to user-specific subcollection: users/{uid}/notifications
+        try {
+          unsubscribeSub = onSnapshot(
+            collection(db, "users", user.uid, "notifications"),
+            (snapshot) => {
+              const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
+              dispatch(setNotifications(mapped));
+            },
+            (subError) => {
+              console.error("Both notifications queries failed:", subError);
+              dispatch(setNotificationsError(subError.message || "Failed to load notifications."));
+              dispatch(setNotifications([]));
+            },
+          );
+        } catch (e) {
+          dispatch(setNotificationsError("Failed to initialize notifications fallback stream."));
+          dispatch(setNotifications([]));
+        }
+      },
+    );
+
+    return () => {
+      unsubscribeTop();
+      if (unsubscribeSub) {
+        unsubscribeSub();
+      }
+    };
   };
-};
 
 export default notificationSlice.reducer;

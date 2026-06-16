@@ -89,8 +89,9 @@ export const {
  * REAL-TIME SYNCHRONIZED STREAM SUB-MODULE (THUNKS)
  * Initializes an active Firestore collection listener stream.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const startTicketSyncListener = () => (dispatch: any, getState: () => any) => {
+import type { AppDispatch } from "./index";
+
+export const startTicketSyncListener = () => (dispatch: AppDispatch, getState: () => RootState) => {
   dispatch(setTicketsLoading(true));
 
   const state = getState() as RootState;
