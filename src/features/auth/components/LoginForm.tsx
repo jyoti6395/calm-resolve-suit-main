@@ -5,8 +5,11 @@ import { Logo } from "@/components/layout/Logo";
 import { Mail, Lock, Eye, EyeOff, ChevronLeft, AlertCircle, Loader2 } from "lucide-react";
 import { logIn } from "@/services/authService";
 
+import { useAppSelector } from "@/store/hooks";
+
 export function LoginPage() {
   const navigate = useNavigate();
+  const { error: authError } = useAppSelector((state) => state.auth);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -78,10 +81,10 @@ export function LoginPage() {
             </p>
           </div>
           {/* Error Banner */}
-          {error && (
+          {(error || authError) && (
             <div className="mx-6 mt-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive text-[13px] font-medium rounded-2xl flex items-start gap-2.5 animate-slide-up">
               <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>{error}</span>
+              <span>{error || authError}</span>
             </div>
           )}
 

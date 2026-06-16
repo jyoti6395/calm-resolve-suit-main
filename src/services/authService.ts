@@ -62,8 +62,21 @@ export async function logIn(email: string, password: string): Promise<FirebaseUs
   const userCredential = await signInWithEmailAndPassword(auth, email, password);
   const user = userCredential.user;
 
-  // Create/update user document in Firestore users collection
+  // Fetch profile to verify role before allowing login success
   const userDocRef = doc(db, "users", user.uid);
+  const userDocSnap = await getDoc(userDocRef);
+
+  if (userDocSnap.exists()) {
+    const profile = userDocSnap.data() as UserProfile;
+    const role = profile.role || "customer";
+
+    if (role !== "customer" && role !== "technician") {
+      await signOut(auth);
+      throw new Error("Authentication failed. Please check your account or contact support.");
+    }
+  }
+
+  // Create/update user document in Firestore users collection
   await setDoc(
     userDocRef,
     {
@@ -118,8 +131,23 @@ export async function updateUserProfile(uid: string, updates: Partial<UserProfil
 export async function sendPasswordReset(email: string): Promise<void> {
   const trimmedEmail = email.trim().toLowerCase();
 
-  // Send the password reset email using Firebase Auth.
-  // It handles sending the email if the account exists.
+  // 1. Verify the account role before allowing a password reset
+  const usersRef = collection(db, "users");
+  const q = query(usersRef, where("email", "==", trimmedEmail));
+  const querySnapshot = await getDocs(q);
+
+  if (!querySnapshot.empty) {
+    const profile = querySnapshot.docs[0].data() as UserProfile;
+    const role = profile.role || "customer";
+
+    // Prevent super_admin or other internal roles from resetting passwords via the public app
+    if (role !== "customer" && role !== "technician") {
+      // Silently return to prevent user enumeration attacks
+      return;
+    }
+  }
+
+  // 2. Send the password reset email using Firebase Auth.
   await sendPasswordResetEmail(auth, trimmedEmail);
 }
 

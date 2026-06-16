@@ -122,13 +122,24 @@ function RootComponent() {
   // Global Auth Guard
   useEffect(() => {
     if (!loading) {
-      const publicRoutes = ["/login", "/signup", "/forgot-password", "/reset-password", "/onboarding", "/", "/otp"];
+      const publicRoutes = [
+        "/login",
+        "/signup",
+        "/forgot-password",
+        "/reset-password",
+        "/onboarding",
+        "/",
+        "/otp",
+      ];
       const currentPath = router.state.location.pathname;
       const isPublicPath = publicRoutes.some((p) => currentPath === p);
 
       if (!isAuthenticated && !isPublicPath) {
         router.navigate({ to: "/login", replace: true });
-      } else if (isAuthenticated && (currentPath === "/login" || currentPath === "/signup" || currentPath === "/")) {
+      } else if (
+        isAuthenticated &&
+        (currentPath === "/login" || currentPath === "/signup" || currentPath === "/")
+      ) {
         router.navigate({ to: "/dashboard", replace: true });
       }
     }

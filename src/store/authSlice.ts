@@ -87,12 +87,18 @@ export const initializeAuthListener = () => (dispatch: any) => {
           throw new Error("This account is inactive. Please contact your administrator.");
         }
 
+        const role = profileData.role || "customer";
+        if (role !== "customer" && role !== "technician") {
+          await signOut(auth);
+          throw new Error("Authentication failed. Please check your account or contact support.");
+        }
+
         // 4. Sanitize and consolidate payload
         const authUser: AuthUser = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
           displayName: firebaseUser.displayName || profileData.fullName || null,
-          role: profileData.role || "technician",
+          role: role,
           status: profileData.status || "active",
         };
 
