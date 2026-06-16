@@ -500,55 +500,21 @@ function TicketWorkspace() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {user?.role === "technician" && ticket && ticket.assignedToId !== user.uid ? (
-                      <button
-                        onClick={async () => {
-                          try {
-                            const ticketRef = doc(db, "tickets", id);
-                            await updateDoc(ticketRef, {
-                              assignedToId: user.uid,
-                              assignedToName: user.displayName || user.email || "Technician",
-                              status: "in_progress",
-                              updatedAt: serializeTimestamp(new Date()),
-                            });
-                            setTicket((prev) => {
-                              if (!prev) return null;
-                              return {
-                                ...prev,
-                                assignedToId: user.uid,
-                                assignedToName: user.displayName || user.email || "Technician",
-                                status: "in_progress",
-                              };
-                            });
-                            toast.success("You have successfully claimed this ticket!");
-                          } catch (err) {
-                            console.error("Failed to claim ticket:", err);
-                            toast.error("Failed to claim ticket.");
-                          }
-                        }}
-                        className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[12px] font-bold hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
-                      >
-                        Claim Ticket
-                      </button>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-                            // toast.message("Scrolled to chat history");
-                          }}
-                          className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/95 transition-all shadow-sm active:scale-95 cursor-pointer"
-                        >
-                          <MessageCircle className="h-4.5 w-4.5" />
-                        </button>
-                        <a
-                          href={`tel:+15550199`}
-                          className="h-10 w-10 rounded-full bg-secondary text-foreground flex items-center justify-center hover:bg-secondary/80 transition-all border border-border/60 active:scale-95"
-                        >
-                          <Phone className="h-4.5 w-4.5" />
-                        </a>
-                      </>
-                    )}
+                    {/* <button
+                      onClick={() => {
+                        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                        // toast.message("Scrolled to chat history");
+                      }}
+                      className="h-10 w-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/95 transition-all shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      <MessageCircle className="h-4.5 w-4.5" />
+                    </button> */}
+                    <a
+                      href={`tel:+15550199`}
+                      className="h-10 w-10 rounded-full bg-secondary text-foreground flex items-center justify-center hover:bg-secondary/80 transition-all border border-border/60 active:scale-95"
+                    >
+                      <Phone className="h-4.5 w-4.5" />
+                    </a>
                   </div>
                 </div>
               </div>
