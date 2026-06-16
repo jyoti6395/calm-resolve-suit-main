@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { sanitizeQuerySnapshot } from "../lib/formatters";
-import type { RootState } from "./index";
+import type { RootState, AppDispatch } from "./index";
 
 export interface DbNotification {
   id: string;
@@ -78,66 +78,111 @@ export const {
   clearNotificationState,
 } = notificationSlice.actions;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const startNotificationSyncListener = () => (dispatch: any, getState: () => any) => {
-  dispatch(setNotificationsLoading(true));
+export const startNotificationSyncListener =
+  () => (dispatch: AppDispatch, getState: () => RootState) => {
+    dispatch(setNotificationsLoading(true));
 
-  const state = getState() as RootState;
-  const user = state.auth.user;
+    const state = getState() as RootState;
+    const user = state.auth.user;
 
-  if (!user) {
-    dispatch(
-      setNotificationsError("Cannot sync notifications: No authenticated user session found."),
-    );
-    return () => {};
-  }
-
-  let unsubscribeSub: (() => void) | null = null;
-
-  // 1. Try top-level "notifications" query
-  const unsubscribeTop = onSnapshot(
-    query(collection(db, "notifications"), where("userId", "==", user.uid)),
-    (snapshot) => {
-      try {
-        const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
-        dispatch(setNotifications(mapped));
-      } catch (err: unknown) {
-        console.error("Notification parsing error:", err);
-      }
-    },
-    (error) => {
-      console.warn(
-        "Top-level notifications query failed. Trying user subcollection fallback...",
-        error,
+    if (!user) {
+      dispatch(
+        setNotificationsError("Cannot sync notifications: No authenticated user session found."),
       );
+      return () => {};
+    }
 
-      // 2. Fallback to user-specific subcollection: users/{uid}/notifications
-      try {
-        unsubscribeSub = onSnapshot(
-          collection(db, "users", user.uid, "notifications"),
-          (snapshot) => {
-            const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
-            dispatch(setNotifications(mapped));
-          },
-          (subError) => {
-            console.error("Both notifications queries failed:", subError);
-            dispatch(setNotificationsError(subError.message || "Failed to load notifications."));
-            dispatch(setNotifications([]));
-          },
+    let unsubscribeSub: (() => void) | null = null;
+
+    // 1. Try top-level "notifications" query
+    const unsubscribeTop = onSnapshot(
+      query(collection(db, "notifications"), where("userId", "==", user.uid)),
+      (snapshot) => {
+        try {
+          const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
+          dispatch(setNotifications(mapped));
+        } catch (err: unknown) {
+          console.error("Notification parsing error:", err);
+        }
+      },
+      (error) => {
+        console.warn(
+          "Top-level notifications query failed. Trying user subcollection fallback...",
+          error,
         );
-      } catch (e) {
-        dispatch(setNotificationsError("Failed to initialize notifications fallback stream."));
-        dispatch(setNotifications([]));
-      }
-    },
-  );
 
-  return () => {
-    unsubscribeTop();
-    if (unsubscribeSub) {
-      unsubscribeSub();
+        // 2. Fallback to user-specific subcollection: users/{uid}/notifications
+        try {
+          unsubscribeSub = onSnapshot(
+            collection(db, "users", user.uid, "notifications"),
+            (snapshot) => {
+              const mapped = sanitizeQuerySnapshot<DbNotification>(snapshot);
+              dispatch(setNotifications(mapped));
+            },
+            (subError) => {
+              console.error("Both notifications queries failed:", subError);
+              dispatch(setNotificationsError(subError.message || "Failed to load notifications."));
+              dispatch(setNotifications([]));
+            },
+          );
+        } catch (e) {
+          dispatch(setNotificationsError("Failed to initialize notifications fallback stream."));
+          dispatch(setNotifications([]));
+        }
+      },
+    );
+
+    return () => {
+      unsubscribeTop();
+      if (unsubscribeSub) {
+        unsubscribeSub();
+      }
+    };
+  };
+
+export const deleteNotification =
+  (notificationId: string) => async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState() as RootState;
+    const user = state.auth.user;
+
+    if (!user) {
+      console.error("Cannot delete notification: No authenticated user session found.");
+      return;
+    }
+
+    try {
+      const rootDocRef = doc(db, "notifications", notificationId);
+      await deleteDoc(rootDocRef);
+    } catch (err) {
+      console.warn(
+        "Failed to delete from root notifications, trying subcollection fallback...",
+        err,
+      );
+      try {
+        const subDocRef = doc(db, "notifications", notificationId);
+        await deleteDoc(subDocRef);
+      } catch (subErr) {
+        console.error("Failed to delete notification in both locations:", subErr);
+        throw subErr;
+      }
     }
   };
-};
+
+export const clearAllNotifications =
+  () => async (dispatch: AppDispatch, getState: () => RootState) => {
+    const state = getState() as RootState;
+    const user = state.auth.user;
+    const notifications = state.notifications.notifications;
+
+    if (!user) {
+      console.error("Cannot clear notifications: No authenticated user session found.");
+      return;
+    }
+
+    if (notifications.length === 0) return;
+
+    const promises = notifications.map((notif) => dispatch(deleteNotification(notif.id)));
+    await Promise.all(promises);
+  };
 
 export default notificationSlice.reducer;

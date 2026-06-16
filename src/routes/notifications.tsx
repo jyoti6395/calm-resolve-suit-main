@@ -1,22 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
 import { useHeaderSetup } from "@/components/HeaderContext";
-import { Settings2, Bell, Loader2 } from "lucide-react";
+import { Bell, Loader2, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { startNotificationSyncListener, togglePreference } from "@/store/notificationSlice";
+import {
+  startNotificationSyncListener,
+  togglePreference,
+  deleteNotification,
+  clearAllNotifications,
+} from "@/store/notificationSlice";
 import { groupNotifications, getNotificationToneStyles } from "@/lib/notifications";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/firebase/firebase";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/notifications")({ component: Notifications });
 
 function Notifications() {
   const dispatch = useAppDispatch();
   const { notifications, loading, preferences } = useAppSelector((state) => state.notifications);
-  const user = useAppSelector((state) => state.auth.user);
-  const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     const unsubscribe = dispatch(startNotificationSyncListener());
@@ -38,63 +40,32 @@ function Notifications() {
       ? "All caught up"
       : `${unreadCount} new`;
 
+  const handleClearAll = async () => {
+    try {
+      await dispatch(clearAllNotifications());
+      toast.success("All notifications cleared");
+    } catch (err) {
+      toast.error("Failed to clear notifications");
+    }
+  };
+
   useHeaderSetup(
     {
       title: "Notifications",
       subtitle: subtitleText,
-      right: (
-        <button className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-          <Settings2 className="h-4 w-4" />
-        </button>
-      ),
+      right:
+        unreadCount > 0 ? (
+          <button
+            type="button"
+            onClick={handleClearAll}
+            className="px-3 py-1.5 rounded-full bg-secondary hover:bg-muted flex items-center justify-center text-[12px] font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+          >
+            Clear all
+          </button>
+        ) : undefined,
     },
     [loading, unreadCount],
   );
-
-  const handleGenerateDemo = async () => {
-    if (!user) return;
-    setGenerating(true);
-    const demoItems = [
-      {
-        title: "SLA breach risk",
-        body: "AT-2835 has 32 minutes remaining.",
-        tone: "destructive" as const,
-        createdAt: new Date().toISOString(),
-        userId: user.uid,
-        read: false,
-      },
-      {
-        title: "New reply on AT-2841",
-        body: "Priya: Profile update pushed — try reconnecting.",
-        tone: "primary" as const,
-        createdAt: new Date(Date.now() - 1000 * 60 * 14).toISOString(), // 14m ago
-        userId: user.uid,
-        read: false,
-      },
-      {
-        title: "Ticket resolved",
-        body: "AT-2828 marked as resolved by Sam Kim.",
-        tone: "success" as const,
-        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1d ago
-        userId: user.uid,
-        read: false,
-      },
-    ];
-
-    for (const item of demoItems) {
-      try {
-        await addDoc(collection(db, "notifications"), item);
-      } catch (err) {
-        console.warn("Failed to write to root notifications, trying subcollection...", err);
-        try {
-          await addDoc(collection(db, "users", user.uid, "notifications"), item);
-        } catch (subErr) {
-          console.error("Failed to add demo notification in both locations:", subErr);
-        }
-      }
-    }
-    setGenerating(false);
-  };
 
   return (
     <MobileShell>
@@ -113,13 +84,6 @@ function Notifications() {
             <p className="text-[12px] text-muted-foreground mt-1 max-w-[240px] leading-normal">
               You have no new alerts in your notifications feed.
             </p>
-            <button
-              onClick={handleGenerateDemo}
-              disabled={generating}
-              className="mt-5 h-10 px-5 rounded-xl bg-primary text-primary-foreground text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {generating ? "Generating..." : "Generate Demo Alerts"}
-            </button>
           </div>
         ) : (
           <div className="px-5 space-y-6">
@@ -143,11 +107,27 @@ function Notifications() {
                           <Icon className={`h-4 w-4 ${tone.text}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between gap-2">
+                          <div className="flex justify-between items-start gap-2">
                             <p className="text-[13.5px] font-semibold">{it.title}</p>
-                            <span className="text-[11px] text-muted-foreground shrink-0">
-                              {it.time}
-                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[11px] text-muted-foreground">{it.time}</span>
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    await dispatch(deleteNotification(it.id));
+                                    toast.success("Notification cleared");
+                                  } catch (err) {
+                                    toast.error("Failed to clear notification");
+                                  }
+                                }}
+                                className="h-5 w-5 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
+                                aria-label="Clear notification"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <p className="text-[12.5px] text-muted-foreground mt-0.5 leading-snug">
                             {it.body}

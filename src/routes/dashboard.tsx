@@ -1,20 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { BottomNav } from "@/components/BottomNav";
 import {
-  Search,
   Bell,
   Plus,
-  ChevronRight,
-  Zap,
-  AlertTriangle,
-  FileWarning,
   CheckCircle2,
   ArrowUpRight,
   Clock,
-  User,
-  X,
+  Lock,
+  FileText,
+  Wifi,
+  CreditCard,
+  Laptop,
+  Key,
+  Terminal,
+  Sparkles,
+  Server,
+  Shield,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { getStatusBadgeClass, getPriorityBadgeClass, formatUSDateTime } from "@/lib/formatters";
@@ -22,51 +25,69 @@ import type { Ticket } from "@/types/store";
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
-const summary = [
+const categoriesList = [
   {
-    key: "open",
-    label: "Open",
-    value: 24,
-    delta: "+3",
-    icon: Zap,
-    color: "text-primary",
-    bg: "bg-primary/10",
+    title: "Technical Support",
+    desc: "App issues, errors, bugs",
+    icon: Terminal,
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    categoryKey: "Software",
   },
   {
-    key: "pending",
-    label: "Pending",
-    value: 12,
-    delta: "−1",
-    icon: Clock,
-    color: "text-warning",
-    bg: "bg-warning/15",
+    title: "Account Access",
+    desc: "Login, password, 2FA",
+    icon: Key,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    categoryKey: "Access",
   },
   {
-    key: "resolved",
-    label: "Resolved",
-    value: 86,
-    delta: "+12",
-    icon: CheckCircle2,
-    color: "text-success",
-    bg: "bg-success/15",
+    title: "Connectivity",
+    desc: "Internet, Wi-Fi, VPN",
+    icon: Wifi,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    categoryKey: "Network",
   },
   {
-    key: "escalated",
-    label: "Escalated",
-    value: 3,
-    delta: "+1",
-    icon: AlertTriangle,
-    color: "text-destructive",
-    bg: "bg-destructive/12",
+    title: "Billing Support",
+    desc: "Invoices, payments, refunds",
+    icon: CreditCard,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    categoryKey: "Email",
   },
+  {
+    title: "Product Support",
+    desc: "Features and how-tos",
+    icon: Laptop,
+    color: "text-indigo-500",
+    bg: "bg-indigo-500/10",
+    categoryKey: "Hardware",
+  },
+  {
+    title: "General Enquiries",
+    desc: "Other queries",
+    icon: Sparkles,
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    categoryKey: "Other",
+  },
+  // {
+  //   title: "Security & Audits",
+  //   desc: "Compliance, spam, threats",
+  //   icon: Shield,
+  //   color: "text-rose-500",
+  //   bg: "bg-rose-500/10",
+  //   categoryKey: "Security",
+  // },
 ];
 
 function Dashboard() {
   const { user } = useAppSelector((state) => state.auth);
   const { technicians: dbTechnicians } = useAppSelector((state) => state.technicians);
   const dbTickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
-
-  const [searchQuery, setSearchQuery] = useState("");
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -76,29 +97,66 @@ function Dashboard() {
     return "Good night";
   }, []);
 
-  const searchResults = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return { tickets: [], technicians: [] };
+  const openCount = useMemo(() => {
+    return dbTickets.filter((t) => t.status?.toLowerCase() === "open").length;
+  }, [dbTickets]);
 
-    const matchedTickets = dbTickets.filter((t) => {
-      return (
-        t.subject?.toLowerCase().includes(query) ||
-        t.ticketSequenceId?.toLowerCase().includes(query) ||
-        t.id?.toLowerCase().includes(query) ||
-        t.category?.toLowerCase().includes(query) ||
-        t.description?.toLowerCase().includes(query)
-      );
-    });
+  const in_progressCount = useMemo(() => {
+    return dbTickets.filter((t) => {
+      const s = t.status?.toLowerCase();
+      return s === "pending" || s === "in_progress";
+    }).length;
+  }, [dbTickets]);
 
-    const matchedTechnicians = dbTechnicians.filter((tech) => {
-      return tech.name?.toLowerCase().includes(query) || tech.role?.toLowerCase().includes(query);
-    });
+  const resolvedCount = useMemo(() => {
+    return dbTickets.filter((t) => t.status?.toLowerCase() === "resolved").length;
+  }, [dbTickets]);
 
-    return {
-      tickets: matchedTickets,
-      technicians: matchedTechnicians,
-    };
-  }, [searchQuery, dbTickets, dbTechnicians]);
+  const closedCount = useMemo(() => {
+    return dbTickets.filter((t) => t.status?.toLowerCase() === "closed").length;
+  }, [dbTickets]);
+
+  const summary = useMemo(
+    () => [
+      {
+        key: "open",
+        label: "Open",
+        value: openCount,
+        icon: FileText,
+        color: "text-blue-500",
+        bg: "bg-blue-500/10",
+        statusFilter: "open",
+      },
+      {
+        key: "in_progress",
+        label: "In Progress",
+        value: in_progressCount,
+        icon: Clock,
+        color: "text-warning",
+        bg: "bg-warning/15",
+        statusFilter: "in_progress",
+      },
+      {
+        key: "resolved",
+        label: "Resolved",
+        value: resolvedCount,
+        icon: CheckCircle2,
+        color: "text-emerald-500",
+        bg: "bg-emerald-500/10",
+        statusFilter: "resolved",
+      },
+      {
+        key: "closed",
+        label: "Closed",
+        value: closedCount,
+        icon: Lock,
+        color: "text-slate-500",
+        bg: "bg-slate-500/10",
+        statusFilter: "closed",
+      },
+    ],
+    [openCount, in_progressCount, resolvedCount, closedCount],
+  );
 
   const recentTickets = useMemo(() => {
     return [...dbTickets]
@@ -146,7 +204,7 @@ function Dashboard() {
         <div className="sticky top-0 z-50 bg-[oklch(0.22_0.12_263)] backdrop-blur-md px-5 pt-[env(safe-area-inset-top,0px)] text-white">
           <div className="relative flex items-center justify-between h-14">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center font-bold">
+              <div className="h-11 w-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center font-bold">
                 {getInitials()}
               </div>
               <div>
@@ -156,7 +214,7 @@ function Dashboard() {
             </div>
             <Link
               to="/notifications"
-              className="relative h-11 w-11 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center"
+              className="relative h-11 w-11 rounded-full bg-white/10 backdrop-blur-xl border border-white/15 flex items-center justify-center"
             >
               <Bell className="h-4 w-4" />
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive ring-2 ring-[oklch(0.18_0.12_263)]" />
@@ -165,308 +223,163 @@ function Dashboard() {
         </div>
 
         {/* Hero with Rounded Bottom Corners */}
-        <div className="relative px-5 pt-3 pb-7 bg-[oklch(0.22_0.12_263)] text-white rounded-b-[2.5rem] overflow-hidden">
-          {/* Ambient Glows */}
-          {/* <div className="absolute -top-20 -right-10 h-56 w-56 rounded-full bg-primary-glow/40 blur-3xl animate-float-orb" /> */}
-          <div className="absolute inset-0  opacity-50" />
+        <div className="relative px-5 pb-8 bg-[oklch(0.22_0.12_263)] text-white rounded-b-[2.5rem] overflow-hidden">
+          <div className="absolute inset-0 opacity-50" />
 
-          <div className="relative mt-2 flex items-center gap-2 h-12 rounded-2xl glass-dark px-4 text-white text-sm">
-            <Search className="h-4 w-4 text-white/70" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search tickets, IDs, technicians…"
-              className="bg-transparent border-none outline-none w-full text-white placeholder-white/60 text-sm"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="text-white/60 hover:text-white transition-colors"
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
+          {/* Hero Content */}
+          <div className="relative z-10 mt-6">
+            <h1 className="text-[28px] font-bold  leading-tight tracking-tight text-white">
+              How can we help today?
+            </h1>
+            <p className="mt-2 text-[13px] font-semibold  text-white/70 leading-relaxed mx-auto">
+              Submit requests, track progress, and stay connected with our support team.
+            </p>
           </div>
 
-          {/* SLA alert */}
-          <div className="relative mt-4 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/15 p-3 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-destructive/30 flex items-center justify-center">
-              <FileWarning className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold">1 SLA at risk</p>
-              <p className="text-[11px] text-white/60 truncate">
-                AT-2835 • Production DB latency — 32m remaining
-              </p>
-            </div>
-            <ChevronRight className="h-4 w-4 text-white/60" />
+          {/* Action Buttons */}
+          <div className="relative z-10 flex items-center gap-3 mt-7 w-full">
+            <Link
+              to="/tickets/new"
+              className="flex-[2.3] h-12 px-6 rounded-full bg-white hover:bg-white/95 text-primary font-semibold text-[14px] flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              <Plus className="h-4 w-4 stroke-[3]" />
+              Create request
+            </Link>
+            <Link
+              to="/tickets"
+              search={{ search: "" }}
+              className="flex-1 h-12 px-6 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 text-white font-semibold text-[14px] flex items-center justify-center transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+            >
+              Track request
+            </Link>
           </div>
         </div>
 
-        {searchQuery ? (
-          <div className="px-5 mt-6 space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-[15px] font-bold text-foreground">Search Results</h2>
-              <button
-                onClick={() => setSearchQuery("")}
-                className="text-[12px] text-primary font-semibold hover:underline"
-              >
-                Clear
-              </button>
-            </div>
-
-            {/* Technicians Section */}
-            {searchResults.technicians.length > 0 && (
-              <div>
-                <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
-                  Technicians ({searchResults.technicians.length})
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {searchResults.technicians.map((t) => (
+        {/* Summary cards */}
+        <div className="px-5 mt-5">
+          <div className="grid grid-cols-2 gap-3">
+            {summary.map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  to="/tickets"
+                  search={{ status: s.statusFilter }}
+                  key={s.key}
+                  className="rounded-[1.5rem] bg-card border border-border/80 p-3 shadow-sm hover:shadow-soft hover:-translate-y-0.5 active:scale-[0.98] transition-all flex flex-col justify-between"
+                >
+                  <div className="flex items-center justify-between w-full">
                     <div
-                      key={t.uid}
-                      className="rounded-2xl bg-card border border-border p-3 flex items-center gap-3"
+                      className={`h-9 w-9 rounded-full ${s.bg} flex items-center justify-center`}
                     >
-                      <div className="relative h-10 w-10 shrink-0 rounded-xl bg-gradient-brand text-white flex items-center justify-center font-bold text-sm">
-                        {t.initials}
-                        <span
-                          className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-card ${t.online ? "bg-success" : "bg-muted-foreground"}`}
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-semibold truncate text-foreground">
-                          {t.name}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground truncate">{t.role}</p>
-                      </div>
+                      <Icon className={`h-4 w-4 ${s.color}`} />
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Tickets Section */}
-            {searchResults.tickets.length > 0 && (
-              <div>
-                <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2.5">
-                  Tickets ({searchResults.tickets.length})
-                </h3>
-                <div className="space-y-2.5">
-                  {searchResults.tickets.map((t) => (
-                    <Link
-                      key={t.id}
-                      to="/tickets/$id"
-                      params={{ id: t.id }}
-                      className="block rounded-2xl bg-card border border-border p-4 active:scale-[0.99] transition-transform"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
-                          {t.ticketSequenceId || t.id.slice(0, 10)}
-                        </span>
-                        <span
-                          className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(t.status)} capitalize`}
-                        >
-                          {t.status.replace("_", " ")}
-                        </span>
-                      </div>
-                      <p className="mt-1.5 text-[14px] font-semibold leading-snug text-foreground">
-                        {(t as Ticket & { title?: string }).title || t.subject}
-                      </p>
-                      <div className="mt-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${getPriorityBadgeClass(t.priority).dot}`}
-                          />
-                          <span className="text-[11px] text-muted-foreground capitalize">
-                            {t.priority} · {t.category}
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-muted-foreground">
-                          {formatUSDateTime(t.updatedAt || t.createdAt)}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {searchResults.technicians.length === 0 && searchResults.tickets.length === 0 && (
-              <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-3xl p-8 bg-card/50 text-center">
-                <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-3">
-                  <Search className="h-5 w-5 text-muted-foreground/60" />
-                </div>
-                <h3 className="text-[14px] font-bold text-foreground">No matches found</h3>
-                <p className="mt-1.5 text-[11px] text-muted-foreground max-w-[240px] leading-relaxed">
-                  We couldn't find any tickets or technicians matching "{searchQuery}".
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
-            {/* Summary cards */}
-            {/* <div className="px-5 mt-5">
-              <div className="grid grid-cols-2 gap-3">
-                {summary.map((s) => {
-                  const Icon = s.icon;
-                  return (
-                    <Link
-                      to="/tickets"
-                      key={s.key}
-                      className="rounded-3xl bg-card border border-border p-4 shadow-soft hover:shadow-elevated transition-all"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className={`h-9 w-9 rounded-xl ${s.bg} flex items-center justify-center`}>
-                          <Icon className={`h-4 w-4 ${s.color}`} />
-                        </div>
-                        <span className="text-[11px] font-semibold text-success flex items-center gap-0.5">
-                          <ArrowUpRight className="h-3 w-3" /> {s.delta}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-[28px] font-extrabold tracking-tight leading-none">
-                        {s.value}
-                      </p>
-                      <p className="mt-1 text-[12px] text-muted-foreground font-medium">{s.label}</p>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div> */}
-
-            {/* Quick actions */}
-            <div className="px-5 mt-6">
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  { label: "Raise", icon: Plus, to: "/tickets/new" },
-                  { label: "Chat", icon: Bell, to: "/tickets" },
-                  // { label: "SLA", icon: AlertTriangle, to: "/analytics" },
-                  // { label: "KB", icon: Zap, to: "/tickets" },
-                ].map((a) => (
-                  <Link
-                    key={a.label}
-                    to={a.to}
-                    className="flex flex-col items-center gap-1.5 py-3 rounded-2xl bg-card border border-border"
-                  >
-                    <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                      <a.icon className="h-4 w-4" />
-                    </div>
-                    <span className="text-[11px] font-semibold">{a.label}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Technicians */}
-            <div className="px-5 mt-7 flex items-center justify-between">
-              <h2 className="text-[15px] font-bold">Technicians on shift</h2>
-              {/* <Link to="/profile" className="text-[12px] text-primary font-semibold">
-                View team
-              </Link> */}
-            </div>
-
-            {displayTechnicians.length === 0 ? (
-              <div className="px-5 mt-3">
-                <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-3xl p-6 bg-card/50 text-center">
-                  <div className="relative h-16 w-16 rounded-full bg-secondary flex items-center justify-center">
-                    <div className="h-10 w-10 rounded-full bg-card/60 flex items-center justify-center text-muted-foreground">
-                      <User className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5 h-6 w-6 rounded-full bg-primary border-2 border-card flex items-center justify-center text-primary-foreground">
-                      <X className="h-3 w-3 stroke-[3]" />
-                    </div>
+                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground/45" />
                   </div>
-                  <h3 className="mt-4 text-[14px] font-bold text-foreground">
-                    No Technicians Available
-                  </h3>
-                  <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed max-w-[280px]">
-                    There are currently no technicians on shift.
-                    <br />
-                    Tickets will be assigned automatically when a technician becomes available.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="px-5 mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-1">
-                {displayTechnicians.map((t) => (
-                  <div
-                    key={t.uid}
-                    className="shrink-0 w-[140px] rounded-2xl bg-card border border-border p-3"
-                  >
-                    <div className="relative h-11 w-11 rounded-2xl bg-gradient-brand text-white flex items-center justify-center font-bold">
-                      {t.initials}
-                      <span
-                        className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full ring-2 ring-card ${t.online ? "bg-success" : "bg-muted-foreground"}`}
-                      />
-                    </div>
-                    <p className="mt-2 text-[13px] font-semibold truncate">{t.name}</p>
-                    <p className="text-[11px] text-muted-foreground truncate">{t.role}</p>
-                    {/* <p className="mt-2 text-[10px] font-semibold text-primary">{t.load} active</p> */}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Recent tickets */}
-            <div className="px-5  mt-7 flex items-center justify-between">
-              <h2 className="text-[15px] font-bold">Recent tickets</h2>
-              <Link to="/tickets" className="text-[12px] text-primary font-semibold">
-                See all
-              </Link>
-            </div>
-            <div className="px-5 mt-3 pb-30 space-y-2.5">
-              {recentTickets.length === 0 ? (
-                <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-3xl p-6 bg-card/50 text-center">
-                  <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-3">
-                    <CheckCircle2 className="h-5 w-5 text-muted-foreground/60" />
-                  </div>
-                  <h3 className="text-[14px] font-bold text-foreground">No recent tickets</h3>
-                  <p className="mt-1 text-[11px] text-muted-foreground max-w-[220px] leading-relaxed">
-                    There are no recent tickets to display at this time.
-                  </p>
-                </div>
-              ) : (
-                recentTickets.map((t) => (
-                  <Link
-                    key={t.id}
-                    to="/tickets/$id"
-                    params={{ id: t.id }}
-                    className="block rounded-2xl bg-card border border-border p-4 active:scale-[0.99] transition-transform"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
-                        {t.ticketSequenceId || t.id.slice(0, 10)}
-                      </span>
-                      <span
-                        className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(t.status)} capitalize`}
-                      >
-                        {t.status.replace("_", " ")}
-                      </span>
-                    </div>
-                    <p className="mt-1.5 text-[14px] font-semibold leading-snug">
-                      {(t as Ticket & { title?: string }).title || t.subject}
+                  <div className="mt-2.5">
+                    <p className="text-[24px] font-bold text-foreground leading-none">{s.value}</p>
+                    <p className="mt-1 text-[11.5px] text-muted-foreground font-medium">
+                      {s.label}
                     </p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${getPriorityBadgeClass(t.priority).dot}`}
-                        />
-                        <span className="text-[11px] text-muted-foreground capitalize">
-                          {t.priority} · {t.category}
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-muted-foreground">
-                        {formatUSDateTime(t.updatedAt || t.createdAt)}
-                      </span>
-                    </div>
-                  </Link>
-                ))
-              )}
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* How can we help? Section */}
+        <div className="px-5 mt-7 flex items-center justify-between">
+          <h2 className="text-[15px] font-bold">How can we help?</h2>
+          <Link to="/tickets/new" className="text-[12px] text-primary font-semibold">
+            See all
+          </Link>
+        </div>
+        <div className="px-5 mt-3">
+          <div className="grid grid-cols-2 gap-3">
+            {categoriesList.map((cat) => {
+              const Icon = cat.icon;
+              return (
+                <Link
+                  to="/tickets/new"
+                  search={{ category: cat.categoryKey }}
+                  key={cat.title}
+                  className="rounded-2xl bg-card border border-border/85 p-4 shadow-sm hover:shadow-soft hover:-translate-y-0.5 active:scale-[0.98] transition-all flex flex-col justify-between"
+                >
+                  <div
+                    className={`h-10 w-10 rounded-full ${cat.bg} flex items-center justify-center shrink-0 self-start`}
+                  >
+                    <Icon className={`h-5 w-5 ${cat.color}`} />
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-[13px] font-bold text-foreground leading-snug">
+                      {cat.title}
+                    </p>
+                    <p className="mt-1 text-[11px] text-muted-foreground  leading-normal">
+                      {cat.desc}
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recent tickets */}
+        <div className="px-5 mt-7 flex items-center justify-between">
+          <h2 className="text-[15px] font-bold">Recent tickets</h2>
+          <Link to="/tickets" className="text-[12px] text-primary font-semibold">
+            See all
+          </Link>
+        </div>
+        <div className="px-5 mt-3 pb-30 space-y-2.5">
+          {recentTickets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center border border-dashed border-border rounded-3xl p-6 bg-card/50 text-center">
+              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center text-muted-foreground mb-3">
+                <CheckCircle2 className="h-5 w-5 text-muted-foreground/60" />
+              </div>
+              <h3 className="text-[14px] font-bold text-foreground">No recent tickets</h3>
+              <p className="mt-1 text-[11px] text-muted-foreground max-w-[220px] leading-relaxed">
+                There are no recent tickets to display at this time.
+              </p>
             </div>
-          </>
-        )}
+          ) : (
+            recentTickets.map((t) => (
+              <Link
+                key={t.id}
+                to="/tickets/$id"
+                params={{ id: t.id }}
+                className="block rounded-2xl bg-card border border-border p-4 active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold text-muted-foreground tracking-wider">
+                    {t.ticketSequenceId || t.id.slice(0, 10)}
+                  </span>
+                  <span
+                    className={`text-[9.5px] font-extrabold px-2 py-0.5 rounded-full ${getStatusBadgeClass(t.status)} capitalize`}
+                  >
+                    {t.status.replace("_", " ")}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[14px] font-semibold leading-snug">
+                  {(t as Ticket & { title?: string }).title || t.subject}
+                </p>
+                <div className="mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${getPriorityBadgeClass(t.priority).dot}`}
+                    />
+                    <span className="text-[11px] text-muted-foreground capitalize">
+                      {t.priority} · {t.category}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">
+                    {formatUSDateTime(t.updatedAt || t.createdAt)}
+                  </span>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
       </div>
 
       {/* FAB */}
