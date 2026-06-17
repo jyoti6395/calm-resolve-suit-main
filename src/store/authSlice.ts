@@ -97,7 +97,7 @@ export const initializeAuthListener = () => (dispatch: any) => {
         const authUser: AuthUser = {
           uid: firebaseUser.uid,
           email: firebaseUser.email,
-          displayName: firebaseUser.displayName || profileData.fullName || null,
+          displayName: profileData.fullName || firebaseUser.displayName || null,
           role: role,
           status: profileData.status || "active",
         };

@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Terminal, Key, Wifi, CreditCard, Laptop, Sparkles } from "lucide-react";
+import { useAppSelector } from "@/store/hooks";
+import { getUserRoles } from "@/lib/utils";
 
 export const categoriesList = [
   {
@@ -53,6 +55,11 @@ export const categoriesList = [
 ];
 
 export function CategoryGrid() {
+  const { user } = useAppSelector((state) => state.auth);
+  const { isCustomer } = getUserRoles(user?.role);
+
+  if (!isCustomer) return null;
+
   return (
     <>
       <div className="px-5 mt-7 flex items-center justify-between">

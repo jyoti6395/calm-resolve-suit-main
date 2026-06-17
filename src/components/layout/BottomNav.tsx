@@ -1,11 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Ticket, BarChart3, Bell, User } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
+import { getUserRoles } from "@/lib/utils";
 
 const items = [
   { to: "/dashboard", icon: Home, label: "Home" },
   { to: "/tickets", icon: Ticket, label: "Tickets" },
-  // { to: "/analytics", icon: BarChart3, label: "Insights" },
+  { to: "/analytics", icon: BarChart3, label: "Insights" },
   { to: "/notifications", icon: Bell, label: "Alerts" },
   { to: "/profile", icon: User, label: "Profile" },
 ] as const;
@@ -13,9 +14,10 @@ const items = [
 export function BottomNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAppSelector((state) => state.auth);
+  const { isTechnician } = getUserRoles(user?.role);
 
   const visibleItems = items.filter((item) => {
-    // if (item.to === "/analytics" && user?.role === "technician") return false;
+    if (item.to === "/analytics" && !isTechnician) return false;
     return true;
   });
 
