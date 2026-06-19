@@ -220,7 +220,7 @@ function Profile() {
     return (
       <>
         <DesktopPageShell title="Profile & Settings">
-          <div className="max-w-[900px] mx-auto w-full pb-16 pt-4">
+          <div className="max-w-[900px] mx-auto w-full pb-0">
             {/* Top: User Hero Card */}
             <div className="w-full mb-12 bg-gradient-hero rounded-[2rem] p-8 shadow-lg relative overflow-hidden flex items-center justify-between">
               <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary-glow/40 blur-3xl" />
@@ -280,13 +280,13 @@ function Profile() {
               </div>
 
               {/* Right Settings Content */}
-              <div className="w-full space-y-12">
+              <div className="w-full space-y-6">
                 {sections.map((sec) => (
                   <div key={sec.title} id={sec.id} className="scroll-mt-8">
                     <p className="text-[12px] font-extrabold uppercase tracking-widest text-slate-500 mb-4 pl-1">
                       {sec.title}
                     </p>
-                    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden p-2">
+                    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden ">
                       {sec.items.map((it, i) => {
                         const Icon = it.icon;
                         return (
@@ -317,7 +317,7 @@ function Profile() {
                 ))}
 
                 {/* Actions */}
-                <div className="pt-6 space-y-4">
+                <div className="pt-0 space-y-4">
                   <button
                     onClick={() => setIsLogoutConfirmOpen(true)}
                     className="w-full flex items-center justify-center gap-2 h-14 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 shadow-sm transition-colors focus:outline-none cursor-pointer"

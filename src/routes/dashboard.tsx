@@ -58,6 +58,7 @@ function Dashboard() {
   const { isTechnician, isCustomer } = getUserRoles(user?.role);
   const { technicians: dbTechnicians } = useAppSelector((state) => state.technicians);
   const dbTickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
+  const notificationItems = useAppSelector((state) => state.notifications.notifications);
   const navigate = useNavigate({ from: "/dashboard" });
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
@@ -239,164 +240,171 @@ function Dashboard() {
 
   if (!isMobile) {
     return (
-      <div className="flex flex-col h-full w-full p-6 lg:p-8 pb-10">
-        <div className="w-full max-w-[1600px]">
-          {/* Component Title (As requested: inside component, styled like mockup) */}
-          <div className="mb-6">
-            <h1 className="text-[22px] font-bold text-blue-700 tracking-tight">Dashboard</h1>
-          </div>
-
-          {/* Greeting Section */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col h-full w-full px-8 py-8 pb-10 bg-[#f5f6fa] min-h-screen">
+        <div className="w-full max-w-[1440px] mx-auto">
+          {/* ── ZONE 1: Header ─────────────────────────────────────────────── */}
+          <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-[26px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
-                Good afternoon, {user?.displayName?.split(" ")[0] || "there"}{" "}
-                <span className="text-[26px]">👋</span>
-              </h2>
-              <p className="mt-1.5 text-[15px] text-slate-500">
-                Here is an overview of your support queue today.
+              <h1 className="text-[28px] font-extrabold text-slate-800 tracking-tight leading-tight">
+                {greeting}, {user?.displayName?.split(" ")[0] || "there"} 👋
+              </h1>
+              <p className="mt-1 text-[14px] text-slate-500 font-medium">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+                &nbsp;·&nbsp;Here&apos;s your support overview.
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-semibold border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              <Link
+                to="/tickets"
+                search={{ status: "all" }}
+                className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 shadow-sm transition-colors"
               >
-                <Clock className="h-4 w-4" />
-                Last 7 Days
-              </Button>
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-semibold border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                <FileText className="h-4 w-4" />
+                All Tickets
+              </Link>
+              <Link
+                to="/tickets/new"
+                className="flex items-center gap-2 h-10 px-5 rounded-xl text-[13px] font-bold bg-gradient-brand text-white hover:opacity-90 shadow-sm transition-all"
               >
-                <ListFilter className="h-4 w-4" />
-                Filters
-              </Button>
+                <Plus className="h-4 w-4 stroke-[3]" />
+                New Request
+              </Link>
             </div>
           </div>
 
-          <div className="mb-8">
-            <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
-              {summary.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <Link
-                    to="/tickets"
-                    search={{
-                      status: s.statusFilter as
-                        | "open"
-                        | "in_progress"
-                        | "resolved"
-                        | "closed"
-                        | "all",
-                    }}
-                    key={s.key}
-                    className="group relative overflow-hidden rounded-[1.5rem] bg-white border border-slate-100 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition-all flex flex-col justify-between"
-                  >
-                    {/* Corner Fold Accent */}
-                    <div className="absolute top-0 right-0 h-[5.5rem] w-[5.5rem] overflow-hidden rounded-tr-[1.5rem]">
-                      <div
-                        className={`absolute -top-[4rem] -right-[4rem] w-[8rem] h-[8rem] rotate-45 ${s.foldColor}`}
-                      />
-                    </div>
-
-                    {/* Trend Badge */}
-                    <div className="absolute top-4 right-4 z-10">
-                      <span
-                        className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${s.trendColor}`}
-                      >
-                        {s.trend}
-                      </span>
-                    </div>
-
-                    <div className="relative z-10">
-                      <div
-                        className={`h-11 w-11 rounded-full ${s.bg} flex items-center justify-center mb-5 shadow-sm`}
-                      >
-                        <Icon className={`h-5 w-5 ${s.color}`} strokeWidth={2.5} />
-                      </div>
-
-                      <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">
-                        {s.label}
-                      </p>
-                      <p className="text-[40px] font-extrabold text-slate-800 leading-none tracking-tighter">
-                        {s.value}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Two-Column Grid: Recent Tickets & Tech Status */}
-          <div
-            className={`flex flex-col gap-6 flex-1 min-h-0 ${isTechnician ? "xl:grid xl:grid-cols-[2fr_1fr]" : ""}`}
-          >
-            {/* Recent Tickets Table */}
-            <div className="rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex-1 flex flex-col mb-4">
-              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-50">
-                <h3 className="text-[18px] font-bold text-slate-800 tracking-tight">
-                  Recent Tickets
-                </h3>
+          {/* ── ZONE 2: KPI Cards ──────────────────────────────────────────── */}
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-7">
+            {summary.map((s) => {
+              const Icon = s.icon;
+              return (
                 <Link
                   to="/tickets"
-                  search={{ status: "all" }}
-                  className="flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 hover:underline"
+                  search={{
+                    status: s.statusFilter as
+                      | "open"
+                      | "in_progress"
+                      | "resolved"
+                      | "closed"
+                      | "all",
+                  }}
+                  key={s.key}
+                  className="group relative overflow-hidden rounded-[1.5rem] bg-white border border-slate-100 p-6 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition-all flex flex-col justify-between"
                 >
-                  View All <ChevronRight className="h-3.5 w-3.5" />
+                  {/* Corner Fold */}
+                  <div className="absolute top-0 right-0 h-[5rem] w-[5rem] overflow-hidden rounded-tr-[1.5rem]">
+                    <div
+                      className={`absolute -top-[3.5rem] -right-[3.5rem] w-[7rem] h-[7rem] rotate-45 ${s.foldColor}`}
+                    />
+                  </div>
+                  {/* Trend Badge */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <span
+                      className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${s.trendColor}`}
+                    >
+                      {s.trend}
+                    </span>
+                  </div>
+                  <div className="relative z-10">
+                    <div
+                      className={`h-11 w-11 rounded-2xl ${s.bg} flex items-center justify-center mb-4 shadow-sm`}
+                    >
+                      <Icon className={`h-5 w-5 ${s.color}`} strokeWidth={2.5} />
+                    </div>
+                    <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1">
+                      {s.label}
+                    </p>
+                    <p className="text-[40px] font-extrabold text-slate-800 leading-none tracking-tighter">
+                      {s.value}
+                    </p>
+                  </div>
                 </Link>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[800px]">
-                  <thead>
-                    <tr className="border-b border-slate-50 bg-white">
-                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
-                        Ticket ID
-                      </th>
-                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
-                        Subject
-                      </th>
-                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
-                        Customer
-                      </th>
-                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
-                        Status
-                      </th>
-                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500 text-right">
-                        Updated
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {filteredRecentTickets.slice(0, 5).map((t) => {
-                      const initials = t.requesterEmail?.slice(0, 2).toUpperCase() || "US";
+              );
+            })}
+          </div>
 
-                      return (
+          {/* ── ZONE 3: Main Content + Sidebar ─────────────────────────────── */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1fr_360px] gap-6 items-start">
+            {/* LEFT: Main Content */}
+            <div className="space-y-6">
+              {/* Recent Tickets Table */}
+              <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-5 border-b border-slate-50">
+                  <div>
+                    <h2 className="text-[17px] font-bold text-slate-800 tracking-tight">
+                      Recent Tickets
+                    </h2>
+                    <p className="text-[12px] text-slate-400 mt-0.5 font-medium">
+                      Latest activity across your support queue
+                    </p>
+                  </div>
+                  <Link
+                    to="/tickets"
+                    search={{ status: "all" }}
+                    className="flex items-center gap-1.5 text-[13px] font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    View All <ChevronRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                      <tr className="border-b border-slate-50 bg-slate-50/50">
+                        <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          Ticket ID
+                        </th>
+                        <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          Subject
+                        </th>
+                        <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          Priority
+                        </th>
+                        <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          Status
+                        </th>
+                        <th className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400 text-right">
+                          Updated
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {filteredRecentTickets.slice(0, 7).map((t) => (
                         <tr
                           key={t.id}
                           onClick={() => navigate({ to: "/tickets/$id", params: { id: t.id } })}
-                          className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                          className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
                         >
                           <td className="px-6 py-4">
-                            <span className="text-[13px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
-                              {t.ticketSequenceId || t.id.slice(0, 10)}
+                            <span className="text-[13px] font-bold text-slate-700 group-hover:text-blue-600 transition-colors font-mono">
+                              {t.ticketSequenceId || t.id.slice(0, 8)}
                             </span>
                           </td>
-                          <td className="px-6 py-4">
-                            <p className="text-[13px] text-slate-500 truncate max-w-[250px]">
+                          <td className="px-6 py-4 max-w-[240px]">
+                            <p className="text-[13px] text-slate-700 font-semibold truncate">
                               {(t as Ticket & { title?: string }).title || t.subject}
+                            </p>
+                            <p className="text-[11px] text-slate-400 font-medium mt-0.5 truncate">
+                              {t.requesterName || t.requesterEmail || "Unknown"}
                             </p>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">
-                                {initials}
-                              </div>
-                              <span className="text-[13px] text-slate-600 font-medium">
-                                {t.requesterName || t.requesterEmail || "Unknown"}
-                              </span>
-                            </div>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold capitalize border ${
+                                t.priority === "critical"
+                                  ? "bg-red-50 border-red-200 text-red-600"
+                                  : t.priority === "high"
+                                    ? "bg-orange-50 border-orange-200 text-orange-600"
+                                    : t.priority === "medium"
+                                      ? "bg-amber-50 border-amber-200 text-amber-600"
+                                      : "bg-slate-50 border-slate-200 text-slate-600"
+                              }`}
+                            >
+                              {t.priority || "—"}
+                            </span>
                           </td>
                           <td className="px-6 py-4">
                             <span
@@ -405,75 +413,301 @@ function Dashboard() {
                                   ? "bg-red-50 border-red-200 text-red-600"
                                   : t.status === "in_progress"
                                     ? "bg-blue-50 border-blue-200 text-blue-600"
-                                    : "bg-green-50 border-green-200 text-green-600"
+                                    : t.status === "resolved"
+                                      ? "bg-green-50 border-green-200 text-green-600"
+                                      : "bg-slate-50 border-slate-200 text-slate-500"
                               }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${t.status === "open" ? "bg-red-500" : t.status === "in_progress" ? "bg-blue-500" : "bg-green-500"}`}
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  t.status === "open"
+                                    ? "bg-red-500"
+                                    : t.status === "in_progress"
+                                      ? "bg-blue-500"
+                                      : t.status === "resolved"
+                                        ? "bg-green-500"
+                                        : "bg-slate-400"
+                                }`}
                               />
-                              {t.status.replace("_", " ")}
+                              {t.status?.replace("_", " ")}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-right text-[13px] text-slate-500 font-medium">
+                          <td className="px-6 py-4 text-right text-[12px] text-slate-400 font-medium">
                             {getRelativeTime(t.updatedAt || t.createdAt)}
                           </td>
                         </tr>
-                      );
-                    })}
-                    {filteredRecentTickets.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          className="px-6 py-12 text-center text-muted-foreground text-[14px]"
-                        >
-                          No recent tickets found.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      ))}
+                      {filteredRecentTickets.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-14 text-center">
+                            <div className="flex flex-col items-center gap-3">
+                              <div className="h-12 w-12 rounded-2xl bg-slate-100 flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-slate-400" />
+                              </div>
+                              <p className="text-[14px] text-slate-500 font-semibold">
+                                No tickets yet
+                              </p>
+                              <p className="text-[12px] text-slate-400">
+                                Create your first request to get started.
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
+
+              {/* Activity Timeline */}
+              {filteredRecentTickets.length > 0 && (
+                <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] p-6">
+                  <h2 className="text-[17px] font-bold text-slate-800 tracking-tight mb-5">
+                    Activity Timeline
+                  </h2>
+                  <div className="relative">
+                    <div className="absolute left-[18px] top-0 bottom-0 w-px bg-slate-100" />
+                    <div className="space-y-5">
+                      {filteredRecentTickets.slice(0, 4).map((t) => (
+                        <div
+                          key={`activity-${t.id}`}
+                          className="flex items-start gap-4 pl-1 cursor-pointer group"
+                          onClick={() => navigate({ to: "/tickets/$id", params: { id: t.id } })}
+                        >
+                          <div
+                            className={`h-9 w-9 rounded-full shrink-0 flex items-center justify-center z-10 border-2 border-white shadow-sm ${
+                              t.status === "open"
+                                ? "bg-red-100"
+                                : t.status === "in_progress"
+                                  ? "bg-blue-100"
+                                  : t.status === "resolved"
+                                    ? "bg-green-100"
+                                    : "bg-slate-100"
+                            }`}
+                          >
+                            {t.status === "resolved" ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : t.status === "in_progress" ? (
+                              <Clock className="h-4 w-4 text-blue-600" />
+                            ) : (
+                              <FileWarning className="h-4 w-4 text-red-600" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0 pt-1">
+                            <p className="text-[13px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors truncate">
+                              {(t as Ticket & { title?: string }).title || t.subject}
+                            </p>
+                            <p className="text-[12px] text-slate-400 font-medium mt-0.5">
+                              <span className="font-mono text-slate-500">
+                                {t.ticketSequenceId || t.id.slice(0, 8)}
+                              </span>
+                              &nbsp;·&nbsp;Status:{" "}
+                              <span className="capitalize font-semibold text-slate-600">
+                                {t.status?.replace("_", " ")}
+                              </span>
+                              &nbsp;·&nbsp;{getRelativeTime(t.updatedAt || t.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Technicians Online */}
-            {isTechnician && (
-              <div className="rounded-2xl bg-card border border-border shadow-sm p-6 overflow-y-auto">
-                <h3 className="text-[16px] font-bold text-foreground tracking-tight mb-5">
-                  Technicians Online
-                </h3>
-                <div className="space-y-4">
-                  {displayTechnicians.map((t) => (
-                    <div key={t.uid} className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-secondary text-foreground flex items-center justify-center font-bold text-[13px]">
-                          {t.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .slice(0, 2)
-                            .toUpperCase()}
+            {/* RIGHT: Sidebar */}
+            <div className="space-y-5 sticky top-6">
+              {/* Quick Create Card */}
+              <div className="rounded-[1.5rem] bg-gradient-hero text-white p-6 shadow-lg relative overflow-hidden">
+                <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
+                <div className="relative">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center">
+                      <Sparkles className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[15px] font-extrabold text-white leading-tight">
+                        Need help?
+                      </p>
+                      <p className="text-[12px] text-white/70 font-medium">
+                        We&apos;ll route it instantly
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    to="/tickets/new"
+                    className="w-full flex items-center justify-center gap-2 h-12 rounded-2xl bg-white text-blue-700 font-bold text-[14px] hover:bg-white/90 transition-all shadow-sm"
+                  >
+                    <Plus className="h-4 w-4 stroke-[3]" />
+                    Create New Request
+                  </Link>
+                </div>
+              </div>
+
+              {/* Notification Feed */}
+              <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-[15px] font-bold text-slate-800">Notifications</h2>
+                  <Link
+                    to="/notifications"
+                    className="text-[12px] font-bold text-blue-600 hover:text-blue-700"
+                  >
+                    View all
+                  </Link>
+                </div>
+                {notificationItems.length > 0 ? (
+                  <div className="space-y-4">
+                    {notificationItems.slice(0, 4).map((n) => (
+                      <div key={n.id} className="flex items-start gap-3">
+                        <div
+                          className={`h-8 w-8 rounded-xl shrink-0 flex items-center justify-center ${
+                            n.tone === "success"
+                              ? "bg-green-100"
+                              : n.tone === "destructive"
+                                ? "bg-red-100"
+                                : n.tone === "warning"
+                                  ? "bg-amber-100"
+                                  : "bg-blue-100"
+                          }`}
+                        >
+                          {n.tone === "success" ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                          ) : n.tone === "destructive" ? (
+                            <Bell className="h-4 w-4 text-red-600" />
+                          ) : n.tone === "warning" ? (
+                            <Clock className="h-4 w-4 text-amber-600" />
+                          ) : (
+                            <Bell className="h-4 w-4 text-blue-600" />
+                          )}
                         </div>
-                        <div>
-                          <p className="text-[14px] font-semibold text-foreground">{t.name}</p>
-                          <p className="text-[12px] font-medium text-muted-foreground">
-                            {t.role || "Technician"}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold text-slate-800 leading-snug truncate">
+                            {n.title}
+                          </p>
+                          <p className="text-[11px] text-slate-400 font-medium mt-0.5 line-clamp-2">
+                            {n.body}
+                          </p>
+                          <p className="text-[10px] text-slate-300 font-medium mt-1">
+                            {getRelativeTime(n.createdAt)}
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-[15px] font-bold text-primary">{t.load}</p>
-                        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                          Active
-                        </p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-4">
+                    <CheckCircle2 className="h-8 w-8 text-green-400" />
+                    <p className="text-[13px] font-semibold text-slate-500">All caught up!</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Category Quick Links */}
+              <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] p-6">
+                <h2 className="text-[15px] font-bold text-slate-800 mb-4">Browse by topic</h2>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[
+                    {
+                      label: "Technical",
+                      icon: Terminal,
+                      color: "text-purple-600",
+                      bg: "bg-purple-50",
+                      cat: "Software",
+                    },
+                    {
+                      label: "Account",
+                      icon: Key,
+                      color: "text-emerald-600",
+                      bg: "bg-emerald-50",
+                      cat: "Access",
+                    },
+                    {
+                      label: "Network",
+                      icon: Wifi,
+                      color: "text-blue-600",
+                      bg: "bg-blue-50",
+                      cat: "Network",
+                    },
+                    {
+                      label: "Billing",
+                      icon: CreditCard,
+                      color: "text-amber-600",
+                      bg: "bg-amber-50",
+                      cat: "Email",
+                    },
+                    {
+                      label: "Hardware",
+                      icon: Laptop,
+                      color: "text-indigo-600",
+                      bg: "bg-indigo-50",
+                      cat: "Hardware",
+                    },
+                    {
+                      label: "General",
+                      icon: Sparkles,
+                      color: "text-pink-600",
+                      bg: "bg-pink-50",
+                      cat: "Other",
+                    },
+                  ].map(({ label, icon: Icon, color, bg, cat }) => (
+                    <Link
+                      key={cat}
+                      to="/tickets/new"
+                      search={{ category: cat }}
+                      className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all group"
+                    >
+                      <div
+                        className={`h-8 w-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}
+                      >
+                        <Icon className={`h-4 w-4 ${color}`} />
                       </div>
-                    </div>
+                      <span className="text-[12px] font-bold text-slate-700 group-hover:text-slate-900">
+                        {label}
+                      </span>
+                    </Link>
                   ))}
-                  {displayTechnicians.length === 0 && (
-                    <p className="text-sm text-muted-foreground">No other technicians online.</p>
-                  )}
                 </div>
               </div>
-            )}
+
+              {/* Technicians Online (technician only) */}
+              {isTechnician && displayTechnicians.length > 0 && (
+                <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] p-6">
+                  <h2 className="text-[15px] font-bold text-slate-800 mb-4">Technicians Online</h2>
+                  <div className="space-y-3">
+                    {displayTechnicians.map((t) => (
+                      <div key={t.uid} className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="h-9 w-9 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-[12px]">
+                              {t.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase()}
+                            </div>
+                            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-green-400 border-2 border-white" />
+                          </div>
+                          <div>
+                            <p className="text-[13px] font-bold text-slate-800">{t.name}</p>
+                            <p className="text-[11px] text-slate-400 font-medium">
+                              {t.role || "Technician"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[14px] font-extrabold text-blue-600">{t.load}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Active
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
