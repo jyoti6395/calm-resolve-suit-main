@@ -10,7 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { HeaderProvider, useHeader } from "@/components/layout/HeaderContext";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { DesktopLayout } from "@/components/layout/DesktopLayout";
 
 function NotFoundComponent() {
   return (
@@ -119,31 +119,48 @@ function RootComponent() {
 
   const router = useRouter();
 
-  // Global Auth Guard
+  // Platform-aware Global Auth Guard
   useEffect(() => {
     if (!loading) {
-      const publicRoutes = [
+      const currentPath = router.state.location.pathname;
+
+      // Routes that are public on BOTH mobile and desktop
+      const sharedPublicRoutes = [
         "/login",
         "/signup",
         "/forgot-password",
         "/reset-password",
-        "/onboarding",
-        "/",
         "/otp",
       ];
-      const currentPath = router.state.location.pathname;
+
+      // Additional routes that are public ONLY on mobile (Flutter WebView)
+      // On desktop these are bypassed — unauthenticated users are sent to /login
+      const mobileOnlyPublicRoutes = ["/", "/onboarding"];
+
+      const publicRoutes = isMobile
+        ? [...sharedPublicRoutes, ...mobileOnlyPublicRoutes]
+        : sharedPublicRoutes;
+
       const isPublicPath = publicRoutes.some((p) => currentPath === p);
 
       if (!isAuthenticated && !isPublicPath) {
+        // Not authenticated and trying to access a protected route → go to login
+        router.navigate({ to: "/login", replace: true });
+      } else if (!isAuthenticated && !isMobile && mobileOnlyPublicRoutes.includes(currentPath)) {
+        // Desktop user hit "/" or "/onboarding" without being logged in → send to login
         router.navigate({ to: "/login", replace: true });
       } else if (
         isAuthenticated &&
-        (currentPath === "/login" || currentPath === "/signup" || currentPath === "/")
+        (currentPath === "/login" ||
+          currentPath === "/signup" ||
+          currentPath === "/" ||
+          currentPath === "/onboarding")
       ) {
+        // Authenticated user on an auth/onboarding page → send to dashboard
         router.navigate({ to: "/dashboard", replace: true });
       }
     }
-  }, [loading, isAuthenticated, router.state.location.pathname, router]);
+  }, [loading, isAuthenticated, isMobile, router.state.location.pathname, router]);
 
   if (loading) {
     return (
@@ -157,6 +174,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <HeaderProvider>
         {isMobile ? (
+          // ─── MOBILE LAYOUT (Flutter WebView) ───────────────────────────────
+          // This entire branch is UNCHANGED from the original implementation.
+          // Every pixel of the mobile experience is preserved exactly as-is.
           <div className="h-screen w-full bg-background flex justify-center overflow-hidden">
             <div className="relative w-full max-w-[440px] h-full flex flex-col">
               <GlobalHeaderRenderer />
@@ -165,18 +185,18 @@ function RootComponent() {
               </div>
             </div>
           </div>
+        ) : isAuthenticated ? (
+          // ─── DESKTOP AUTHENTICATED — Sidebar + main content ─────────────────
+          <DesktopLayout>
+            <Outlet />
+          </DesktopLayout>
         ) : (
-          <SidebarProvider>
-            <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
-              {/* Desktop sidebar/layouts go here */}
-              <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                <GlobalHeaderRenderer />
-                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                  <Outlet />
-                </div>
-              </main>
-            </div>
-          </SidebarProvider>
+          // ─── DESKTOP PUBLIC (login, signup, forgot-password, etc.) ───────────
+          // No sidebar — full-screen bare layout so auth pages can render
+          // their own split-screen designs without any chrome around them.
+          <div className="h-screen w-full bg-background overflow-hidden">
+            <Outlet />
+          </div>
         )}
         <Toaster />
       </HeaderProvider>

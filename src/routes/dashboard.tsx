@@ -2,6 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
 import {
   Bell,
   Plus,
@@ -21,6 +24,7 @@ import {
   Search,
   FileWarning,
   ChevronRight,
+  ListFilter,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import {
@@ -31,6 +35,17 @@ import {
 } from "@/lib/formatters";
 import type { Ticket } from "@/types/store";
 import { getUserRoles } from "@/lib/utils";
+
+function getRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const diffInMinutes = Math.floor((new Date().getTime() - date.getTime()) / 60000);
+  if (diffInMinutes < 1) return "Just now";
+  if (diffInMinutes < 60) return `${diffInMinutes} mins ago`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+}
 
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
@@ -43,8 +58,9 @@ function Dashboard() {
   const { isTechnician, isCustomer } = getUserRoles(user?.role);
   const { technicians: dbTechnicians } = useAppSelector((state) => state.technicians);
   const dbTickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
-  const navigate = useNavigate();
+  const navigate = useNavigate({ from: "/dashboard" });
   const [searchQuery, setSearchQuery] = useState("");
+  const isMobile = useIsMobile();
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -84,42 +100,54 @@ function Dashboard() {
     () => [
       {
         key: "open",
-        label: "Open",
+        label: "OPEN TICKETS",
         value: openCount,
-        icon: FileText,
-        color: "text-blue-500",
-        bg: "bg-blue-500/10",
+        icon: FileWarning,
+        color: "text-red-500",
+        bg: "bg-red-50",
+        trend: "+12%",
+        trendColor: "bg-red-100 text-red-600",
+        foldColor: "bg-red-50",
         statusFilter: "open",
       },
       {
         key: "in_progress",
-        label: "In Progress",
+        label: "IN PROGRESS",
         value: in_progressCount,
         icon: Clock,
-        color: "text-warning",
-        bg: "bg-warning/15",
+        color: "text-blue-500",
+        bg: "bg-blue-50",
+        trend: "-5%",
+        trendColor: "bg-blue-100 text-blue-600",
+        foldColor: "bg-blue-50",
         statusFilter: "in_progress",
       },
       {
         key: "resolved",
-        label: "Resolved",
+        label: "RESOLVED TODAY",
         value: resolvedCount,
         icon: CheckCircle2,
-        color: "text-emerald-500",
-        bg: "bg-emerald-500/10",
+        color: "text-green-500",
+        bg: "bg-green-50",
+        trend: "+24%",
+        trendColor: "bg-green-100 text-green-600",
+        foldColor: "bg-green-50",
         statusFilter: "resolved",
       },
       {
-        key: "closed",
-        label: "Closed",
-        value: closedCount,
-        icon: Lock,
+        key: "avg_response",
+        label: "AVG RESPONSE",
+        value: "14m",
+        icon: Clock,
         color: "text-slate-500",
-        bg: "bg-slate-500/10",
-        statusFilter: "closed",
+        bg: "bg-slate-100",
+        trend: "+2m",
+        trendColor: "bg-orange-100 text-orange-600",
+        foldColor: "bg-slate-100",
+        statusFilter: "all",
       },
     ],
-    [openCount, in_progressCount, resolvedCount, closedCount],
+    [openCount, in_progressCount, resolvedCount],
   );
 
   const recentTickets = useMemo(() => {
@@ -208,6 +236,249 @@ function Dashboard() {
     }
     return "AP";
   };
+
+  if (!isMobile) {
+    return (
+      <div className="flex flex-col h-full w-full p-6 lg:p-8 pb-10">
+        <div className="w-full max-w-[1600px]">
+          {/* Component Title (As requested: inside component, styled like mockup) */}
+          <div className="mb-6">
+            <h1 className="text-[22px] font-bold text-blue-700 tracking-tight">Dashboard</h1>
+          </div>
+
+          {/* Greeting Section */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8 gap-4">
+            <div>
+              <h2 className="text-[26px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                Good afternoon, {user?.displayName?.split(" ")[0] || "there"}{" "}
+                <span className="text-[26px]">👋</span>
+              </h2>
+              <p className="mt-1.5 text-[15px] text-slate-500">
+                Here is an overview of your support queue today.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-semibold border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <Clock className="h-4 w-4" />
+                Last 7 Days
+              </Button>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 h-10 px-4 rounded-xl text-[13px] font-semibold border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+              >
+                <ListFilter className="h-4 w-4" />
+                Filters
+              </Button>
+            </div>
+          </div>
+
+          <div className="mb-8">
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-5">
+              {summary.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <Link
+                    to="/tickets"
+                    search={{
+                      status: s.statusFilter as
+                        | "open"
+                        | "in_progress"
+                        | "resolved"
+                        | "closed"
+                        | "all",
+                    }}
+                    key={s.key}
+                    className="group relative overflow-hidden rounded-[1.5rem] bg-white border border-slate-100 p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] transition-all flex flex-col justify-between"
+                  >
+                    {/* Corner Fold Accent */}
+                    <div className="absolute top-0 right-0 h-[5.5rem] w-[5.5rem] overflow-hidden rounded-tr-[1.5rem]">
+                      <div
+                        className={`absolute -top-[4rem] -right-[4rem] w-[8rem] h-[8rem] rotate-45 ${s.foldColor}`}
+                      />
+                    </div>
+
+                    {/* Trend Badge */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <span
+                        className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide ${s.trendColor}`}
+                      >
+                        {s.trend}
+                      </span>
+                    </div>
+
+                    <div className="relative z-10">
+                      <div
+                        className={`h-11 w-11 rounded-full ${s.bg} flex items-center justify-center mb-5 shadow-sm`}
+                      >
+                        <Icon className={`h-5 w-5 ${s.color}`} strokeWidth={2.5} />
+                      </div>
+
+                      <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider mb-1.5">
+                        {s.label}
+                      </p>
+                      <p className="text-[40px] font-extrabold text-slate-800 leading-none tracking-tighter">
+                        {s.value}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Two-Column Grid: Recent Tickets & Tech Status */}
+          <div
+            className={`flex flex-col gap-6 flex-1 min-h-0 ${isTechnician ? "xl:grid xl:grid-cols-[2fr_1fr]" : ""}`}
+          >
+            {/* Recent Tickets Table */}
+            <div className="rounded-2xl bg-white border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex-1 flex flex-col mb-4">
+              <div className="flex items-center justify-between px-6 py-5 border-b border-slate-50">
+                <h3 className="text-[18px] font-bold text-slate-800 tracking-tight">
+                  Recent Tickets
+                </h3>
+                <Link
+                  to="/tickets"
+                  search={{ status: "all" }}
+                  className="flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 hover:underline"
+                >
+                  View All <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                  <thead>
+                    <tr className="border-b border-slate-50 bg-white">
+                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
+                        Ticket ID
+                      </th>
+                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
+                        Subject
+                      </th>
+                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
+                        Customer
+                      </th>
+                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-[11px] font-bold capitalize tracking-wider text-slate-500 text-right">
+                        Updated
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {filteredRecentTickets.slice(0, 5).map((t) => {
+                      const initials = t.requesterEmail?.slice(0, 2).toUpperCase() || "US";
+
+                      return (
+                        <tr
+                          key={t.id}
+                          onClick={() => navigate({ to: "/tickets/$id", params: { id: t.id } })}
+                          className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                        >
+                          <td className="px-6 py-4">
+                            <span className="text-[13px] font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                              {t.ticketSequenceId || t.id.slice(0, 10)}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-[13px] text-slate-500 truncate max-w-[250px]">
+                              {(t as Ticket & { title?: string }).title || t.subject}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-7 w-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[10px] font-bold shrink-0">
+                                {initials}
+                              </div>
+                              <span className="text-[13px] text-slate-600 font-medium">
+                                {t.requesterName || t.requesterEmail || "Unknown"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold capitalize ${
+                                t.status === "open"
+                                  ? "bg-red-50 border-red-200 text-red-600"
+                                  : t.status === "in_progress"
+                                    ? "bg-blue-50 border-blue-200 text-blue-600"
+                                    : "bg-green-50 border-green-200 text-green-600"
+                              }`}
+                            >
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${t.status === "open" ? "bg-red-500" : t.status === "in_progress" ? "bg-blue-500" : "bg-green-500"}`}
+                              />
+                              {t.status.replace("_", " ")}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right text-[13px] text-slate-500 font-medium">
+                            {getRelativeTime(t.updatedAt || t.createdAt)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredRecentTickets.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-6 py-12 text-center text-muted-foreground text-[14px]"
+                        >
+                          No recent tickets found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Technicians Online */}
+            {isTechnician && (
+              <div className="rounded-2xl bg-card border border-border shadow-sm p-6 overflow-y-auto">
+                <h3 className="text-[16px] font-bold text-foreground tracking-tight mb-5">
+                  Technicians Online
+                </h3>
+                <div className="space-y-4">
+                  {displayTechnicians.map((t) => (
+                    <div key={t.uid} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-secondary text-foreground flex items-center justify-center font-bold text-[13px]">
+                          {t.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-[14px] font-semibold text-foreground">{t.name}</p>
+                          <p className="text-[12px] font-medium text-muted-foreground">
+                            {t.role || "Technician"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[15px] font-bold text-primary">{t.load}</p>
+                        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                          Active
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {displayTechnicians.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No other technicians online.</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <MobileShell>

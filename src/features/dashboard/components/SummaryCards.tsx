@@ -7,11 +7,14 @@ export function SummaryCards({
   summary: Array<{
     key: string;
     label: string;
-    value: number;
+    value: number | string;
     icon: React.ElementType;
     color: string;
     bg: string;
     statusFilter: string;
+    trend?: string;
+    trendColor?: string;
+    foldColor?: string;
   }>;
 }) {
   return (

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Activity, MessagesSquare, Paperclip, BarChart3, ArrowRight } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const slides = [
   {
@@ -32,6 +33,27 @@ const slides = [
 
 export function OnboardingCarousel() {
   const nav = useNavigate();
+  const isMobile = useIsMobile();
+
+  // ─── DESKTOP BYPASS ───────────────────────────────────────────────────────
+  // Onboarding is a mobile-only experience.
+  // Desktop users are sent directly to /login without rendering the carousel.
+  useEffect(() => {
+    if (!isMobile) {
+      nav({ to: "/login", replace: true });
+    }
+  }, [isMobile, nav]);
+
+  // Prevent any flicker on desktop while redirect fires
+  if (!isMobile) return null;
+
+  // ─── MOBILE PATH ─────────────────────────────────────────────────────────
+  // Everything below is UNCHANGED — the exact original OnboardingCarousel code.
+  return <OnboardingCarouselContent nav={nav} />;
+}
+
+// Extracted into sub-component so the desktop early-return above is clean
+function OnboardingCarouselContent({ nav }: { nav: ReturnType<typeof useNavigate> }) {
   const [i, setI] = useState(0);
   const s = slides[i];
   const Icon = s.icon;

@@ -23,7 +23,7 @@ export function UserProfileCard({ onEditClick }: UserProfileCardProps) {
   };
 
   return (
-    <div className="mx-5 rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
+    <div className="rounded-3xl bg-gradient-hero text-white p-5 shadow-elevated relative overflow-hidden">
       <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary-glow/40 blur-3xl" />
       <div className="relative flex items-center gap-4">
         <div className="h-16 w-16 rounded-2xl bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center text-[22px] font-extrabold text-white">

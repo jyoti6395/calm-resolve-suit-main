@@ -167,7 +167,7 @@ const getInitials = (name: string | null) => {
 export function TicketQueue({
   searchParams,
 }: {
-  searchParams: { search?: string; status?: string; priority?: string };
+  searchParams: { search?: string; status?: string; priority?: string; page?: number };
 }) {
   const navigate = useNavigate({ from: "/tickets/" });
   const tickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
@@ -256,6 +256,24 @@ export function TicketQueue({
     });
   }, [tickets, searchParams]);
 
+  // Pagination Logic (20 items per page)
+  const ITEMS_PER_PAGE = 20;
+  const currentPage = searchParams.page || 1;
+  const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE) || 1;
+  const safePage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedList = useMemo(() => {
+    return filteredList.slice(0, safePage * ITEMS_PER_PAGE);
+  }, [filteredList, safePage]);
+
+  const handleLoadMore = () => {
+    if (safePage >= totalPages) return;
+    navigate({
+      search: (prev) => ({ ...prev, page: safePage + 1 }),
+      replace: true,
+    });
+  };
+
   useHeaderSetup(
     {
       title: "Tickets",
@@ -325,7 +343,7 @@ export function TicketQueue({
         </div>
 
         <div className="px-4 mt-4 pb-30 flex flex-col gap-3 flex-1">
-          {filteredList.map((ticket) => {
+          {paginatedList.map((ticket) => {
             const hasAssignee = !!ticket.assignedToName;
             const progress = getTicketProgress(ticket.status, hasAssignee);
             const isPriority = ticket.priority === "critical" || ticket.priority === "urgent";
@@ -480,6 +498,19 @@ export function TicketQueue({
               </Link>
             );
           })}
+
+          {/* Load More Button */}
+          {safePage < totalPages && (
+            <div className="mt-4 flex justify-center pb-4">
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                className="flex items-center gap-2 h-11 px-6 rounded-full bg-secondary text-foreground font-bold text-[13px] hover:bg-muted transition-colors border border-transparent shadow-sm"
+              >
+                Load More Tickets
+              </button>
+            </div>
+          )}
 
           {/* Upgraded Empty State */}
           {filteredList.length === 0 && (

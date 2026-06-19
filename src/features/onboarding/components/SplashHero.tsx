@@ -3,19 +3,38 @@ import { useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { Logo } from "@/components/layout/Logo";
 import { ShieldCheck } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useAppSelector } from "@/store/hooks";
 
 export function SplashHero() {
   const nav = useNavigate();
+  const isMobile = useIsMobile();
+  const { isAuthenticated } = useAppSelector((s) => s.auth);
   const [progress, setProgress] = useState(0);
 
+  // ─── DESKTOP BYPASS ───────────────────────────────────────────────────────
+  // On desktop the splash screen is never shown.
+  // The __root.tsx auth guard also handles this redirect as a safety net.
   useEffect(() => {
+    if (!isMobile) {
+      nav({ to: isAuthenticated ? "/dashboard" : "/login", replace: true });
+    }
+  }, [isMobile, isAuthenticated, nav]);
+
+  // ─── MOBILE ANIMATION ─────────────────────────────────────────────────────
+  // The following code is UNCHANGED — exactly the original mobile splash logic.
+  useEffect(() => {
+    if (!isMobile) return; // guard: skip timers on desktop
     const t = setInterval(() => setProgress((p) => Math.min(100, p + 4)), 60);
     const go = setTimeout(() => nav({ to: "/onboarding" }), 2400);
     return () => {
       clearInterval(t);
       clearTimeout(go);
     };
-  }, [nav]);
+  }, [isMobile, nav]);
+
+  // Prevent any flicker on desktop while redirect fires
+  if (!isMobile) return null;
 
   return (
     <MobileShell>
