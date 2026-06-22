@@ -69,7 +69,7 @@ export const startTechnicianSyncListener = () => (dispatch: AppDispatch) => {
   dispatch(setTechniciansLoading(true));
 
   const usersRef = collection(db, "users");
-  const q = query(usersRef, where("role", "==", "technician"));
+  const q = query(usersRef, where("role", "==", "technician"), where("status", "==", "active"));
 
   const unsubscribe = onSnapshot(
     q,
