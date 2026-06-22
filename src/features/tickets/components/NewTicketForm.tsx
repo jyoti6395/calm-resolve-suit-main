@@ -290,8 +290,13 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         <input
           {...register("title")}
           placeholder="e.g. VPN keeps disconnecting"
+          maxLength={100}
           className="w-full h-12 px-4 rounded-xl bg-white border-2 border-slate-200 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-[14px] font-semibold text-slate-900 placeholder:text-slate-400 transition-all hover:border-slate-300 shadow-sm"
         />
+        <div className="flex justify-between text-[11px] text-slate-300 mt-1.5 px-1">
+          <span>Minimum 5 characters</span>
+          <span>{watchTitle?.length || 0} / 100</span>
+        </div>
       </div>
 
       <div>
@@ -310,29 +315,6 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         </div>
       </div>
 
-      {watchDescription?.length > 10 && (
-        <div className="rounded-xl bg-blue-50 border border-blue-100 p-4 animate-scale-in">
-          <div className="flex items-center gap-2 text-blue-600 mb-2">
-            <Sparkles className="h-4 w-4" />
-            <span className="text-[11px] font-bold uppercase tracking-wider">AI Suggestions</span>
-          </div>
-          <div className="space-y-1.5">
-            {[
-              "Reset VPN profile on macOS",
-              "Allowlist AnyConnect in firewall",
-              "Common Cisco AnyConnect issues",
-            ].map((s) => (
-              <button
-                key={s}
-                className="w-full flex items-center justify-between rounded-lg bg-white px-3 py-2 text-left text-[12.5px] font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                {s}
-                <ChevronRight className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div>
         <label className="block text-[12px] font-bold uppercase tracking-wider text-slate-400 mb-3">

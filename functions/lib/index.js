@@ -1,19 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.autoAssignTicket = void 0;
+exports.provisionTechnician = exports.onTicketUpdate = exports.autoAssignTicket = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const firestore_1 = require("firebase-admin/firestore");
 admin.initializeApp();
 const db = admin.firestore();
 exports.autoAssignTicket = functions.firestore
-  .document("tickets/{ticketId}")
-  .onCreate(async (snap, context) => {
+    .document("tickets/{ticketId}")
+    .onCreate(async (snap, context) => {
     const ticketId = context.params.ticketId;
     const ticketData = snap.data();
     // Prevent infinite loops if the document somehow already has an assignee
     if (ticketData.assignedToId) {
-      console.log(`Ticket ${ticketId} is already assigned. Skipping auto-assignment.`);
-      return null;
+        console.log(`Ticket ${ticketId} is already assigned. Skipping auto-assignment.`);
+        return null;
     }
     try {
         // Find all active technicians
@@ -76,7 +77,11 @@ exports.autoAssignTicket = functions.firestore
                 console.error("Failed to write assignment notification to root:", e);
             }
             try {
-                await db.collection("users").doc(ticketData.createdBy).collection("notifications").add(creatorNotif);
+                await db
+                    .collection("users")
+                    .doc(ticketData.createdBy)
+                    .collection("notifications")
+                    .add(creatorNotif);
             }
             catch (e) {
                 console.error("Failed to write assignment notification to subcollection:", e);
@@ -98,7 +103,11 @@ exports.autoAssignTicket = functions.firestore
             console.error("Failed to write tech assignment notification to root:", e);
         }
         try {
-            await db.collection("users").doc(selectedTechnician.id).collection("notifications").add(techNotif);
+            await db
+                .collection("users")
+                .doc(selectedTechnician.id)
+                .collection("notifications")
+                .add(techNotif);
         }
         catch (e) {
             console.error("Failed to write tech assignment notification to subcollection:", e);
@@ -135,12 +144,65 @@ exports.onTicketUpdate = functions.firestore
                 console.error("Failed to write status update to root:", e);
             }
             try {
-                await db.collection("users").doc(afterData.createdBy).collection("notifications").add(notifPayload);
+                await db
+                    .collection("users")
+                    .doc(afterData.createdBy)
+                    .collection("notifications")
+                    .add(notifPayload);
             }
             catch (e) {
                 console.error("Failed to write status update to subcollection:", e);
             }
         }
+    }
+});
+// Utility to verify super_admin role
+async function requireSuperAdmin(context) {
+    var _a;
+    if (!context.auth) {
+        throw new functions.https.HttpsError("unauthenticated", "The function must be called while authenticated.");
+    }
+    const userDoc = await db.collection("users").doc(context.auth.uid).get();
+    if (!userDoc.exists || ((_a = userDoc.data()) === null || _a === void 0 ? void 0 : _a.role) !== "super_admin") {
+        throw new functions.https.HttpsError("permission-denied", "Only super_admin users can perform this action.");
+    }
+}
+exports.provisionTechnician = functions.https.onCall(async (data, context) => {
+    // 1. Verify caller is authenticated and is a super_admin
+    await requireSuperAdmin(context);
+    const { email, password, displayName, department, phoneNumber, employeeId, skills, } = data;
+    if (!email || !password || !displayName) {
+        throw new functions.https.HttpsError("invalid-argument", "Missing required fields: email, password, or displayName.");
+    }
+    try {
+        // 2. Create the user in Firebase Authentication using Admin SDK
+        const userRecord = await admin.auth().createUser({
+            email: email,
+            password: password,
+            displayName: displayName,
+        });
+        // 3. Create the corresponding profile document in Firestore
+        const techData = {
+            email: email.toLowerCase().trim(),
+            displayName: displayName.trim(),
+            department: department || "",
+            phoneNumber: (phoneNumber === null || phoneNumber === void 0 ? void 0 : phoneNumber.trim()) || "",
+            employeeId: (employeeId === null || employeeId === void 0 ? void 0 : employeeId.trim()) || "",
+            skills: skills || [],
+            role: "technician",
+            status: "active",
+            createdAt: firestore_1.FieldValue.serverTimestamp(),
+        };
+        await db.collection("users").doc(userRecord.uid).set(techData);
+        return {
+            success: true,
+            uid: userRecord.uid,
+            message: "Technician successfully provisioned.",
+        };
+    }
+    catch (error) {
+        console.error("Error provisioning technician:", error);
+        throw new functions.https.HttpsError("internal", error.message || "Failed to provision technician");
     }
 });
 //# sourceMappingURL=index.js.map

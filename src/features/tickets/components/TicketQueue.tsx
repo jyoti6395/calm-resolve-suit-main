@@ -15,6 +15,7 @@ import {
   Settings,
   Shield,
   Sparkles,
+  Folder,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import {
@@ -107,9 +108,9 @@ const getCategoryIconComponent = (category: string, subject: string) => {
     };
   }
   return {
-    Icon: Sparkles,
-    color: "text-pink-600 dark:text-pink-400",
-    bg: "bg-pink-50 dark:bg-pink-950/20",
+    Icon: Folder,
+    color: "text-slate-500 dark:text-slate-400",
+    bg: "bg-slate-100 dark:bg-slate-800/50",
   };
 };
 
