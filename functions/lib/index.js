@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.provisionTechnician = exports.onTicketUpdate = exports.autoAssignTicket = void 0;
+exports.appProvisionTechnician = exports.onTicketUpdate = exports.autoAssignTicket = void 0;
 const functions = require("firebase-functions/v1");
 const admin = require("firebase-admin");
 const firestore_1 = require("firebase-admin/firestore");
@@ -167,7 +167,7 @@ async function requireSuperAdmin(context) {
         throw new functions.https.HttpsError("permission-denied", "Only super_admin users can perform this action.");
     }
 }
-exports.provisionTechnician = functions.https.onCall(async (data, context) => {
+exports.appProvisionTechnician = functions.https.onCall(async (data, context) => {
     // 1. Verify caller is authenticated and is a super_admin
     await requireSuperAdmin(context);
     const { email, password, displayName, department, phoneNumber, employeeId, skills, } = data;

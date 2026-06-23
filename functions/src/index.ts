@@ -187,7 +187,7 @@ async function requireSuperAdmin(context: functions.https.CallableContext) {
   }
 }
 
-export const provisionTechnician = functions.https.onCall(async (data, context) => {
+export const appProvisionTechnician = functions.https.onCall(async (data, context) => {
   // 1. Verify caller is authenticated and is a super_admin
   await requireSuperAdmin(context);
 
