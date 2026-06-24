@@ -17,7 +17,16 @@ import { sanitizeQuerySnapshot, serializeTimestamp } from "@/lib/formatters";
 import { MessageInputForm } from "@/features/tickets/components/MessageInputForm";
 import type { Ticket, Message } from "@/types/store";
 import { toast } from "sonner";
-import { Clock, Check, Phone, ArrowLeft, MoreHorizontal, MessageCircle } from "lucide-react";
+import {
+  Clock,
+  Check,
+  Phone,
+  ArrowLeft,
+  MoreHorizontal,
+  MessageCircle,
+  Image as ImageIcon,
+  FileText,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 interface NotificationPayload {
@@ -398,6 +407,40 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
               <p className="mt-3 text-[14px] text-white/80 leading-relaxed font-medium">
                 {ticket.description}
               </p>
+            )}
+
+            {ticket.attachments && ticket.attachments.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-white/10 space-y-2.5">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">
+                  Attachments ({ticket.attachments.length})
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {ticket.attachments.map((file, idx) => {
+                    const isImage =
+                      file.type === "photo" || file.name.match(/\.(jpeg|jpg|gif|png|webp)$/i);
+                    const FileIcon = isImage ? ImageIcon : FileText;
+                    return (
+                      <a
+                        key={idx}
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-2.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-[0.99] transition-all border border-white/10 group cursor-pointer"
+                      >
+                        <div className="h-8.5 w-8.5 rounded-lg bg-white/10 flex items-center justify-center text-white shrink-0">
+                          <FileIcon className="h-4.5 w-4.5" />
+                        </div>
+                        <span className="text-[13px] font-bold text-white truncate flex-1 pr-2 group-hover:underline">
+                          {file.name}
+                        </span>
+                        <span className="text-[11.5px] text-white/50 font-semibold mr-1 select-none">
+                          Download
+                        </span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
             <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-white/60 text-[12px]">

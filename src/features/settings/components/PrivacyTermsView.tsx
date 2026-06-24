@@ -11,9 +11,14 @@ import {
   Globe,
   Check,
   ChevronDown,
+  ArrowLeft,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 
 export function PrivacyTermsView() {
+  const isMobile = useIsMobile();
   const [privacyExpanded, setPrivacyExpanded] = useState(true);
   const [termsExpanded, setTermsExpanded] = useState(false);
 
@@ -23,6 +28,243 @@ export function PrivacyTermsView() {
     back: true,
   });
 
+  // ─── DESKTOP & TABLET LAYOUT ──────────────────────────────────────────────
+  if (!isMobile) {
+    return (
+      <DesktopPageShell noPadding>
+        <div className="flex flex-col h-full w-full bg-slate-50 min-h-screen">
+          {/* Top Breadcrumb Header */}
+          <div className="flex items-center justify-between px-8 py-4 border-b border-slate-200 bg-white shrink-0">
+            <div className="flex items-center gap-4">
+              <Link
+                to="/profile"
+                className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+              <div>
+                <h1 className="text-[18px] font-bold text-slate-800 tracking-tight">
+                  Privacy & Terms
+                </h1>
+                <p className="text-[13px] text-slate-500 mt-0.5 font-medium">
+                  Data safety & platform rules
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Layout Area */}
+          <div className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-start">
+              {/* Column 1: Privacy Policy & Ticket & Support Terms */}
+              <div className="space-y-6">
+                {/* Privacy Policy */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <Shield className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-[16px] font-bold text-slate-855 text-slate-850">
+                      Privacy Policy
+                    </h3>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Data We Collect */}
+                    <div>
+                      <h4 className="text-[12px] font-bold text-slate-550 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <User className="h-4 w-4" /> DATA WE COLLECT
+                      </h4>
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[13px] text-slate-500 font-medium">
+                        {[
+                          "Name & personal identifiers",
+                          "Email Address",
+                          "Support Ticket Information",
+                          "Uploaded Documents & Attachments",
+                          "Device & Browser Information",
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* How We Use Your Data */}
+                    <div className="border-t border-slate-105 pt-4">
+                      <h4 className="text-[12px] font-bold text-slate-550 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <Info className="h-4 w-4" /> HOW WE USE YOUR DATA
+                      </h4>
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[13px] text-slate-500 font-medium">
+                        {[
+                          "Provide support services",
+                          "Manage support tickets",
+                          "Improve user experience",
+                          "Send notifications and updates",
+                          "Generate analytics and reports",
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Data Protection */}
+                    <div className="border-t border-slate-105 pt-4">
+                      <h4 className="text-[12px] font-bold text-slate-555 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <Lock className="h-4 w-4" /> DATA PROTECTION
+                      </h4>
+                      <ul className="space-y-2 text-[13px] text-slate-500 font-medium">
+                        {[
+                          "Data is encrypted during transmission",
+                          "Secure authentication and access control",
+                          "Regular security monitoring",
+                          "Role-based access permissions",
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ticket & Support Terms */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="text-[15px] font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-blue-600" />
+                    Ticket & Support Terms
+                  </h3>
+                  <ul className="space-y-3 text-[13.5px] text-slate-500 font-medium">
+                    {[
+                      "Ticket responses are handled based on priority",
+                      "Resolution times may vary by issue type",
+                      "Support communication may be recorded for quality purposes",
+                      "Attachments must comply with company policies",
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Column 2: Terms of Service & Data Retention Policy */}
+              <div className="space-y-6">
+                {/* Terms of Service */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                    <h3 className="text-[16px] font-bold text-slate-850">Terms of Service</h3>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* User Responsibilities */}
+                    <div>
+                      <h4 className="text-[12px] font-bold text-slate-555 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <User className="h-4 w-4" /> USER RESPONSIBILITIES
+                      </h4>
+                      <ul className="space-y-2 text-[13px] text-slate-500 font-medium">
+                        {[
+                          "Provide accurate information",
+                          "Use the platform lawfully",
+                          "Maintain account security",
+                          "Respect other users and support staff",
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Prohibited Activities */}
+                    <div className="border-t border-slate-105 pt-4">
+                      <h4 className="text-[12px] font-bold text-slate-555 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <AlertOctagon className="h-4 w-4" /> PROHIBITED ACTIVITIES
+                      </h4>
+                      <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[13px] text-slate-500 font-medium">
+                        {[
+                          "Unauthorized access attempts",
+                          "Uploading harmful content",
+                          "Sharing false information",
+                          "Misusing support resources",
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Service Availability */}
+                    <div className="border-t border-slate-105 pt-4">
+                      <h4 className="text-[12px] font-bold text-slate-555 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                        <Globe className="h-4 w-4" /> SERVICE AVAILABILITY
+                      </h4>
+                      <ul className="space-y-2 text-[13px] text-slate-500 font-medium">
+                        {[
+                          "Services may be updated periodically",
+                          "Scheduled maintenance may occur",
+                          "Downtime notifications will be communicated when possible",
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Data Retention Policy */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                  <h3 className="text-[15px] font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-blue-600" />
+                    Data Retention Policy
+                  </h3>
+                  <ul className="space-y-3 text-[13.5px] text-slate-500 font-medium">
+                    {[
+                      "Open tickets are retained for operational purposes",
+                      "Closed tickets are archived securely",
+                      "Users may request account deactivation",
+                      "Historical records may be retained for compliance and auditing",
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Version Info */}
+            <div className="py-8 text-center border-t border-slate-200/50 mt-12">
+              <p className="text-[11px] font-bold tracking-widest uppercase text-slate-400">
+                Last Updated: June 2026 · SOC 2 Type II
+              </p>
+            </div>
+          </div>
+        </div>
+      </DesktopPageShell>
+    );
+  }
+
+  // ─── MOBILE LAYOUT (completely unchanged) ─────────────────────────────────
   return (
     <MobileShell>
       <div className="min-h-screen bg-background pb-20 pt-4">
@@ -105,7 +347,7 @@ export function PrivacyTermsView() {
                   <h4 className="text-[12px] font-extrabold text-primary  tracking-wider mb-2 flex items-center gap-1.5">
                     <Lock className="h-3.5 w-3.5" /> Data Protection
                   </h4>
-                  <ul className="space-y-2 text-[13px] text-muted-foreground">
+                  <ul className="space-y-2 text-[13px] text-slate-500">
                     {[
                       "Data is encrypted during transmission",
                       "Secure authentication and access control",

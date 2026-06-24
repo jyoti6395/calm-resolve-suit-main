@@ -12,7 +12,7 @@ import {
   HelpCircle,
   LogOut,
   ChevronRight,
-  Pencil,
+  // Pencil,
   Trash2,
   Loader2,
   User,
@@ -48,12 +48,6 @@ const sections = [
         hint: "Acme Corp · 1,240 seats",
         to: "/company-info",
       },
-      {
-        icon: Lock,
-        label: "Security",
-        hint: "Password, 2FA",
-        to: "/security",
-      },
     ],
   },
   {
@@ -62,7 +56,7 @@ const sections = [
     sidebarIcon: SlidersHorizontal,
     items: [
       { icon: Bell, label: "Notifications", hint: "All alerts on", to: "/notifications" },
-      { icon: Globe, label: "Language & Region", hint: "English (US)", to: "/language" },
+      // { icon: Globe, label: "Language & Region", hint: "English (US)", to: "/language" },
     ],
   },
   {
@@ -85,7 +79,6 @@ function Profile() {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState("account");
 
   const getInitials = () => {
     if (user?.displayName) {
@@ -104,8 +97,8 @@ function Profile() {
     try {
       await deleteAccount();
       // Successful deletion. Firebase SDK deleteUser automatically triggers auth state changes,
-      // which clears the Redux auth state. We navigate the user to /signup as requested.
-      navigate({ to: "/signup" });
+      // which clears the Redux auth state. We navigate the user to /login as requested.
+      navigate({ to: "/login" });
     } catch (err: unknown) {
       const error = err as { code?: string; message?: string };
       console.error("Failed to delete account:", error);
@@ -219,122 +212,169 @@ function Profile() {
   if (!isMobile) {
     return (
       <>
-        <DesktopPageShell title="Profile & Settings">
-          <div className="max-w-[900px] mx-auto w-full pb-0">
-            {/* Top: User Hero Card */}
-            <div className="w-full mb-12 bg-gradient-hero rounded-[2rem] p-8 shadow-lg relative overflow-hidden flex items-center justify-between">
-              <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary-glow/40 blur-3xl" />
-              <div className="relative flex items-center gap-6">
-                <div className="relative">
-                  <div className="h-20 w-20 rounded-[1.25rem] bg-white/15 backdrop-blur border border-white/20 text-white flex items-center justify-center text-[24px] font-extrabold shadow-md">
-                    {getInitials()}
-                  </div>
-                  <button
-                    onClick={() => setIsEditOpen(true)}
-                    className="absolute -bottom-2 -right-2 h-8 w-8 bg-white/15 backdrop-blur rounded-full border border-white/20 shadow-sm flex items-center justify-center hover:bg-white/25 transition-all cursor-pointer"
-                  >
-                    <Pencil className="h-3.5 w-3.5 text-white" />
-                  </button>
-                </div>
-                <div>
-                  <h2 className="text-[24px] font-extrabold text-white tracking-tight leading-tight">
-                    {user?.displayName || "Guest User"}
-                  </h2>
-                  <div className="flex items-center gap-2 text-white/80 mt-1.5">
-                    <UserCircle2 className="h-4 w-4" />
-                    <span className="text-[14px] font-medium">
-                      {user?.email || "Not logged in"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="relative bg-white/10 border border-white/20 text-white px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur">
-                <User className="h-4 w-4" />
-                <span className="text-[13px] font-bold">Personal customer</span>
+        <DesktopPageShell noPadding>
+          <div className="flex flex-col h-full w-full bg-slate-50 min-h-screen">
+            {/* Top Breadcrumb Header */}
+            <div className="flex items-center justify-between px-8 py-4 border-b border-slate-200 bg-white shrink-0">
+              <div>
+                <h1 className="text-[18px] font-bold text-slate-800 tracking-tight">
+                  Profile & Settings
+                </h1>
+                <p className="text-[13px] text-slate-500 mt-0.5 font-medium">
+                  Manage your user profile, credentials, and settings.
+                </p>
               </div>
             </div>
 
-            {/* Bottom: Split Grid for Nav and Settings */}
-            <div className="grid grid-cols-[220px_1fr] gap-12 w-full items-start">
-              {/* Left Sidebar Menu */}
-              <div className="w-full shrink-0 sticky top-6 space-y-1.5">
-                {sections.map((sec) => (
-                  <button
-                    key={sec.id}
-                    onClick={() => {
-                      setActiveSection(sec.id);
-                      document.getElementById(sec.id)?.scrollIntoView({ behavior: "smooth" });
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer font-bold text-[14px] ${
-                      activeSection === sec.id
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-slate-600 hover:bg-slate-100/80"
-                    }`}
-                  >
-                    <sec.sidebarIcon
-                      className={`h-4 w-4 ${activeSection === sec.id ? "text-blue-600" : "text-slate-500"}`}
-                    />
-                    {sec.title}
-                  </button>
-                ))}
-              </div>
+            {/* Main Layout Area */}
+            <div className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-5 animate-fade-in">
+              <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-6 w-full items-start">
+                {/* Left: User Hero Card (Sticky with reduced opacity) */}
+                <div className="w-full relative overflow-hidden rounded-2xl p-6 xl:p-8 shadow-elevated border border-slate-200/10 md:sticky md:top-6 flex flex-col md:min-h-[480px]">
+                  {/* Background layer with reduced opacity */}
+                  <div className="absolute inset-0 bg-gradient-hero opacity-[0.85] pointer-events-none" />
+                  {/* Decorative glow orb */}
+                  <div className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-primary-glow/40 blur-3xl pointer-events-none" />
 
-              {/* Right Settings Content */}
-              <div className="w-full space-y-6">
-                {sections.map((sec) => (
-                  <div key={sec.title} id={sec.id} className="scroll-mt-8">
-                    <p className="text-[12px] font-extrabold uppercase tracking-widest text-slate-500 mb-4 pl-1">
-                      {sec.title}
-                    </p>
-                    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden ">
-                      {sec.items.map((it, i) => {
-                        const Icon = it.icon;
-                        return (
-                          <button
-                            key={it.label}
-                            onClick={() =>
-                              "to" in it && navigate({ to: (it as { to: string }).to })
-                            }
-                            className={`w-full flex items-center gap-5 px-4 py-4 rounded-2xl hover:bg-slate-50 transition-colors group`}
-                          >
-                            <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 text-slate-600 flex items-center justify-center shrink-0 shadow-sm">
-                              <Icon className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1 text-left min-w-0 pt-0.5">
-                              <p className="text-[15px] font-bold text-slate-800 leading-tight">
-                                {it.label}
-                              </p>
-                              <p className="text-[13px] text-slate-500 mt-1 truncate font-medium">
-                                {it.hint}
-                              </p>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 transition-colors mr-2" />
-                          </button>
-                        );
-                      })}
+                  {/* Card Content (User Profile inside a white border box) */}
+                  <div className="relative z-10 w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl pt-12 pb-12 px-5 flex flex-col items-center text-center animate-scale-in">
+                    <div className="h-16 w-16 rounded-xl bg-white/15 backdrop-blur border border-white/20 text-white flex items-center justify-center text-xl font-extrabold shadow-md mb-4">
+                      {getInitials()}
+                    </div>
+                    <h2 className="text-[18px] font-extrabold text-white tracking-tight leading-tight">
+                      {user?.displayName || "Guest User"}
+                    </h2>
+                    <div className="flex items-center gap-1.5 text-white/80 mt-3.5">
+                      <UserCircle2 className="h-4 w-4 shrink-0 text-white/60" />
+                      <span className="text-[13px] font-medium truncate max-w-[190px]">
+                        {user?.email || "Not logged in"}
+                      </span>
                     </div>
                   </div>
-                ))}
 
-                {/* Actions */}
-                <div className="pt-0 space-y-4">
-                  <button
-                    onClick={() => setIsLogoutConfirmOpen(true)}
-                    className="w-full flex items-center justify-center gap-2 h-14 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold hover:bg-slate-50 shadow-sm transition-colors focus:outline-none cursor-pointer"
-                  >
-                    <LogOut className="h-4 w-4" /> Log out
-                  </button>
-                  <button
-                    onClick={() => {
-                      setDeleteError(null);
-                      setIsDeleteConfirmOpen(true);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 h-14 rounded-2xl bg-white border border-red-100 text-red-600 font-bold hover:bg-red-50 shadow-sm transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="h-4 w-4" /> Delete account
-                  </button>
-                  <div className="pt-8">
-                    <p className="text-center text-[11px] font-bold tracking-widest uppercase text-slate-400">
+                  {/* Spacer to push company info to bottom and stretch height naturally */}
+                  <div className="flex-1" />
+
+                  {/* Divider Line */}
+                  <div className="relative z-10 border-t border-white/10 w-full mb-6" />
+
+                  {/* Company Info section matching the hero design */}
+                  <div className="relative z-10 flex flex-col gap-3.5 text-white mb-2">
+                    <div>
+                      <h3 className="text-[16px] font-bold leading-tight tracking-tight">
+                        Hans Organization
+                      </h3>
+                      <p className="text-[11.5px] text-white/60 mt-0.5 font-medium">
+                        ID: ORG-2026-001
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-3.5 text-[12px] border-t border-white/10">
+                      <div>
+                        <p className="text-white/50 text-[9px] tracking-wider font-semibold uppercase leading-none mb-1.5">
+                          Subscription
+                        </p>
+                        <p className="text-white flex items-center gap-1 font-bold text-[13px] truncate">
+                          <ShieldCheck className="h-4 w-4 text-primary-glow shrink-0" /> Enterprise
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-white/50 text-[9px] tracking-wider font-semibold uppercase leading-none mb-1.5">
+                          Since
+                        </p>
+                        <p className="text-white font-bold text-[13px] truncate">Jan 15, 2021</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Settings Content */}
+                <div className="w-full space-y-5">
+                  {sections
+                    .filter((sec) => sec.id !== "account")
+                    .map((sec) => (
+                      <div key={sec.title} id={sec.id} className="scroll-mt-6">
+                        <p className="text-[11px] font-bold  tracking-wider text-slate-500 mb-2.5 pl-2">
+                          {sec.title}
+                        </p>
+                        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                          {sec.items.map((it, i) => {
+                            const Icon = it.icon;
+                            return (
+                              <button
+                                key={it.label}
+                                onClick={() =>
+                                  "to" in it && navigate({ to: (it as { to: string }).to })
+                                }
+                                className={`w-full flex items-center gap-5 px-4 py-3.5 hover:bg-slate-50 transition-colors group text-left cursor-pointer ${
+                                  i !== sec.items.length - 1 ? "border-b border-slate-100" : ""
+                                }`}
+                              >
+                                <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 flex items-center justify-center shrink-0 shadow-sm">
+                                  <Icon className="h-5 w-5 text-slate-500 group-hover:text-primary transition-colors" />
+                                </div>
+                                <div className="flex-1 text-left min-w-0 pt-0.5">
+                                  <p className="text-[14.5px] font-bold text-slate-800 leading-tight">
+                                    {it.label}
+                                  </p>
+                                  <p className="text-[12.5px] text-slate-500 mt-1 truncate font-medium">
+                                    {it.hint}
+                                  </p>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 transition-colors mr-2" />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+
+                  {/* Actions Section styled as a Premium Category card */}
+                  <div>
+                    <p className="text-[11px] font-bold  tracking-wider text-slate-500 mb-2.5 pl-2">
+                      Account Actions
+                    </p>
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                      <button
+                        onClick={() => setIsLogoutConfirmOpen(true)}
+                        className="w-full flex items-center gap-5 px-4 py-3.5 hover:bg-slate-50 transition-colors group text-left cursor-pointer border-b border-slate-100"
+                      >
+                        <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 flex items-center justify-center shrink-0 shadow-sm">
+                          <LogOut className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0 pt-0.5">
+                          <p className="text-[14.5px] font-bold text-slate-800">Log out</p>
+                          <p className="text-[12.5px] text-slate-400 mt-1 font-medium">
+                            Log out of your current session securely
+                          </p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-slate-600 transition-colors mr-2" />
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setDeleteError(null);
+                          setIsDeleteConfirmOpen(true);
+                        }}
+                        className="w-full flex items-center gap-5 px-4 py-3.5 hover:bg-red-50/50 transition-colors group text-left cursor-pointer"
+                      >
+                        <div className="h-10 w-10 rounded-xl bg-red-50 border border-red-100 text-red-650 flex items-center justify-center shrink-0 shadow-sm">
+                          <Trash2 className="h-4.5 w-4.5 text-red-600" />
+                        </div>
+                        <div className="flex-1 text-left min-w-0 pt-0.5">
+                          <p className="text-[14.5px] font-bold text-red-600">Delete account</p>
+                          <p className="text-[12.5px] text-red-400 mt-1 font-medium">
+                            Permanently delete your profile and support history
+                          </p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-red-600 transition-colors mr-2" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Version Info */}
+                  <div className="pt-6 pb-2">
+                    <p className="text-center text-[11px] font-bold tracking-widest  text-slate-400">
                       AdviseTech v3.4.1 · SOC 2 Type II
                     </p>
                   </div>
@@ -362,7 +402,7 @@ function Profile() {
         <div className="px-5 mt-6 space-y-6">
           {sections.map((sec) => (
             <div key={sec.title}>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+              <p className="text-[11px] font-bold  tracking-wider text-muted-foreground px-1">
                 {sec.title}
               </p>
               <div className="mt-3 rounded-2xl bg-card border border-border overflow-hidden">

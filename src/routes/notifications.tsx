@@ -1,11 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Bell, Loader2, X } from "lucide-react";
+import { Bell, Loader2, X, ArrowLeft } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   startNotificationSyncListener,
@@ -31,6 +31,7 @@ export const Route = createFileRoute("/notifications")({ component: Notification
 function Notifications() {
   const isMobile = useIsMobile();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { notifications, loading, preferences } = useAppSelector((state) => state.notifications);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
@@ -85,10 +86,24 @@ function Notifications() {
   // ─── DESKTOP LAYOUT ────────────────────────────────────────────────────────
   if (!isMobile) {
     return (
-      <DesktopPageShell title="Notifications">
-        <div className="flex flex-col h-full w-full pb-10 max-w-[1100px] mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <p className="text-[15px] font-medium text-slate-500">{subtitleText}</p>
+      <DesktopPageShell noPadding>
+        <div className="flex flex-col h-full w-full bg-slate-50 min-h-screen">
+          {/* Top Breadcrumb Header */}
+          <div className="flex items-center justify-between px-8 py-4 border-b border-slate-200 bg-white shrink-0">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate({ to: "/" })}
+                className="flex items-center justify-center h-8 w-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div>
+                <h1 className="text-[18px] font-bold text-slate-800 tracking-tight">
+                  Notifications
+                </h1>
+                <p className="text-[13px] text-slate-500 mt-0.5 font-medium">{subtitleText}</p>
+              </div>
+            </div>
             {unreadCount > 0 && (
               <button
                 type="button"
@@ -99,14 +114,18 @@ function Notifications() {
               </button>
             )}
           </div>
-          <div className="w-full">
-            <DesktopNotificationsContent
-              loading={loading}
-              notifications={notifications}
-              groups={groups}
-              preferences={preferences}
-              dispatch={dispatch}
-            />
+
+          {/* Main Layout Area */}
+          <div className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-[1600px] w-full mx-auto animate-fade-in">
+            <div className="w-full">
+              <DesktopNotificationsContent
+                loading={loading}
+                notifications={notifications}
+                groups={groups}
+                preferences={preferences}
+                dispatch={dispatch}
+              />
+            </div>
           </div>
         </div>
         <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
@@ -218,7 +237,7 @@ function MobileNotificationsContent({
         <div className="px-5 space-y-6">
           {groups.map((g) => (
             <div key={g.title}>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <p className="text-[11px] font-bold tracking-wider text-muted-foreground">
                 {g.title}
               </p>
               <div className="mt-3 space-y-2">
@@ -262,22 +281,6 @@ function MobileNotificationsContent({
           ))}
         </div>
       )}
-
-      <div className="mx-5 mt-6 rounded-3xl bg-card border border-border p-4">
-        <p className="text-[13px] font-bold">Notification preferences</p>
-        <div className="mt-3 space-y-2">
-          {[
-            { key: "newReplies" as const, label: "New replies" },
-            { key: "statusChanges" as const, label: "Status changes" },
-            { key: "weeklyDigest" as const, label: "Weekly digest" },
-          ].map(({ key, label }) => (
-            <label key={key} className="flex items-center justify-between py-2 cursor-pointer">
-              <span className="text-[13px]">{label}</span>
-              <Toggle on={preferences[key]} onToggle={() => dispatch(togglePreference(key))} />
-            </label>
-          ))}
-        </div>
-      </div>
     </>
   );
 }
@@ -310,101 +313,74 @@ function DesktopNotificationsContent({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 w-full items-start">
-      {/* Left Pane: Notifications Feed */}
-      <div className="w-full">
-        {loading && notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-            <p className="text-[13px] font-medium text-slate-500 mt-4">Loading notifications...</p>
-          </div>
-        ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center py-24 px-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <div className="h-20 w-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-slate-400 mb-6 border border-slate-100 shadow-inner">
-              <Bell className="h-8 w-8 text-slate-400" />
-            </div>
-            <h3 className="text-[18px] font-extrabold text-slate-800">All caught up!</h3>
-            <p className="text-[14px] text-slate-500 mt-2 max-w-[280px] font-medium leading-relaxed">
-              You have no new alerts in your notifications feed.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {groups.map((g) => (
-              <div key={g.title}>
-                <p className="text-[12px] font-bold uppercase tracking-wider text-slate-500 mb-3 pl-2">
-                  {g.title}
-                </p>
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  {g.items.map((it) => {
-                    const tone = getNotificationToneStyles(it.tone);
-                    const Icon = it.icon;
-                    return (
-                      <div
-                        key={it.id}
-                        className="flex items-start gap-4 p-5 border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors group relative"
-                      >
-                        <div
-                          className={`h-11 w-11 rounded-xl ${tone.bg} flex items-center justify-center shrink-0`}
-                        >
-                          <Icon className={`h-5 w-5 ${tone.text}`} />
-                        </div>
-                        <div className="flex-1 min-w-0 pt-0.5">
-                          <div className="flex justify-between items-start gap-4">
-                            <p className="text-[15px] font-bold text-slate-800 leading-tight">
-                              {it.title}
-                            </p>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-[12px] font-medium text-slate-400">
-                                {it.time}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => handleClearOne(it.id)}
-                                className="h-7 w-7 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors cursor-pointer shrink-0 opacity-0 group-hover:opacity-100 absolute right-4 top-4"
-                                aria-label="Clear notification"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </div>
-                          <p className="text-[14px] text-slate-500 mt-1.5 leading-relaxed font-medium">
-                            {it.body}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Right Pane: Settings Sidebar */}
-      <div className="w-full shrink-0 sticky top-6">
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-          <h3 className="text-[14px] font-bold text-slate-800 mb-5">Notification Preferences</h3>
-          <div className="space-y-1">
-            {[
-              { key: "newReplies" as const, label: "New replies" },
-              { key: "statusChanges" as const, label: "Status changes" },
-              { key: "weeklyDigest" as const, label: "Weekly digest" },
-            ].map(({ key, label }) => (
-              <label
-                key={key}
-                className="flex items-center justify-between py-3 cursor-pointer group"
-              >
-                <span className="text-[14px] font-medium text-slate-600 group-hover:text-slate-900 transition-colors">
-                  {label}
-                </span>
-                <Toggle on={preferences[key]} onToggle={() => dispatch(togglePreference(key))} />
-              </label>
-            ))}
-          </div>
+    <div className="w-full">
+      {loading && notifications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+          <p className="text-[13px] font-medium text-slate-500 mt-4">Loading notifications...</p>
         </div>
-      </div>
+      ) : notifications.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-center py-24 px-8 bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <div className="h-20 w-20 rounded-[2rem] bg-slate-50 flex items-center justify-center text-slate-400 mb-6 border border-slate-100 shadow-inner">
+            <Bell className="h-8 w-8 text-slate-400" />
+          </div>
+          <h3 className="text-[18px] font-extrabold text-slate-800">All caught up!</h3>
+          <p className="text-[14px] text-slate-500 mt-2 max-w-[280px] font-medium leading-relaxed">
+            You have no new alerts in your notifications feed.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {groups.map((g) => (
+            <div key={g.title}>
+              <p className="text-[12px] font-bold tracking-wider text-slate-500 mb-3 pl-2">
+                {g.title}
+              </p>
+              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                {g.items.map((it) => {
+                  const tone = getNotificationToneStyles(it.tone);
+                  const Icon = it.icon;
+                  return (
+                    <div
+                      key={it.id}
+                      className="flex items-start gap-4 p-5 border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors group relative"
+                    >
+                      <div
+                        className={`h-11 w-11 rounded-xl ${tone.bg} flex items-center justify-center shrink-0`}
+                      >
+                        <Icon className={`h-5 w-5 ${tone.text}`} />
+                      </div>
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <div className="flex justify-between items-start gap-4">
+                          <p className="text-[15px] font-bold text-slate-805 leading-tight">
+                            {it.title}
+                          </p>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-[12px] font-medium text-slate-400">
+                              {it.time}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleClearOne(it.id)}
+                              className="h-7 w-7 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-all cursor-pointer shrink-0 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+                              aria-label="Clear notification"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-[14px] text-slate-500 mt-1.5 leading-relaxed font-medium">
+                          {it.body}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

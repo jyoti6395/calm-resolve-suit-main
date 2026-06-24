@@ -36,12 +36,12 @@ export function UserProfileCard({ onEditClick }: UserProfileCardProps) {
             Personal · {user?.role || "Customer"}
           </p>
         </div>
-        <button
+        {/* <button
           onClick={onEditClick}
           className="h-10 w-10 shrink-0 rounded-full bg-white/15 backdrop-blur border border-white/20 flex items-center justify-center cursor-pointer hover:bg-white/25 active:scale-95 transition-all focus:outline-none"
         >
           <Pencil className="h-4 w-4 text-white" />
-        </button>
+        </button> */}
       </div>
     </div>
   );

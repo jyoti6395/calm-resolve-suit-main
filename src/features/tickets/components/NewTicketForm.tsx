@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
@@ -21,16 +21,26 @@ import {
   Tag,
   ClipboardList,
   Send,
+  X,
+  Loader2,
 } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAppSelector } from "@/store/hooks";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/firebase/firebase";
+import { db, storage } from "@/firebase/firebase";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+  UploadTask,
+} from "firebase/storage";
 import { toast } from "sonner";
 import { serializeTimestamp } from "@/lib/formatters";
 import { SLA_HOURS_MAP } from "@/constants/ticket";
+import { Progress } from "@/components/ui/progress";
 
 const priorities = [
   {
@@ -149,11 +159,37 @@ const STEPS = [
   { n: 3, label: "Review", sublabel: "Confirm & submit", icon: Send },
 ];
 
+interface AttachmentItem {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  progress: number;
+  status: "uploading" | "success" | "error";
+  url?: string;
+  type: "photo" | "document";
+  uploadTask?: UploadTask;
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
 export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: string }) {
   const nav = useNavigate({ from: "/tickets/new" });
   const isMobile = useIsMobile();
   const [step, setStep] = useState(preselectedCategory ? 2 : 1);
   const user = useAppSelector((state) => state.auth.user);
+
+  const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
+
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useHeaderSetup({ title: "Raise a ticket", back: true }, []);
 
@@ -179,10 +215,98 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
   const watchDescription = watch("description");
   const watchPriority = watch("priority");
 
+  const isUploading = attachments.some((a) => a.status === "uploading");
   const canNext =
-    (step === 1 && !!watchCategory) ||
-    (step === 2 && watchTitle.length >= 5 && watchDescription.length >= 10) ||
-    step === 3;
+    ((step === 1 && !!watchCategory) ||
+      (step === 2 && watchTitle.length >= 5 && watchDescription.length >= 10) ||
+      step === 3) &&
+    !isUploading;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "photo" | "document") => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`File "${file.name}" exceeds the 10MB size limit.`);
+        return;
+      }
+
+      const id = Math.random().toString(36).substring(2, 9) + "_" + Date.now();
+
+      const newAttachment: AttachmentItem = {
+        id,
+        file,
+        name: file.name,
+        size: file.size,
+        progress: 0,
+        status: "uploading",
+        type,
+      };
+
+      setAttachments((prev) => [...prev, newAttachment]);
+
+      if (!user) {
+        toast.error("You must be logged in to upload files.");
+        return;
+      }
+
+      const storageRef = ref(storage, `tickets/attachments/${user.uid}/${id}/${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      setAttachments((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, uploadTask } : item)),
+      );
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          setAttachments((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, progress } : item)),
+          );
+        },
+        (error) => {
+          console.error("Upload error:", error);
+          toast.error(`Failed to upload ${file.name}`);
+          setAttachments((prev) =>
+            prev.map((item) => (item.id === id ? { ...item, status: "error", progress: 0 } : item)),
+          );
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setAttachments((prev) =>
+            prev.map((item) =>
+              item.id === id ? { ...item, status: "success", url: downloadURL } : item,
+            ),
+          );
+        },
+      );
+    });
+
+    e.target.value = "";
+  };
+
+  const handleRemoveAttachment = async (id: string) => {
+    const item = attachments.find((a) => a.id === id);
+    if (!item) return;
+
+    if (item.status === "uploading" && item.uploadTask) {
+      item.uploadTask.cancel();
+    }
+
+    if (item.status === "success" && item.url) {
+      try {
+        if (!user) return;
+        const storageRef = ref(storage, `tickets/attachments/${user.uid}/${id}/${item.name}`);
+        await deleteObject(storageRef);
+      } catch (err) {
+        console.error("Failed to delete file from storage:", err);
+      }
+    }
+
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
 
   const onSubmit = async (data: CreateTicketInput) => {
     try {
@@ -206,6 +330,14 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         createdAt: serializeTimestamp(now),
         updatedAt: serializeTimestamp(now),
         slaDeadline: serializeTimestamp(slaDeadline),
+        attachments: attachments
+          .filter((a) => a.status === "success" && a.url)
+          .map((a) => ({
+            name: a.name,
+            url: a.url!,
+            type: a.type,
+            size: a.size,
+          })),
       };
       const docRef = await addDoc(collection(db, "tickets"), payload);
       const notificationPayload = {
@@ -315,7 +447,6 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         </div>
       </div>
 
-
       <div>
         <label className="block text-[12px] font-bold uppercase tracking-wider text-slate-400 mb-3">
           Priority
@@ -345,7 +476,12 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
 
       <div>
         <label className="block text-[12px] font-bold uppercase tracking-wider text-slate-400 mb-3">
-          Attachments
+          Attachments{" "}
+          {isUploading && (
+            <span className="text-blue-500 lowercase font-medium animate-pulse">
+              (uploading files...)
+            </span>
+          )}
         </label>
         <div className={`grid gap-3 ${isMobile ? "grid-cols-3" : "grid-cols-2"}`}>
           {(isMobile
@@ -362,6 +498,11 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
             <button
               key={l}
               type="button"
+              onClick={() => {
+                if (l === "Camera") cameraInputRef.current?.click();
+                else if (l === "Photo" || l === "Upload Photo") imageInputRef.current?.click();
+                else if (l === "File" || l === "Upload File") fileInputRef.current?.click();
+              }}
               className="h-20 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2 hover:bg-slate-100 hover:border-slate-300 transition-colors cursor-pointer group"
             >
               <I className="h-5 w-5 text-slate-400 group-hover:text-slate-500 transition-colors" />
@@ -371,6 +512,91 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
             </button>
           ))}
         </div>
+
+        {/* Hidden Inputs */}
+        <input
+          type="file"
+          ref={cameraInputRef}
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => handleFileChange(e, "photo")}
+        />
+        <input
+          type="file"
+          ref={imageInputRef}
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleFileChange(e, "photo")}
+          multiple
+        />
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
+          className="hidden"
+          onChange={(e) => handleFileChange(e, "document")}
+          multiple
+        />
+
+        {/* Attachment Item Progress / Complete List */}
+        {attachments.length > 0 && (
+          <div className="mt-4 space-y-2 max-h-[220px] overflow-y-auto pr-1">
+            {attachments.map((item) => {
+              const FileIcon = item.type === "photo" ? ImageIcon : FileText;
+              return (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-150 shadow-sm animate-scale-in"
+                >
+                  <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 shrink-0">
+                    <FileIcon className="h-4.5 w-4.5" />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[13px] font-bold text-slate-700 truncate leading-snug">
+                      {item.name}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400 font-medium">
+                      <span>{formatFileSize(item.size)}</span>
+                      <span className="text-slate-300">•</span>
+                      {item.status === "uploading" && (
+                        <span className="text-blue-500 font-semibold">Uploading</span>
+                      )}
+                      {item.status === "success" && (
+                        <span className="text-emerald-500 font-semibold">Ready</span>
+                      )}
+                      {item.status === "error" && (
+                        <span className="text-red-500 font-semibold">Failed</span>
+                      )}
+                    </div>
+                    {item.status === "uploading" && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <Progress value={item.progress} className="h-1.5 bg-blue-100/50" />
+                        <span className="text-[10px] font-bold text-blue-600 shrink-0 min-w-[28px] text-right">
+                          {item.progress}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-1.5">
+                    {item.status === "uploading" && (
+                      <Loader2 className="h-3.5 w-3.5 text-blue-500 animate-spin" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAttachment(item.id)}
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -402,8 +628,37 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
             k="Description"
             v={`${getValues("description")?.slice(0, 80) || ""}${getValues("description")?.length > 80 ? "…" : ""}`}
           />
-          <Row k="Attachments" v="0 files" />
+          <Row
+            k="Attachments"
+            v={`${attachments.filter((a) => a.status === "success").length} file(s)`}
+          />
         </div>
+
+        {/* Attachments list for review */}
+        {attachments.filter((a) => a.status === "success").length > 0 && (
+          <div className="mt-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-0.5">
+              Attached Files ({attachments.filter((a) => a.status === "success").length})
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {attachments
+                .filter((a) => a.status === "success")
+                .map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-100 text-[12px] min-w-0"
+                  >
+                    {a.type === "photo" ? (
+                      <ImageIcon className="h-4 w-4 text-slate-400 shrink-0" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-slate-400 shrink-0" />
+                    )}
+                    <span className="font-bold text-slate-700 truncate">{a.name}</span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl bg-green-50 border border-green-100 p-5 flex items-start gap-4">

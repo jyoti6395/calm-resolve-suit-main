@@ -219,7 +219,7 @@ function MobileLoginPage() {
         </div>
 
         {/* Create Account Link */}
-        <div className="px-6 pb-8 pt-6 text-center text-[13px] text-muted-foreground">
+        {/* <div className="px-6 pb-8 pt-6 text-center text-[13px] text-muted-foreground">
           New to AdviseTech?{" "}
           <Link to="/signup" className="text-primary font-semibold hover:underline">
             Create account
@@ -229,7 +229,7 @@ function MobileLoginPage() {
             <span className="underline cursor-pointer hover:text-foreground">Terms</span> &{" "}
             <span className="underline cursor-pointer hover:text-foreground">Privacy Policy</span>.
           </p>
-        </div>
+        </div> */}
       </div>
     </MobileShell>
   );
@@ -409,12 +409,12 @@ function DesktopLoginPage() {
           </form>
 
           {/* Create account */}
-          <p className="mt-8 text-center text-[13px] text-muted-foreground">
+          {/* <p className="mt-8 text-center text-[13px] text-muted-foreground">
             New to AdviseTech?{" "}
             <Link to="/signup" className="text-primary font-semibold hover:underline">
               Create account
             </Link>
-          </p>
+          </p> */}
           <p className="mt-3 text-center text-[11px] text-muted-foreground/70">
             By continuing you agree to our{" "}
             <span className="underline cursor-pointer hover:text-foreground">Terms</span> &{" "}

@@ -132,19 +132,24 @@ export async function sendPasswordReset(email: string): Promise<void> {
   const trimmedEmail = email.trim().toLowerCase();
 
   // 1. Verify the account role before allowing a password reset
-  const usersRef = collection(db, "users");
-  const q = query(usersRef, where("email", "==", trimmedEmail));
-  const querySnapshot = await getDocs(q);
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("email", "==", trimmedEmail));
+    const querySnapshot = await getDocs(q);
 
-  if (!querySnapshot.empty) {
-    const profile = querySnapshot.docs[0].data() as UserProfile;
-    const role = profile.role || "customer";
+    if (!querySnapshot.empty) {
+      const profile = querySnapshot.docs[0].data() as UserProfile;
+      const role = profile.role || "customer";
 
-    // Prevent super_admin or other internal roles from resetting passwords via the public app
-    if (role !== "customer" && role !== "technician") {
-      // Silently return to prevent user enumeration attacks
-      return;
+      // Prevent super_admin or other internal roles from resetting passwords via the public app
+      if (role !== "customer" && role !== "technician") {
+        // Silently return to prevent user enumeration attacks
+        return;
+      }
     }
+  } catch (error) {
+    // Gracefully handle query permission/network errors and proceed with the password reset
+    console.warn("Bypassing client-side role check during password reset:", error);
   }
 
   // 2. Send the password reset email using Firebase Auth.

@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SupportRouteImport } from './routes/support'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PrivacyTermsRouteImport } from './routes/privacy-terms'
@@ -32,11 +31,6 @@ import { Route as TicketsIdRouteImport } from './routes/tickets.$id'
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -139,7 +133,6 @@ export interface FileRoutesByFullPath {
   '/privacy-terms': typeof PrivacyTermsRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
   '/tickets/$id': typeof TicketsIdRoute
   '/tickets/confirmation': typeof TicketsConfirmationRoute
@@ -160,7 +153,6 @@ export interface FileRoutesByTo {
   '/privacy-terms': typeof PrivacyTermsRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
   '/tickets/$id': typeof TicketsIdRoute
   '/tickets/confirmation': typeof TicketsConfirmationRoute
@@ -182,7 +174,6 @@ export interface FileRoutesById {
   '/privacy-terms': typeof PrivacyTermsRoute
   '/profile': typeof ProfileRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/signup': typeof SignupRoute
   '/support': typeof SupportRoute
   '/tickets/$id': typeof TicketsIdRoute
   '/tickets/confirmation': typeof TicketsConfirmationRoute
@@ -205,7 +196,6 @@ export interface FileRouteTypes {
     | '/privacy-terms'
     | '/profile'
     | '/reset-password'
-    | '/signup'
     | '/support'
     | '/tickets/$id'
     | '/tickets/confirmation'
@@ -226,7 +216,6 @@ export interface FileRouteTypes {
     | '/privacy-terms'
     | '/profile'
     | '/reset-password'
-    | '/signup'
     | '/support'
     | '/tickets/$id'
     | '/tickets/confirmation'
@@ -247,7 +236,6 @@ export interface FileRouteTypes {
     | '/privacy-terms'
     | '/profile'
     | '/reset-password'
-    | '/signup'
     | '/support'
     | '/tickets/$id'
     | '/tickets/confirmation'
@@ -269,7 +257,6 @@ export interface RootRouteChildren {
   PrivacyTermsRoute: typeof PrivacyTermsRoute
   ProfileRoute: typeof ProfileRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  SignupRoute: typeof SignupRoute
   SupportRoute: typeof SupportRoute
   TicketsIdRoute: typeof TicketsIdRoute
   TicketsConfirmationRoute: typeof TicketsConfirmationRoute
@@ -284,13 +271,6 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/support'
       preLoaderRoute: typeof SupportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -429,7 +409,6 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyTermsRoute: PrivacyTermsRoute,
   ProfileRoute: ProfileRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  SignupRoute: SignupRoute,
   SupportRoute: SupportRoute,
   TicketsIdRoute: TicketsIdRoute,
   TicketsConfirmationRoute: TicketsConfirmationRoute,

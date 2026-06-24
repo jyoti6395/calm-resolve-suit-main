@@ -15,6 +15,13 @@ export interface AuthUser {
   tenureDays?: number;
 }
 
+export interface TicketAttachment {
+  name: string;
+  url: string;
+  type: string;
+  size?: number;
+}
+
 export interface Ticket {
   id: string;
   ticketSequenceId: string;
@@ -35,6 +42,7 @@ export interface Ticket {
   slaDeadline: string;
   tags?: string[];
   csatScore?: number;
+  attachments?: TicketAttachment[];
 }
 
 export interface Message {

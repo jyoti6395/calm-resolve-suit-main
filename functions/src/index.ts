@@ -63,7 +63,7 @@ export const autoAssignTicket = functions.firestore
       const selectedTechnician = workloads[0].tech;
 
       console.log(
-        `Assigning ticket ${ticketId} to technician ${selectedTechnician.name} (${selectedTechnician.id})`
+        `Assigning ticket ${ticketId} to technician ${selectedTechnician.name} (${selectedTechnician.id})`,
       );
 
       // Securely patch the ticket document with the assigned technician
@@ -174,7 +174,7 @@ async function requireSuperAdmin(context: functions.https.CallableContext) {
   if (!context.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
-      "The function must be called while authenticated."
+      "The function must be called while authenticated.",
     );
   }
 
@@ -182,7 +182,7 @@ async function requireSuperAdmin(context: functions.https.CallableContext) {
   if (!userDoc.exists || userDoc.data()?.role !== "super_admin") {
     throw new functions.https.HttpsError(
       "permission-denied",
-      "Only super_admin users can perform this action."
+      "Only super_admin users can perform this action.",
     );
   }
 }
@@ -191,20 +191,12 @@ export const appProvisionTechnician = functions.https.onCall(async (data, contex
   // 1. Verify caller is authenticated and is a super_admin
   await requireSuperAdmin(context);
 
-  const {
-    email,
-    password,
-    displayName,
-    department,
-    phoneNumber,
-    employeeId,
-    skills,
-  } = data;
+  const { email, password, displayName, department, phoneNumber, employeeId, skills } = data;
 
   if (!email || !password || !displayName) {
     throw new functions.https.HttpsError(
       "invalid-argument",
-      "Missing required fields: email, password, or displayName."
+      "Missing required fields: email, password, or displayName.",
     );
   }
 
@@ -236,8 +228,9 @@ export const appProvisionTechnician = functions.https.onCall(async (data, contex
       uid: userRecord.uid,
       message: "Technician successfully provisioned.",
     };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error provisioning technician:", error);
-    throw new functions.https.HttpsError("internal", error.message || "Failed to provision technician");
+    const message = (error instanceof Error && error.message) || "Failed to provision technician";
+    throw new functions.https.HttpsError("internal", message);
   }
 });
