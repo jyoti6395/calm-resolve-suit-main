@@ -682,7 +682,7 @@ export function SupportView() {
         </div>
 
         {/* Contact Information */}
-        <div ref={contactCardRef} className="px-5 mb-8">
+        <div ref={contactCardRef} className="px-5 pb-32 mb-8">
           <h3 className="text-[14px] font-bold  tracking-wider text-muted-foreground px-1 mb-3">
             Direct Contact
           </h3>
@@ -735,7 +735,7 @@ export function SupportView() {
         </div>
 
         {/* Feedback Section */}
-        <div className="px-5 mb-8 pb-32">
+        {/* <div className="px-5 mb-8 pb-32">
           <div className="rounded-3xl bg-card border border-border p-4 shadow-soft text-center">
             {feedbackState === "none" ? (
               <>
@@ -767,7 +767,7 @@ export function SupportView() {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Slide-up Details Modal for Knowledge Base Articles */}
