@@ -375,10 +375,10 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       </div>
 
       {/* Main Split Content */}
-      <div className="flex flex-1 min-h-0 overflow-hidden p-6 lg:p-8 gap-6 max-w-[1600px] w-full mx-auto">
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 overflow-y-auto lg:overflow-hidden p-6 lg:p-8 gap-6 max-w-[1600px] w-full mx-auto">
         {/* Left Pane: Ticket Details */}
-        <div className="w-[350px] xl:w-[400px] shrink-0 flex flex-col gap-5 overflow-y-auto pr-2 pb-8 custom-scrollbar">
-          <div className="p-6 xl:p-8 rounded-[2rem] bg-gradient-hero text-white shadow-lg relative overflow-hidden">
+        <div className="w-full lg:w-[350px] xl:w-[400px] shrink-0 grid grid-cols-1 md:grid-cols-2 lg:flex lg:flex-col gap-5 pb-2 lg:pb-8 md:items-start lg:items-stretch lg:overflow-y-auto lg:max-h-full">
+          <div className="md:col-span-1 lg:col-span-1 p-6 xl:p-8 rounded-[2rem] bg-gradient-hero text-white shadow-lg relative overflow-hidden h-fit lg:h-auto w-full shrink-0">
             <div className="flex gap-2 mb-4">
               {user?.role === "super_admin" || user?.role === "technician" ? (
                 <select
@@ -410,8 +410,8 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
             )}
 
             {ticket.attachments && ticket.attachments.length > 0 && (
-              <div className="mt-5 pt-4 border-t border-white/10 space-y-2.5">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">
+              <div className="mt-5 pt-4 border-t border-white/10 space-y-2.5 ">
+                <p className="text-[11px] font-bold  tracking-widest text-white/60">
                   Attachments ({ticket.attachments.length})
                 </p>
                 <div className="grid grid-cols-1 gap-2">
@@ -452,90 +452,90 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-[12px] font-bold text-slate-500 uppercase tracking-wider">
-                Progress
-              </h3>
-            </div>
-            <div className="flex flex-col">
-              {getProgressSteps().map((step, index, arr) => {
-                const isCompleted = step.status === "completed";
-                const isActive = step.status === "active";
-                const isLast = index === arr.length - 1;
-                return (
-                  <div key={step.id} className="relative flex gap-4 pb-7 last:pb-0">
-                    {!isLast && (
-                      <div
-                        className={`absolute left-[11px] top-6 bottom-0 w-[2px] ${step.status === "completed" ? "bg-green-500" : "bg-slate-100"}`}
-                      />
-                    )}
-                    <div className="relative z-10 shrink-0">
-                      {isCompleted ? (
-                        <div className="h-6 w-6 rounded-full bg-green-500 text-white flex items-center justify-center ring-4 ring-white">
-                          <Check className="h-3.5 w-3.5 stroke-[3]" />
-                        </div>
-                      ) : isActive ? (
-                        <div className="h-6 w-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[11px] font-bold ring-4 ring-blue-50">
-                          {step.id}
-                        </div>
-                      ) : (
-                        <div className="h-6 w-6 rounded-full bg-slate-50 text-slate-400 border border-slate-200 flex items-center justify-center text-[11px] font-bold ring-4 ring-white">
-                          {step.id}
-                        </div>
-                      )}
-                    </div>
-                    <div className="pt-0.5 flex flex-col">
-                      <span
-                        className={`text-[13.5px] ${isActive ? "font-bold text-slate-800" : isCompleted ? "font-semibold text-slate-600" : "font-medium text-slate-400"}`}
-                      >
-                        {step.label}
-                      </span>
-                      {isActive && (
-                        <span className="text-[11px] font-bold text-blue-600 mt-0.5">
-                          Current Status
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <h3 className="text-[12px] font-bold text-slate-500 uppercase tracking-wider mb-4">
-              Assigned Specialist
-            </h3>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="h-11 w-11 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[14px]">
-                    {getTechInitials(techName)}
-                  </div>
-                  <span
-                    className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${techOnline ? "bg-green-500" : "bg-slate-300"}`}
-                  />
-                </div>
-                <div>
-                  <h4 className="text-[14px] font-bold text-slate-800">{techName}</h4>
-                  <p className="text-[12px] text-slate-500 font-medium">
-                    {techRole === "technician" ? "Support Specialist" : techRole}
-                  </p>
-                </div>
+          <div className="md:col-span-1 lg:col-span-1 flex flex-col gap-5 w-full h-fit lg:h-auto shrink-0">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-fit w-full">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-[12px] font-bold text-slate-500  tracking-wider">Progress</h3>
               </div>
-              <a
-                href={`tel:+15550199`}
-                className="h-9 w-9 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-200"
-              >
-                <Phone className="h-4 w-4" />
-              </a>
+              <div className="flex flex-col">
+                {getProgressSteps().map((step, index, arr) => {
+                  const isCompleted = step.status === "completed";
+                  const isActive = step.status === "active";
+                  const isLast = index === arr.length - 1;
+                  return (
+                    <div key={step.id} className="relative flex gap-4 pb-7 last:pb-0">
+                      {!isLast && (
+                        <div
+                          className={`absolute left-[11px] top-6 bottom-0 w-[2px] ${step.status === "completed" ? "bg-green-500" : "bg-slate-100"}`}
+                        />
+                      )}
+                      <div className="relative z-10 shrink-0">
+                        {isCompleted ? (
+                          <div className="h-6 w-6 rounded-full bg-green-500 text-white flex items-center justify-center ring-4 ring-white">
+                            <Check className="h-3.5 w-3.5 stroke-[3]" />
+                          </div>
+                        ) : isActive ? (
+                          <div className="h-6 w-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[11px] font-bold ring-4 ring-blue-50">
+                            {step.id}
+                          </div>
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-slate-50 text-slate-400 border border-slate-200 flex items-center justify-center text-[11px] font-bold ring-4 ring-white">
+                            {step.id}
+                          </div>
+                        )}
+                      </div>
+                      <div className="pt-0.5 flex flex-col">
+                        <span
+                          className={`text-[13.5px] ${isActive ? "font-bold text-slate-800" : isCompleted ? "font-semibold text-slate-600" : "font-medium text-slate-400"}`}
+                        >
+                          {step.label}
+                        </span>
+                        {isActive && (
+                          <span className="text-[11px] font-bold text-blue-600 mt-0.5">
+                            Current Status
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm h-fit w-full">
+              <h3 className="text-[12px] font-bold text-slate-500  tracking-wider mb-4">
+                Assigned Specialist
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="h-11 w-11 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-[14px]">
+                      {getTechInitials(techName)}
+                    </div>
+                    <span
+                      className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${techOnline ? "bg-green-500" : "bg-slate-300"}`}
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-slate-800">{techName}</h4>
+                    <p className="text-[12px] text-slate-500 font-medium">
+                      {techRole === "technician" ? "Support Specialist" : techRole}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`tel:+15550199`}
+                  className="h-9 w-9 rounded-full bg-slate-50 text-slate-600 flex items-center justify-center hover:bg-slate-100 transition-colors border border-slate-200"
+                >
+                  <Phone className="h-4 w-4" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Pane: Chat Window */}
-        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-full">
+        <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden h-[650px] lg:h-full">
           {/* Chat Header */}
           <div className="px-6 py-4 border-b border-slate-100 bg-white/50 backdrop-blur-sm flex justify-between items-center shrink-0">
             <div>
@@ -571,7 +571,7 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
                     <div key={msg.id} className="flex flex-col gap-4">
                       {showDivider && (
                         <div className="flex items-center justify-center my-4 w-full">
-                          <span className="bg-slate-200/50 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                          <span className="bg-slate-200/50 text-slate-500 text-[10px] font-bold px-3 py-1 rounded-full  tracking-wider">
                             {msgDateStr}
                           </span>
                         </div>

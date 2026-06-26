@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Terminal, Key, Wifi, CreditCard, Laptop, Sparkles } from "lucide-react";
+import { Terminal, Key, Wifi, ClipboardList, Laptop, Sparkles } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import { getUserRoles } from "@/lib/utils";
 
@@ -29,12 +29,12 @@ export const categoriesList = [
     categoryKey: "Network",
   },
   {
-    title: "Billing Support",
-    desc: "Invoices, payments, refunds",
-    icon: CreditCard,
+    title: "Service Request",
+    desc: "Request a new service or assistance",
+    icon: ClipboardList,
     color: "text-amber-500",
     bg: "bg-amber-500/10",
-    categoryKey: "Email",
+    categoryKey: "Service",
   },
   {
     title: "Product Support",

@@ -82,8 +82,23 @@ const priorities = [
 ] as const;
 
 const createTicketSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters long").max(100),
-  description: z.string().min(10, "Description must be at least 10 characters long").max(800),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title cannot be empty")
+    .min(5, "Title must be at least 5 characters long")
+    .regex(/^[a-zA-Z0-9\s\-_.,?!():@'/#[\]]+$/, "Title contains invalid characters")
+    .max(100),
+  description: z
+    .string()
+    .trim()
+    .min(1, "Description cannot be empty")
+    .min(10, "Description must be at least 10 characters long")
+    .regex(
+      /^[a-zA-Z0-9\s\-_.,?!():@'/#[\]{}"&%*+=;<>~^|\\$]+$/,
+      "Description contains invalid characters",
+    )
+    .max(800, "Description cannot exceed 800 characters"),
   category: z.string().min(1, "Category is required"),
   priority: z.enum(["low", "medium", "high", "critical"]),
 });
@@ -122,14 +137,14 @@ const newCategoriesList = [
     categoryKey: "Network",
   },
   {
-    title: "Billing Support",
-    desc: "Invoices, payments, refunds",
-    icon: CreditCard,
+    title: "Service Request",
+    desc: "Request services or assistance",
+    icon: ClipboardList,
     color: "text-amber-500",
     bg: "bg-amber-500/10",
     selectedBg: "bg-amber-50",
     selectedBorder: "border-amber-400",
-    categoryKey: "Email",
+    categoryKey: "Service",
   },
   {
     title: "Product Support",
@@ -199,9 +214,10 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
     watch,
     setValue,
     getValues,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<CreateTicketInput>({
     resolver: zodResolver(createTicketSchema),
+    mode: "onChange",
     defaultValues: {
       title: "",
       description: "",
@@ -216,9 +232,15 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
   const watchPriority = watch("priority");
 
   const isUploading = attachments.some((a) => a.status === "uploading");
+  const trimmedTitle = watchTitle?.trim() || "";
+  const trimmedDescription = watchDescription?.trim() || "";
   const canNext =
     ((step === 1 && !!watchCategory) ||
-      (step === 2 && watchTitle.length >= 5 && watchDescription.length >= 10) ||
+      (step === 2 &&
+        trimmedTitle.length >= 5 &&
+        trimmedDescription.length >= 10 &&
+        !errors.title &&
+        !errors.description) ||
       step === 3) &&
     !isUploading;
 
@@ -417,7 +439,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
     <div className="animate-slide-up space-y-6">
       <div>
         <label className="block text-[12px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-          Title
+          Title <span className="text-red-500">*</span>
         </label>
         <input
           {...register("title")}
@@ -425,25 +447,42 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
           maxLength={100}
           className="w-full h-12 px-4 rounded-xl bg-white border-2 border-slate-200 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-[14px] font-semibold text-slate-900 placeholder:text-slate-400 transition-all hover:border-slate-300 shadow-sm"
         />
-        <div className="flex justify-between text-[11px] text-slate-300 mt-1.5 px-1">
-          <span>Minimum 5 characters</span>
-          <span>{watchTitle?.length || 0} / 100</span>
+        <div className="flex justify-between text-[11px] mt-1.5 px-1">
+          {errors.title ? (
+            <span className="text-red-500 font-semibold">{errors.title.message}</span>
+          ) : (
+            <span className="text-slate-300">Minimum 5 characters</span>
+          )}
+          <span className="text-slate-300">{watchTitle?.length || 0} / 100</span>
         </div>
       </div>
 
       <div>
         <label className="block text-[12px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-          Description
+          Description <span className="text-red-500">*</span>
         </label>
         <textarea
           {...register("description")}
           placeholder="What happened? What did you expect? Steps to reproduce…"
           rows={6}
+          maxLength={800}
           className="w-full p-4 rounded-xl bg-white border-2 border-slate-200 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-[14px] font-medium text-slate-900 placeholder:text-slate-400 resize-none transition-all hover:border-slate-300 shadow-sm"
         />
-        <div className="flex justify-between text-[11px] text-slate-300 mt-1.5 px-1">
-          <span>Minimum 10 characters</span>
-          <span>{watchDescription?.length || 0} / 800</span>
+        <div className="flex justify-between text-[11px] mt-1.5 px-1">
+          {errors.description ? (
+            <span className="text-red-500 font-semibold">{errors.description.message}</span>
+          ) : watchDescription?.length >= 800 ? (
+            <span className="text-red-500 font-semibold">
+              Description cannot exceed 800 characters
+            </span>
+          ) : (
+            <span className="text-slate-300">Minimum 10 characters</span>
+          )}
+          <span
+            className={`transition-colors ${watchDescription?.length >= 800 ? "text-red-500 font-semibold" : "text-slate-300"}`}
+          >
+            {watchDescription?.length || 0} / 800
+          </span>
         </div>
       </div>
 
@@ -747,31 +786,34 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
 
   // ── DESKTOP: Two-panel split layout ───────────────────────────────────────
   const stepMeta = {
-    1: { heading: "What's the issue about?", sub: "Pick the category that fits best." },
+    1: {
+      heading: "What do you need help with?",
+      sub: "Select the category that best matches your request.",
+    },
     2: {
-      heading: "Describe the problem",
-      sub: `${newCategoriesList.find((c) => c.categoryKey === watchCategory)?.title || "Issue"} · Be as specific as you can.`,
+      heading: "Tell us more",
+      sub: `${newCategoriesList.find((c) => c.categoryKey === watchCategory)?.title || "Issue"} · Provide the details below.`,
     },
     3: { heading: "Review & submit", sub: "Confirm details before raising the ticket." },
   }[step]!;
 
   return (
     <DesktopPageShell title="New Request" noPadding>
-      <div className="flex gap-0 h-full min-h-[calc(100vh-64px)]">
-        {/* ── LEFT SIDEBAR ─────────────────────────────────────────────────── */}
-        <div className="w-[300px] shrink-0 bg-white border-r border-slate-100 flex flex-col px-8 py-10">
+      <div className="flex flex-col lg:flex-row gap-0 h-full min-h-[calc(100vh-64px)]">
+        {/* ── LEFT SIDEBAR (Tablet horizontal / Desktop vertical) ────────────── */}
+        <div className="w-full lg:w-[300px] shrink-0 bg-white border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-row lg:flex-col px-6 lg:px-8 py-5 lg:py-10 justify-between lg:justify-start gap-4 lg:gap-0 items-center lg:items-stretch">
           {/* Back */}
           <button
             type="button"
             onClick={() => nav({ to: "/tickets" as never, search: { status: "all" } as never })}
-            className="flex items-center gap-2 text-[13px] font-semibold text-slate-400 hover:text-slate-700 transition-colors mb-10 cursor-pointer w-fit"
+            className="flex items-center gap-2 text-[13px] font-semibold text-slate-400 hover:text-slate-700 transition-colors mb-0 lg:mb-10 cursor-pointer shrink-0 w-auto"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to tickets
+            <span className="hidden sm:inline">Back to tickets</span>
           </button>
 
           {/* Steps */}
-          <div className="space-y-1">
+          <div className="flex flex-row lg:flex-col gap-2 sm:gap-3 lg:space-y-1">
             {STEPS.map(({ n, label, sublabel, icon: Icon }) => {
               const isActive = step === n;
               const isDone = step > n;
@@ -780,17 +822,17 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
                   {/* Connector line */}
                   {n < 3 && (
                     <div
-                      className={`absolute left-[18px] top-[40px] w-px h-10 ${isDone || isActive ? "bg-blue-200" : "bg-slate-100"}`}
+                      className={`absolute left-[18px] top-[40px] w-px h-10 ${isDone || isActive ? "bg-blue-200" : "bg-slate-100"} hidden lg:block`}
                     />
                   )}
                   <button
                     type="button"
                     disabled={n > step}
                     onClick={() => n <= step && setStep(n)}
-                    className={`flex items-center gap-4 w-full rounded-xl px-3 py-3 transition-all ${isActive ? "bg-blue-50" : isDone ? "hover:bg-slate-50 cursor-pointer" : "cursor-default"}`}
+                    className={`flex items-center gap-2 sm:gap-4 w-auto lg:w-full rounded-xl px-3 py-2 sm:py-3 transition-all ${isActive ? "bg-blue-50" : isDone ? "hover:bg-slate-50 cursor-pointer" : "cursor-default"}`}
                   >
                     <div
-                      className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                      className={`h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center shrink-0 transition-all ${
                         isActive
                           ? "bg-blue-600 text-white shadow-sm"
                           : isDone
@@ -800,14 +842,14 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
                     >
                       {isDone ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                     </div>
-                    <div className="text-left">
+                    <div className="text-left hidden sm:block">
                       <p
-                        className={`text-[13px] font-bold ${isActive ? "text-blue-700" : isDone ? "text-slate-700" : "text-slate-300"}`}
+                        className={`text-[12px] sm:text-[13px] font-bold ${isActive ? "text-blue-700" : isDone ? "text-slate-700" : "text-slate-300"}`}
                       >
                         {label}
                       </p>
                       <p
-                        className={`text-[11px] ${isActive ? "text-blue-500" : isDone ? "text-slate-400" : "text-slate-200"}`}
+                        className={`text-[10px] sm:text-[11px] ${isActive ? "text-blue-500" : isDone ? "text-slate-400" : "text-slate-200"} hidden md:block`}
                       >
                         {sublabel}
                       </p>
@@ -819,7 +861,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
           </div>
 
           {/* Bottom info */}
-          <div className="mt-auto pt-8 border-t border-slate-100">
+          <div className="hidden lg:block mt-auto pt-8 border-t border-slate-100">
             <div className="flex items-start gap-3">
               <div className="h-9 w-9 rounded-full bg-green-50 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -837,7 +879,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         {/* ── RIGHT CONTENT ─────────────────────────────────────────────────── */}
         <div className="flex-1 flex flex-col bg-[#f7f8fc] overflow-y-auto">
           {/* Content header */}
-          <div className="px-10 pt-10 pb-6">
+          <div className="px-6 sm:px-10 pt-8 sm:pt-10 pb-6">
             <div className="flex items-center gap-3 mb-1">
               <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-blue-600 text-white text-[12px] font-bold shrink-0">
                 {step}
@@ -853,11 +895,11 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
           </div>
 
           {/* Form content */}
-          <div className="flex-1 px-10 pb-10">{stepContent}</div>
+          <div className="flex-1 px-6 sm:px-10 pb-10">{stepContent}</div>
 
           {/* Sticky footer actions */}
-          <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-slate-100 px-10 py-5">
-            <div className="flex items-center justify-between max-w-[860px]">
+          <div className="sticky bottom-0 bg-white/90 backdrop-blur-sm border-t border-slate-100 px-6 sm:px-10 py-5">
+            <div className="flex items-center justify-between max-w-[860px] mx-auto w-full">
               <div>
                 {step > 1 && (
                   <button

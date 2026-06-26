@@ -70,7 +70,13 @@ export async function logIn(email: string, password: string): Promise<FirebaseUs
     const profile = userDocSnap.data() as UserProfile;
     const role = profile.role || "customer";
 
-    if (role !== "customer" && role !== "technician") {
+    // Technician login is temporarily disabled
+    if (role === "technician") {
+      await signOut(auth);
+      throw new Error("Technician login is disabled.");
+    }
+
+    if (role !== "customer") {
       await signOut(auth);
       throw new Error("Authentication failed. Please check your account or contact support.");
     }

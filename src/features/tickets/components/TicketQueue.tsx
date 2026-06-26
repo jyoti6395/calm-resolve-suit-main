@@ -168,7 +168,13 @@ const getInitials = (name: string | null) => {
 export function TicketQueue({
   searchParams,
 }: {
-  searchParams: { search?: string; status?: string; priority?: string; page?: number };
+  searchParams: {
+    search?: string;
+    status?: string;
+    priority?: string;
+    page?: number;
+    sortBy?: "newest" | "oldest" | "priority";
+  };
 }) {
   const navigate = useNavigate({ from: "/tickets/" });
   const tickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
@@ -240,7 +246,7 @@ export function TicketQueue({
   }, [searchParams, form]);
 
   const filteredList = useMemo(() => {
-    return tickets.filter((ticket) => {
+    const list = tickets.filter((ticket) => {
       const displaySubject = (ticket as Ticket & { title?: string }).title || ticket.subject || "";
       const displaySequenceId = ticket.ticketSequenceId || ticket.id || "";
       const matchSearch =
@@ -254,6 +260,38 @@ export function TicketQueue({
         ticket.status === searchParams.status;
       const matchPriority = !searchParams.priority || ticket.priority === searchParams.priority;
       return matchSearch && matchStatus && matchPriority;
+    });
+
+    const PRIORITY_ORDER: Record<string, number> = {
+      critical: 4,
+      urgent: 4,
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+
+    const sortBy = searchParams.sortBy || "newest";
+    return list.sort((a, b) => {
+      if (sortBy === "oldest") {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      }
+      if (sortBy === "priority") {
+        const pA = PRIORITY_ORDER[a.priority?.toLowerCase()] || 0;
+        const pB = PRIORITY_ORDER[b.priority?.toLowerCase()] || 0;
+        if (pB !== pA) {
+          return pB - pA;
+        }
+        // Secondary sort: newest first
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      }
+      // Default newest: newest first
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
     });
   }, [tickets, searchParams]);
 

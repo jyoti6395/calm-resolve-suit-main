@@ -12,6 +12,7 @@ const ticketsSearchSchema = z.object({
   search: z.string().optional(),
   priority: z.string().optional(),
   page: z.number().catch(1).optional(),
+  sortBy: z.enum(["newest", "oldest", "priority"]).optional(),
 });
 
 function TicketsIndexRoute() {
@@ -22,7 +23,7 @@ function TicketsIndexRoute() {
   if (!isMobile) {
     return (
       <DesktopPageShell>
-        <div className="flex items-start justify-between mb-7 mt-4">
+        <div className="flex flex-row items-center justify-between mb-7 mt-4 gap-4">
           <div>
             <h1 className="text-[28px] font-extrabold text-foreground tracking-tight leading-tight">
               Tickets

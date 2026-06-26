@@ -8,14 +8,20 @@ import { Button } from "@/components/ui/button";
 export function DesktopTicketGrid({
   searchParams,
 }: {
-  searchParams: { search?: string; status?: string; priority?: string; page?: number };
+  searchParams: {
+    search?: string;
+    status?: string;
+    priority?: string;
+    page?: number;
+    sortBy?: "newest" | "oldest" | "priority";
+  };
 }) {
   const navigate = useNavigate({ from: "/tickets/" });
   const tickets = useAppSelector((state) => state.tickets.tickets) as Ticket[];
   const technicians = useAppSelector((state) => state.technicians.technicians);
 
   const filteredList = useMemo(() => {
-    return tickets.filter((ticket) => {
+    const list = tickets.filter((ticket) => {
       const displaySubject = (ticket as Ticket & { title?: string }).title || ticket.subject || "";
       const displaySequenceId = ticket.ticketSequenceId || ticket.id || "";
       const matchSearch =
@@ -29,6 +35,38 @@ export function DesktopTicketGrid({
         ticket.status === searchParams.status;
       const matchPriority = !searchParams.priority || ticket.priority === searchParams.priority;
       return matchSearch && matchStatus && matchPriority;
+    });
+
+    const PRIORITY_ORDER: Record<string, number> = {
+      critical: 4,
+      urgent: 4,
+      high: 3,
+      medium: 2,
+      low: 1,
+    };
+
+    const sortBy = searchParams.sortBy || "newest";
+    return list.sort((a, b) => {
+      if (sortBy === "oldest") {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateA - dateB;
+      }
+      if (sortBy === "priority") {
+        const pA = PRIORITY_ORDER[a.priority?.toLowerCase()] || 0;
+        const pB = PRIORITY_ORDER[b.priority?.toLowerCase()] || 0;
+        if (pB !== pA) {
+          return pB - pA;
+        }
+        // Secondary sort: newest first
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      }
+      // Default newest: newest first
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
     });
   }, [tickets, searchParams]);
 
@@ -75,7 +113,7 @@ export function DesktopTicketGrid({
 
   return (
     <div className="flex flex-col flex-1 pb-10">
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {paginatedList.map((t) => {
           // Extract UI properties
           const displayId = t.ticketSequenceId || `TK-${t.id.slice(0, 5).toUpperCase()}`;

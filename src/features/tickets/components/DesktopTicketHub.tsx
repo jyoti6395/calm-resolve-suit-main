@@ -15,7 +15,13 @@ import {
 export function DesktopTicketHub({
   searchParams,
 }: {
-  searchParams: { search?: string; status?: string; priority?: string; page?: number };
+  searchParams: {
+    search?: string;
+    status?: string;
+    priority?: string;
+    page?: number;
+    sortBy?: "newest" | "oldest" | "priority";
+  };
 }) {
   const navigate = useNavigate({ from: "/tickets/" });
 
@@ -46,15 +52,15 @@ export function DesktopTicketHub({
   return (
     <div className="flex flex-col flex-1 pb-10">
       {/* Top Filter Bar */}
-      <div className="flex items-center justify-between mb-8 bg-card rounded-2xl border border-border p-2 shadow-sm">
+      <div className="flex flex-col lg:flex-row gap-3 lg:gap-0 lg:items-center justify-between mb-8 bg-card rounded-2xl border border-border p-2 shadow-sm">
         {/* Left side: Status Pills */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar max-w-full">
           {tabs.map((t) => (
             <Button
               key={t.key}
               variant={activeTab === t.key ? "default" : "ghost"}
               onClick={() => handleTabClick(t.key)}
-              className={`px-5 h-9 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
+              className={`px-5 h-9 rounded-xl text-[13px] font-bold transition-all cursor-pointer shrink-0 ${
                 activeTab === t.key
                   ? "shadow-sm"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -66,9 +72,21 @@ export function DesktopTicketHub({
         </div>
 
         {/* Right side: Sort & Layout Toggle */}
-        <div className="flex items-center gap-4 px-2">
+        <div className="flex items-center justify-between lg:justify-end gap-4 px-2 w-full lg:w-auto border-t lg:border-t-0 pt-2 lg:pt-0 border-border/50">
           {/* Sort Dropdown */}
-          <Select defaultValue="newest">
+          <Select
+            value={searchParams.sortBy || "newest"}
+            onValueChange={(val) => {
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  sortBy: val as "newest" | "oldest" | "priority",
+                  page: 1, // Reset page when sort options change
+                }),
+                replace: true,
+              });
+            }}
+          >
             <SelectTrigger className="w-auto h-8 bg-transparent border-none shadow-none text-[13px] font-medium text-foreground focus:ring-0 focus:ring-offset-0 px-2">
               <SelectValue />
             </SelectTrigger>
@@ -83,7 +101,7 @@ export function DesktopTicketHub({
           <div className="w-[1px] h-5 bg-border mx-1" />
 
           {/* Layout Toggle */}
-          <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/50">
+          <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/50 shrink-0">
             <Button
               variant="ghost"
               size="icon"

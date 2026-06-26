@@ -14,7 +14,7 @@ import {
   Lock,
   FileText,
   Wifi,
-  CreditCard,
+  ClipboardList,
   Laptop,
   Key,
   Terminal,
@@ -630,11 +630,11 @@ function Dashboard() {
                       cat: "Network",
                     },
                     {
-                      label: "Billing",
-                      icon: CreditCard,
+                      label: "Service",
+                      icon: ClipboardList,
                       color: "text-amber-600",
                       bg: "bg-amber-50",
-                      cat: "Email",
+                      cat: "Service",
                     },
                     {
                       label: "Hardware",
