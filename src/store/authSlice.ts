@@ -9,6 +9,8 @@ export interface AuthUser {
   displayName: string | null;
   role: "super_admin" | "technician" | string;
   status: "active" | "inactive" | string;
+  companyId?: string;
+  companyName?: string;
 }
 
 export interface AuthState {
@@ -100,6 +102,8 @@ export const initializeAuthListener = () => (dispatch: any) => {
           displayName: profileData.fullName || firebaseUser.displayName || null,
           role: role,
           status: profileData.status || "active",
+          companyId: profileData.companyId || undefined,
+          companyName: profileData.company || undefined,
         };
 
         // 5. Dispatch synchronized local state

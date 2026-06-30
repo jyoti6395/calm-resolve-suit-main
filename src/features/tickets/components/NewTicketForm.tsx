@@ -347,6 +347,8 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         requesterId: user?.uid || null,
         requesterName: user?.displayName || "Unknown User",
         requesterEmail: user?.email || "user@example.com",
+        companyId: user?.companyId || null,
+        companyName: user?.companyName || null,
         department: "General",
         status: "open",
         createdAt: serializeTimestamp(now),

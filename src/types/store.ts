@@ -13,6 +13,8 @@ export interface AuthUser {
   totalTickets?: number;
   avgCsat?: number;
   tenureDays?: number;
+  companyId?: string;
+  companyName?: string;
 }
 
 export interface TicketAttachment {

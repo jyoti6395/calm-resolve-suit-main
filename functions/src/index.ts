@@ -18,27 +18,72 @@ export const autoAssignTicket = functions.firestore
     }
 
     try {
-      // Find all active technicians
-      const techniciansSnapshot = await db
-        .collection("users")
-        .where("role", "==", "technician")
-        .where("status", "==", "active")
-        .get();
+      const technicians: Array<{ id: string; name: string }> = [];
+      let companyId = ticketData.companyId;
 
-      if (techniciansSnapshot.empty) {
-        console.error("No active technicians found. Ticket remains unassigned.");
-        return null;
+      // 1. If companyId is not in the ticket, check if we can retrieve it from the creator's profile
+      if (!companyId && ticketData.createdBy) {
+        const creatorSnap = await db.collection("users").doc(ticketData.createdBy).get();
+        if (creatorSnap.exists) {
+          companyId = creatorSnap.data()?.companyId;
+        }
       }
 
-      // Convert snapshot to an array of technicians
-      const technicians: Array<{ id: string; name: string }> = [];
-      techniciansSnapshot.forEach((doc) => {
-        const data = doc.data();
-        technicians.push({
-          id: doc.id,
-          name: data.displayName || data.fullName || "Unknown Technician",
+      let companyTechsFound = false;
+
+      // 2. Fetch assigned technicians if companyId is set
+      if (companyId) {
+        const companySnap = await db.collection("companies").doc(companyId).get();
+        if (companySnap.exists) {
+          const assignedTechs: string[] = companySnap.data()?.assignedTechs || [];
+          if (assignedTechs.length > 0) {
+            companyTechsFound = true;
+            const refs = assignedTechs.map((uid) => db.collection("users").doc(uid));
+            const docSnaps = await db.getAll(...refs);
+
+            docSnaps.forEach((doc) => {
+              if (doc.exists) {
+                const data = doc.data();
+                if (data && data.role === "technician" && data.status === "active") {
+                  technicians.push({
+                    id: doc.id,
+                    name: data.displayName || data.fullName || "Unknown Technician",
+                  });
+                }
+              }
+            });
+
+            if (technicians.length === 0) {
+              console.warn(
+                `No active assigned technicians found for company ${companyId}. Ticket remains unassigned.`,
+              );
+              return null;
+            }
+          }
+        }
+      }
+
+      // 3. Fallback to all active technicians if no company technicians were defined
+      if (!companyTechsFound) {
+        const techniciansSnapshot = await db
+          .collection("users")
+          .where("role", "==", "technician")
+          .where("status", "==", "active")
+          .get();
+
+        if (techniciansSnapshot.empty) {
+          console.error("No active technicians found. Ticket remains unassigned.");
+          return null;
+        }
+
+        techniciansSnapshot.forEach((doc) => {
+          const data = doc.data();
+          technicians.push({
+            id: doc.id,
+            name: data.displayName || data.fullName || "Unknown Technician",
+          });
         });
-      });
+      }
 
       // Least-Loaded (Optimistic) Allocation Algorithm
       // Query the current active ticket count for each technician to find who is most available
