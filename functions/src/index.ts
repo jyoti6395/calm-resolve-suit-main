@@ -18,6 +18,16 @@ export const autoAssignTicket = functions.firestore
     }
 
     try {
+      const priority = (ticketData.priority || "low").toLowerCase();
+      const priorityToLevel: Record<string, string> = {
+        low: "level1",
+        medium: "level2",
+        high: "level3",
+        critical: "level4",
+        urgent: "level4",
+      };
+      const targetLevel = priorityToLevel[priority] || "level1";
+
       const technicians: Array<{ id: string; name: string }> = [];
       let companyId = ticketData.companyId;
 
@@ -37,7 +47,6 @@ export const autoAssignTicket = functions.firestore
         if (companySnap.exists) {
           const assignedTechs: string[] = companySnap.data()?.assignedTechs || [];
           if (assignedTechs.length > 0) {
-            companyTechsFound = true;
             const refs = assignedTechs.map((uid) => db.collection("users").doc(uid));
             const docSnaps = await db.getAll(...refs);
 
@@ -45,38 +54,61 @@ export const autoAssignTicket = functions.firestore
               if (doc.exists) {
                 const data = doc.data();
                 if (data && data.role === "technician" && data.status === "active") {
-                  technicians.push({
-                    id: doc.id,
-                    name: data.displayName || data.fullName || "Unknown Technician",
-                  });
+                  const techLevel = data.level || "level1";
+                  if (techLevel === targetLevel) {
+                    technicians.push({
+                      id: doc.id,
+                      name: data.displayName || data.fullName || "Unknown Technician",
+                    });
+                  }
                 }
               }
             });
 
-            if (technicians.length === 0) {
-              console.warn(
-                `No active assigned technicians found for company ${companyId}. Ticket remains unassigned.`,
-              );
-              return null;
+            if (technicians.length > 0) {
+              companyTechsFound = true;
             }
           }
         }
       }
 
-      // 3. Fallback to all active technicians if no company technicians were defined
+      // 3. Fallback to active technicians of the same level in the system if none found for company
       if (!companyTechsFound) {
         const techniciansSnapshot = await db
           .collection("users")
           .where("role", "==", "technician")
           .where("status", "==", "active")
+          .where("level", "==", targetLevel)
           .get();
 
-        if (techniciansSnapshot.empty) {
-          console.error("No active technicians found. Ticket remains unassigned.");
+        if (!techniciansSnapshot.empty) {
+          techniciansSnapshot.forEach((doc) => {
+            const data = doc.data();
+            technicians.push({
+              id: doc.id,
+              name: data.displayName || data.fullName || "Unknown Technician",
+            });
+          });
+        }
+      }
+
+      // 4. Absolute fallback: If still no technicians found at targetLevel, fetch all active technicians
+      if (technicians.length === 0) {
+        console.warn(
+          `No active technicians found at level ${targetLevel}. Falling back to any active technician.`,
+        );
+        const fallbackSnapshot = await db
+          .collection("users")
+          .where("role", "==", "technician")
+          .where("status", "==", "active")
+          .get();
+
+        if (fallbackSnapshot.empty) {
+          console.error("No active technicians found in the system. Ticket remains unassigned.");
           return null;
         }
 
-        techniciansSnapshot.forEach((doc) => {
+        fallbackSnapshot.forEach((doc) => {
           const data = doc.data();
           technicians.push({
             id: doc.id,
@@ -236,7 +268,7 @@ export const appProvisionTechnician = functions.https.onCall(async (data, contex
   // 1. Verify caller is authenticated and is a super_admin
   await requireSuperAdmin(context);
 
-  const { email, password, displayName, department, phoneNumber, employeeId, skills } = data;
+  const { email, password, displayName, department, phoneNumber, employeeId, skills, level } = data;
 
   if (!email || !password || !displayName) {
     throw new functions.https.HttpsError(
@@ -261,6 +293,7 @@ export const appProvisionTechnician = functions.https.onCall(async (data, contex
       phoneNumber: phoneNumber?.trim() || "",
       employeeId: employeeId?.trim() || "",
       skills: skills || [],
+      level: (typeof level === "string" ? level.trim() : "level1") || "level1",
       role: "technician",
       status: "active",
       createdAt: FieldValue.serverTimestamp(),
