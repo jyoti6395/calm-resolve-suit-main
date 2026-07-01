@@ -32,7 +32,7 @@ export function PrivacyTermsView() {
                   Privacy Policy
                 </h1>
                 <p className="text-[13px] text-slate-500 mt-0.5 font-medium">
-                  Data safety and privacy terms for advice-tech
+                  Data safety and privacy terms for AdviseTech
                 </p>
               </div>
             </div>
@@ -47,7 +47,7 @@ export function PrivacyTermsView() {
                   Privacy Policy
                 </h2>
                 <p className="text-[13.5px] lg:text-[15px] text-white/80 mt-2 font-medium">
-                  advice-tech Mobile App
+                  AdviseTech IT Support Platform
                 </p>
               </div>
 
@@ -58,14 +58,14 @@ export function PrivacyTermsView() {
                 </p>
 
                 <p className="text-[14px] lg:text-[15px] text-slate-650 leading-relaxed font-medium">
-                  advice-tech is committed to protecting your privacy. This Privacy Policy describes
+                  AdviseTech is committed to protecting your privacy. This Privacy Policy describes
                   how we collect, use, process, and safeguard your personal information when you use
                   our{" "}
                   <strong className="text-slate-800 font-bold">
-                    advice-tech Mobile Application
+                    AdviseTech IT Support Application
                   </strong>
-                  , which is designed to help patients manage eye care appointments, reward points,
-                  and vision health records.
+                  , which is designed to help users submit and track IT support tickets, manage
+                  technical issues, view SLAs, and communicate with support technicians.
                 </p>
 
                 {/* 1. Information We Collect */}
@@ -74,29 +74,34 @@ export function PrivacyTermsView() {
                     1. Information We Collect
                   </h3>
                   <p className="text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
-                    To provide a personalized eye care experience, we may collect the following
-                    types of information:
+                    To provide a seamless IT support experience, we may collect the following types
+                    of information:
                   </p>
                   <ul className="list-disc pl-5 space-y-3.5 text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
                     <li>
                       <strong className="text-slate-800 font-bold">Personal Identification:</strong>{" "}
-                      Name, email address, phone number, date of birth, gender, and mailing address.
+                      Name, email address and associated company or organization affiliation.
                     </li>
                     <li>
                       <strong className="text-slate-800 font-bold">
-                        Vision and Health Records:
+                        Support Tickets & Service Requests:
                       </strong>{" "}
-                      Contact lens and eyeglass prescriptions, appointment booking details, check-in
-                      information, and insurance card images uploaded to the advice-tech Vault.
+                      Subject line, detailed descriptions of technical issues, system
+                      configurations, and files, attachments, or screenshots uploaded to the
+                      tickets.
                     </li>
                     <li>
                       <strong className="text-slate-800 font-bold">Account details:</strong>{" "}
-                      Username, reward tier, transaction history, and points balance details.
+                      Username, role (e.g., customer, technician, administrator), and associated
+                      organization details.
                     </li>
                     <li>
-                      <strong className="text-slate-800 font-bold">Device Information:</strong>{" "}
-                      Device model, operating system version, and generic performance logs to help
-                      us maintain a secure and functional application.
+                      <strong className="text-slate-800 font-bold">
+                        Device & Connection Information:
+                      </strong>{" "}
+                      Device model, operating system version, browser signatures, IP address, and
+                      generic diagnostic logs to help troubleshoot connectivity or device
+                      compatibility issues.
                     </li>
                   </ul>
                 </div>
@@ -110,22 +115,24 @@ export function PrivacyTermsView() {
                     We use the collected information for the following specific purposes:
                   </p>
                   <ul className="list-disc pl-5 space-y-3.5 text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
-                    <li>To schedule, manage, and verify your eye doctor appointments.</li>
                     <li>
-                      To securely process, track, and notify you about your eyeglass and contact
-                      lens orders.
+                      To triage, assign, track, and resolve IT support tickets and service requests.
                     </li>
                     <li>
-                      To calculate, update, and manage your advice-tech points and coupon
-                      redemptions.
+                      To facilitate live chat communication between users and support technicians
+                      regarding active tickets.
                     </li>
                     <li>
-                      To securely store and present your vision records (prescriptions and
-                      documents) in your personal advice-tech Vault.
+                      To measure response times, track technician performance, and maintain Service
+                      Level Agreements (SLAs).
                     </li>
                     <li>
-                      To send you transactional notifications, reminders, or support updates related
-                      to your health records and appointments.
+                      To securely store and display historical tickets, configuration logs, and
+                      solution articles.
+                    </li>
+                    <li>
+                      To send you transactional notifications, reminders, updates, or alerts related
+                      to your support tickets and profile settings.
                     </li>
                   </ul>
                 </div>
@@ -141,16 +148,17 @@ export function PrivacyTermsView() {
                   </p>
                   <ul className="list-disc pl-5 space-y-3.5 text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
                     <li>
-                      All vision records, prescriptions, and card uploads are stored securely on our
-                      cloud infrastructure (Firebase) using encryption protocols.
+                      All support tickets, attachment uploads, and chat logs are stored securely on
+                      our cloud infrastructure (Firebase) using industry-standard encryption
+                      protocols.
                     </li>
                     <li>
                       Data transmission between the App and our servers is secured using SSL/TLS
                       encryption.
                     </li>
                     <li>
-                      We strictly control internal access to user data, ensuring it is only
-                      accessible to authorized medical and administration staff.
+                      We strictly control internal access to customer data, ensuring it is only
+                      accessible to authorized support technicians and system administrators.
                     </li>
                   </ul>
                 </div>
@@ -158,7 +166,7 @@ export function PrivacyTermsView() {
                 {/* 4. Data Sharing and Third Parties */}
                 <div id="data-sharing" className="space-y-4">
                   <h3 className="text-[18px] lg:text-[20px] font-bold text-[#0a2e5c] border-b border-slate-100 pb-2">
-                    4. Data Sharing and Third Parties
+                    4. Data Sharing
                   </h3>
                   <p className="text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
                     We do not sell, trade, or transfer your personally identifiable information to
@@ -166,12 +174,8 @@ export function PrivacyTermsView() {
                   </p>
                   <ul className="list-disc pl-5 space-y-3.5 text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
                     <li>
-                      Our authorized clinic practitioners (optometrists and ophthalmologists) to
-                      manage your eye examinations and vision prescriptions.
-                    </li>
-                    <li>
-                      Our optical manufacturing laboratories to fulfill eyeglass or contact lens
-                      orders placed through the App.
+                      Our authorized IT specialists and system administrators to manage and resolve
+                      your technical tickets.
                     </li>
                   </ul>
                 </div>
@@ -186,27 +190,33 @@ export function PrivacyTermsView() {
                   </p>
                   <ul className="list-disc pl-5 space-y-3.5 text-[14px] lg:text-[15px] text-slate-600 leading-relaxed font-medium">
                     <li>
-                      Access, modify, or update your profile details in the{" "}
-                      <strong className="text-slate-800 font-bold">Account Settings</strong> section
-                      of the App.
+                      Access your profile details in the{" "}
+                      <strong className="text-slate-800 font-bold">Profile</strong> section of the
+                      App.
                     </li>
                     <li>
-                      Request deletion of your account and all associated personal data from our
-                      active databases.
+                      Permanently delete your account and clear all associated personal profile
+                      details and support history directly from the App.
                     </li>
                   </ul>
 
                   <div className="border-l-4 border-blue-600 bg-blue-50/50 p-4 rounded-r-xl mt-4">
                     <p className="text-[13.5px] lg:text-[14.5px] text-slate-600 leading-relaxed font-medium">
-                      To request full deletion of your account and user records, please contact us
-                      directly at{" "}
+                      You can instantly delete your account and personal history within the App by
+                      navigating to the{" "}
+                      <strong className="text-slate-800 font-bold">Profile</strong> page and
+                      clicking <strong className="text-slate-800 font-bold">Delete account</strong>{" "}
+                      under the{" "}
+                      <strong className="text-slate-800 font-bold">Account Actions</strong> section.
+                      This process is fully automated and immediate. For any questions or manual
+                      record removal inquiries, you can reach out to our privacy team at{" "}
                       <a
-                        href="mailto:privacy@advice-tech.com"
+                        href="mailto:privacy@advisetech.com"
                         className="text-blue-600 hover:underline font-semibold"
                       >
-                        privacy@advice-tech.com
+                        privacy@advisetech.com
                       </a>
-                      . We will process and confirm your request within 7 business days.
+                      .
                     </p>
                   </div>
                 </div>
@@ -237,14 +247,14 @@ export function PrivacyTermsView() {
                     <p>
                       <strong className="text-slate-800 font-bold">Email:</strong>{" "}
                       <a
-                        href="mailto:support@advice-tech.com"
+                        href="mailto:support@advisetech.com"
                         className="text-blue-600 hover:underline font-semibold"
                       >
-                        support@advice-tech.com
+                        support@advisetech.com
                       </a>
                     </p>
                     <p>
-                      <strong className="text-slate-800 font-bold">Address:</strong> advice-tech,
+                      <strong className="text-slate-800 font-bold">Address:</strong> AdviseTech,
                       Main Office, New York, NY
                     </p>
                   </div>
@@ -253,7 +263,7 @@ export function PrivacyTermsView() {
                 {/* Footer Section */}
                 <div className="border-t border-slate-100 pt-6 text-center">
                   <p className="text-[12px] text-slate-400 font-medium">
-                    © 2026 advice-tech. All rights reserved.
+                    © 2026 AdviseTech. All rights reserved.
                   </p>
                 </div>
               </div>
@@ -272,7 +282,7 @@ export function PrivacyTermsView() {
           {/* Document Header */}
           <div className="bg-[#0a2e5c] py-8 px-5 text-center">
             <h2 className="text-[24px] font-extrabold tracking-tight text-white">Privacy Policy</h2>
-            <p className="text-[13px] text-white/80 mt-1 font-medium">advice-tech Mobile App</p>
+            <p className="text-[13px] text-white/80 mt-1 font-medium">AdviseTech IT Support App</p>
           </div>
 
           {/* Document Body */}
@@ -282,11 +292,13 @@ export function PrivacyTermsView() {
             </p>
 
             <p className="text-[13.5px] text-slate-600 leading-relaxed font-medium">
-              advice-tech is committed to protecting your privacy. This Privacy Policy describes how
+              AdviseTech is committed to protecting your privacy. This Privacy Policy describes how
               we collect, use, process, and safeguard your personal information when you use our{" "}
-              <strong className="text-slate-800 font-bold">advice-tech Mobile Application</strong>,
-              which is designed to help patients manage eye care appointments, reward points, and
-              vision health records.
+              <strong className="text-slate-800 font-bold">
+                AdviseTech IT Support Application
+              </strong>
+              , which is designed to help users submit and track IT support tickets, manage
+              technical issues, view SLAs, and communicate with support technicians.
             </p>
 
             {/* 1. Information We Collect */}
@@ -295,27 +307,34 @@ export function PrivacyTermsView() {
                 1. Information We Collect
               </h3>
               <p className="text-[13.5px] text-slate-600 leading-relaxed font-medium">
-                To provide a personalized eye care experience, we may collect the following types of
+                To provide a seamless IT support experience, we may collect the following types of
                 information:
               </p>
               <ul className="list-disc pl-5 space-y-3 text-[13.5px] text-slate-600 leading-relaxed font-medium">
                 <li>
                   <strong className="text-slate-800 font-bold">Personal Identification:</strong>{" "}
-                  Name, email address, phone number, date of birth, gender, and mailing address.
+                  Name, email address, phone number, and associated company or organization
+                  affiliation.
                 </li>
                 <li>
-                  <strong className="text-slate-800 font-bold">Vision and Health Records:</strong>{" "}
-                  Contact lens and eyeglass prescriptions, appointment booking details, check-in
-                  information, and insurance card images uploaded to the advice-tech Vault.
+                  <strong className="text-slate-800 font-bold">
+                    Support Tickets & Service Requests:
+                  </strong>{" "}
+                  Subject line, detailed descriptions of technical issues, system configurations,
+                  and files, attachments, or screenshots uploaded to the tickets.
                 </li>
                 <li>
                   <strong className="text-slate-800 font-bold">Account details:</strong> Username,
-                  reward tier, transaction history, and points balance details.
+                  role (e.g., customer, technician, administrator), and associated organization
+                  details.
                 </li>
                 <li>
-                  <strong className="text-slate-800 font-bold">Device Information:</strong> Device
-                  model, operating system version, and generic performance logs to help us maintain
-                  a secure and functional application.
+                  <strong className="text-slate-800 font-bold">
+                    Device & Connection Information:
+                  </strong>{" "}
+                  Device model, operating system version, browser signatures, IP address, and
+                  generic diagnostic logs to help troubleshoot connectivity or device compatibility
+                  issues.
                 </li>
               </ul>
             </div>
@@ -329,21 +348,24 @@ export function PrivacyTermsView() {
                 We use the collected information for the following specific purposes:
               </p>
               <ul className="list-disc pl-5 space-y-3 text-[13.5px] text-slate-600 leading-relaxed font-medium">
-                <li>To schedule, manage, and verify your eye doctor appointments.</li>
                 <li>
-                  To securely process, track, and notify you about your eyeglass and contact lens
-                  orders.
+                  To triage, assign, track, and resolve IT support tickets and service requests.
                 </li>
                 <li>
-                  To calculate, update, and manage your advice-tech points and coupon redemptions.
+                  To facilitate live chat communication between users and support technicians
+                  regarding active tickets.
                 </li>
                 <li>
-                  To securely store and present your vision records (prescriptions and documents) in
-                  your personal advice-tech Vault.
+                  To measure response times, track technician performance, and maintain Service
+                  Level Agreements (SLAs).
                 </li>
                 <li>
-                  To send you transactional notifications, reminders, or support updates related to
-                  your health records and appointments.
+                  To securely store and present your historical tickets, configuration logs, and
+                  solution articles in the application database.
+                </li>
+                <li>
+                  To send you transactional notifications, reminders, updates, or alerts related to
+                  your support tickets and profile settings.
                 </li>
               </ul>
             </div>
@@ -359,16 +381,16 @@ export function PrivacyTermsView() {
               </p>
               <ul className="list-disc pl-5 space-y-3 text-[13.5px] text-slate-600 leading-relaxed font-medium">
                 <li>
-                  All vision records, prescriptions, and card uploads are stored securely on our
-                  cloud infrastructure (Firebase) using encryption protocols.
+                  All support tickets, attachment uploads, and chat logs are stored securely on our
+                  cloud infrastructure (Firebase) using industry-standard encryption protocols.
                 </li>
                 <li>
                   Data transmission between the App and our servers is secured using SSL/TLS
                   encryption.
                 </li>
                 <li>
-                  We strictly control internal access to user data, ensuring it is only accessible
-                  to authorized medical and administration staff.
+                  We strictly control internal access to customer data, ensuring it is only
+                  accessible to authorized support technicians and system administrators.
                 </li>
               </ul>
             </div>
@@ -384,12 +406,12 @@ export function PrivacyTermsView() {
               </p>
               <ul className="list-disc pl-5 space-y-3 text-[13.5px] text-slate-600 leading-relaxed font-medium">
                 <li>
-                  Our authorized clinic practitioners (optometrists and ophthalmologists) to manage
-                  your eye examinations and vision prescriptions.
+                  Our authorized IT specialists and system administrators to manage and resolve your
+                  technical tickets.
                 </li>
                 <li>
-                  Our optical manufacturing laboratories to fulfill eyeglass or contact lens orders
-                  placed through the App.
+                  Approved third-party vendor platforms or internal systems when escalated for
+                  software or hardware warranty servicing.
                 </li>
               </ul>
             </div>
@@ -399,32 +421,36 @@ export function PrivacyTermsView() {
               <h3 className="text-[16px] font-bold text-[#0a2e5c] border-b border-slate-100 pb-1.5">
                 5. User Rights and Data Deletion
               </h3>
-              <p className="text-[13.5px] text-slate-600 leading-relaxed font-medium">
+              <p className="text-[13.5px] text-slate-650 leading-relaxed font-medium">
                 We respect your rights to control your personal data. At any time, you can:
               </p>
               <ul className="list-disc pl-5 space-y-3 text-[13.5px] text-slate-600 leading-relaxed font-medium">
                 <li>
                   Access, modify, or update your profile details in the{" "}
-                  <strong className="text-slate-800 font-bold">Account Settings</strong> section of
-                  the App.
+                  <strong className="text-slate-800 font-bold">Profile</strong> section of the App.
                 </li>
                 <li>
-                  Request deletion of your account and all associated personal data from our active
-                  databases.
+                  Permanently delete your account and clear all associated personal profile details
+                  and support history directly from the App.
                 </li>
               </ul>
 
               <div className="border-l-4 border-blue-600 bg-blue-50/50 p-4 rounded-r-xl mt-3">
                 <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
-                  To request full deletion of your account and user records, please contact us
-                  directly at{" "}
+                  You can instantly delete your account and personal history within the App by
+                  navigating to the <strong className="text-slate-800 font-bold">Profile</strong>{" "}
+                  page and clicking{" "}
+                  <strong className="text-slate-800 font-bold">Delete account</strong> under the{" "}
+                  <strong className="text-slate-800 font-bold">Account Actions</strong> section.
+                  This process is fully automated and immediate. For any questions or manual record
+                  removal inquiries, you can reach out to our privacy team at{" "}
                   <a
-                    href="mailto:privacy@advice-tech.com"
+                    href="mailto:privacy@advisetech.com"
                     className="text-blue-600 hover:underline font-semibold"
                   >
-                    privacy@advice-tech.com
+                    privacy@advisetech.com
                   </a>
-                  . We will process and confirm your request within 7 business days.
+                  .
                 </p>
               </div>
             </div>
@@ -455,14 +481,14 @@ export function PrivacyTermsView() {
                 <p>
                   <strong className="text-slate-800 font-bold">Email:</strong>{" "}
                   <a
-                    href="mailto:support@advice-tech.com"
+                    href="mailto:support@advisetech.com"
                     className="text-blue-600 hover:underline font-semibold"
                   >
-                    support@advice-tech.com
+                    support@advisetech.com
                   </a>
                 </p>
                 <p>
-                  <strong className="text-slate-800 font-bold">Address:</strong> advice-tech, Main
+                  <strong className="text-slate-800 font-bold">Address:</strong> AdviseTech, Main
                   Office, New York, NY
                 </p>
               </div>
@@ -471,7 +497,7 @@ export function PrivacyTermsView() {
             {/* Footer Section */}
             <div className="border-t border-slate-100 pt-6 text-center">
               <p className="text-[11.5px] text-slate-400 font-medium">
-                © 2026 advice-tech. All rights reserved.
+                © 2026 AdviseTech. All rights reserved.
               </p>
             </div>
           </div>

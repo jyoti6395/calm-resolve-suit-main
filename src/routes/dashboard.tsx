@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
@@ -25,6 +25,7 @@ import {
   FileWarning,
   ChevronRight,
   ListFilter,
+  Loader2,
 } from "lucide-react";
 import { useAppSelector } from "@/store/hooks";
 import {
@@ -33,8 +34,13 @@ import {
   formatUSDateTime,
   formatSLAWithCountdown,
 } from "@/lib/formatters";
-import type { Ticket } from "@/types/store";
+import type { Ticket, Department } from "@/types/store";
 import { getUserRoles } from "@/lib/utils";
+import { getDepartments } from "@/services/departmentService";
+import {
+  getDepartmentStyle,
+  fallbackDepartments,
+} from "@/features/tickets/components/NewTicketForm";
 
 function getRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -62,6 +68,39 @@ function Dashboard() {
   const navigate = useNavigate({ from: "/dashboard" });
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
+
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loadingDepts, setLoadingDepts] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchDepts() {
+      try {
+        const list = await getDepartments();
+        if (active) {
+          if (list && list.length > 0) {
+            setDepartments(list);
+          } else {
+            console.log("Departments list is empty, falling back to predefined defaults");
+            setDepartments(fallbackDepartments);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load departments dynamically:", err);
+        if (active) {
+          setDepartments(fallbackDepartments);
+        }
+      } finally {
+        if (active) {
+          setLoadingDepts(false);
+        }
+      }
+    }
+    fetchDepts();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const greeting = useMemo(() => {
     const hour = new Date().getHours();
@@ -606,68 +645,35 @@ function Dashboard() {
               {/* Category Quick Links */}
               <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] p-6">
                 <h2 className="text-[15px] font-bold text-slate-800 mb-4">Browse by topic</h2>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {[
-                    {
-                      label: "Technical",
-                      icon: Terminal,
-                      color: "text-purple-600",
-                      bg: "bg-purple-50",
-                      cat: "Software",
-                    },
-                    {
-                      label: "Account",
-                      icon: Key,
-                      color: "text-emerald-600",
-                      bg: "bg-emerald-50",
-                      cat: "Access",
-                    },
-                    {
-                      label: "Network",
-                      icon: Wifi,
-                      color: "text-blue-600",
-                      bg: "bg-blue-50",
-                      cat: "Network",
-                    },
-                    {
-                      label: "Service",
-                      icon: ClipboardList,
-                      color: "text-amber-600",
-                      bg: "bg-amber-50",
-                      cat: "Service",
-                    },
-                    {
-                      label: "Hardware",
-                      icon: Laptop,
-                      color: "text-indigo-600",
-                      bg: "bg-indigo-50",
-                      cat: "Hardware",
-                    },
-                    {
-                      label: "General",
-                      icon: Sparkles,
-                      color: "text-pink-600",
-                      bg: "bg-pink-50",
-                      cat: "Other",
-                    },
-                  ].map(({ label, icon: Icon, color, bg, cat }) => (
-                    <Link
-                      key={cat}
-                      to="/tickets/new"
-                      search={{ category: cat }}
-                      className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all group"
-                    >
-                      <div
-                        className={`h-8 w-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}
-                      >
-                        <Icon className={`h-4 w-4 ${color}`} />
-                      </div>
-                      <span className="text-[12px] font-bold text-slate-700 group-hover:text-slate-900">
-                        {label}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
+                {loadingDepts ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {departments.map((dept) => {
+                      const style = getDepartmentStyle(dept.categoryKey || dept.id, dept.name);
+                      const Icon = style.icon;
+                      return (
+                        <Link
+                          key={dept.id}
+                          to="/tickets/new"
+                          search={{ category: dept.id }}
+                          className="flex items-center gap-2.5 p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-all group animate-fade-in"
+                        >
+                          <div
+                            className={`h-8 w-8 rounded-lg ${style.bg} flex items-center justify-center shrink-0`}
+                          >
+                            <Icon className={`h-4 w-4 ${style.color}`} />
+                          </div>
+                          <span className="text-[12px] font-bold text-slate-700 group-hover:text-slate-900 truncate">
+                            {dept.name}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
               {/* Technicians Online (technician only) */}
@@ -841,7 +847,7 @@ function Dashboard() {
         <SummaryCards summary={summary} />
 
         {/* How can we help? Section */}
-        <CategoryGrid />
+        <CategoryGrid departments={departments} loading={loadingDepts} />
 
         {/* Recent tickets */}
         <RecentTicketsList tickets={filteredRecentTickets} />

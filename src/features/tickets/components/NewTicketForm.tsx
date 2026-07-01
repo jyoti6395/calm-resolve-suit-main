@@ -221,7 +221,7 @@ export function getDepartmentStyle(key: string, name: string) {
   );
 }
 
-const fallbackDepartments: Department[] = [
+export const fallbackDepartments: Department[] = [
   {
     id: "Software",
     name: "Technical Support",
