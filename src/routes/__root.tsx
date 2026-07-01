@@ -131,6 +131,7 @@ function RootComponent() {
         "/forgot-password",
         "/reset-password",
         "/otp",
+        "/privacy-terms",
       ];
 
       // Additional routes that are public ONLY on mobile (Flutter WebView)
