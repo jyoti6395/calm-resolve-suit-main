@@ -195,7 +195,7 @@ function RootComponent() {
           // ─── DESKTOP PUBLIC (login, signup, forgot-password, etc.) ───────────
           // No sidebar — full-screen bare layout so auth pages can render
           // their own split-screen designs without any chrome around them.
-          <div className="h-screen w-full bg-background overflow-hidden">
+          <div className="h-screen w-full bg-background overflow-y-auto">
             <Outlet />
           </div>
         )}
