@@ -18,9 +18,9 @@ interface DesktopPageShellProps {
 export function DesktopPageShell({ children, noPadding }: DesktopPageShellProps) {
   return (
     <div
-      className={`w-full min-h-full flex flex-col ${noPadding ? "" : "px-4 sm:px-6 lg:px-8 py-6 sm:py-8"}`}
+      className={`w-full min-h-full flex flex-col min-w-0 ${noPadding ? "" : "px-4 sm:px-6 lg:px-8 py-6 sm:py-8"}`}
     >
-      <div className="flex-1 flex flex-col">{children}</div>
+      <div className="flex-1 flex flex-col min-w-0">{children}</div>
     </div>
   );
 }

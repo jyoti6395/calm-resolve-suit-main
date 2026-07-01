@@ -24,9 +24,22 @@ export function DesktopTicketTable({
     const list = tickets.filter((ticket) => {
       const displaySubject = (ticket as Ticket & { title?: string }).title || ticket.subject || "";
       const displaySequenceId = ticket.ticketSequenceId || ticket.id || "";
+      const requester = ticket.requesterName || "";
+      const requesterEmail = ticket.requesterEmail || "";
+      const assignee = ticket.assignedToName || "";
       const matchSearch =
         !searchParams.search ||
-        (displaySubject + " " + displaySequenceId)
+        (
+          displaySubject +
+          " " +
+          displaySequenceId +
+          " " +
+          requester +
+          " " +
+          requesterEmail +
+          " " +
+          assignee
+        )
           .toLowerCase()
           .includes(searchParams.search.toLowerCase());
       const matchStatus =

@@ -62,3 +62,12 @@ export interface Message {
 export type SanitizeSnapshotFn = <T>(snapshot: QuerySnapshot) => T[];
 export type FormatDateTimeFn = (timestamp: DocumentSnapshot | Date | string | unknown) => string;
 export type SerializeTimestampFn = (date: Date | unknown) => string;
+
+export interface Department {
+  id: string;
+  name: string;
+  description: string;
+  categoryKey?: string;
+  title?: string;
+  desc?: string;
+}

@@ -1,9 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getDepartments } from "@/services/departmentService";
+import { Department } from "@/types/store";
 import {
   Camera,
   Image as ImageIcon,
@@ -105,65 +107,155 @@ const createTicketSchema = z.object({
 
 type CreateTicketInput = z.infer<typeof createTicketSchema>;
 
-const newCategoriesList = [
+const DEPARTMENT_STYLES_PRESET: Record<
+  string,
   {
-    title: "Technical Support",
-    desc: "App issues, errors, bugs",
+    icon: typeof Tag;
+    color: string;
+    bg: string;
+    selectedBg: string;
+    selectedBorder: string;
+  }
+> = {
+  software: {
     icon: Terminal,
     color: "text-purple-500",
     bg: "bg-purple-500/10",
     selectedBg: "bg-purple-50",
     selectedBorder: "border-purple-400",
-    categoryKey: "Software",
   },
-  {
-    title: "Account Access",
-    desc: "Login, password, 2FA",
+  technicalsupport: {
+    icon: Terminal,
+    color: "text-purple-500",
+    bg: "bg-purple-500/10",
+    selectedBg: "bg-purple-50",
+    selectedBorder: "border-purple-400",
+  },
+  access: {
     icon: Key,
     color: "text-emerald-500",
     bg: "bg-emerald-500/10",
     selectedBg: "bg-emerald-50",
     selectedBorder: "border-emerald-400",
-    categoryKey: "Access",
   },
-  {
-    title: "Connectivity",
-    desc: "Internet, Wi-Fi, VPN",
+  accountaccess: {
+    icon: Key,
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    selectedBg: "bg-emerald-50",
+    selectedBorder: "border-emerald-400",
+  },
+  network: {
     icon: Wifi,
     color: "text-blue-500",
     bg: "bg-blue-500/10",
     selectedBg: "bg-blue-50",
     selectedBorder: "border-blue-400",
-    categoryKey: "Network",
   },
-  {
-    title: "Service Request",
-    desc: "Request services or assistance",
+  connectivity: {
+    icon: Wifi,
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    selectedBg: "bg-blue-50",
+    selectedBorder: "border-blue-400",
+  },
+  service: {
     icon: ClipboardList,
     color: "text-amber-500",
     bg: "bg-amber-500/10",
     selectedBg: "bg-amber-50",
     selectedBorder: "border-amber-400",
-    categoryKey: "Service",
   },
-  {
-    title: "Product Support",
-    desc: "Features and how-tos",
+  servicerequest: {
+    icon: ClipboardList,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    selectedBg: "bg-amber-50",
+    selectedBorder: "border-amber-400",
+  },
+  hardware: {
     icon: Laptop,
     color: "text-indigo-500",
     bg: "bg-indigo-500/10",
     selectedBg: "bg-indigo-50",
     selectedBorder: "border-indigo-400",
-    categoryKey: "Hardware",
   },
-  {
-    title: "General Enquiries",
-    desc: "Other queries",
+  productsupport: {
+    icon: Laptop,
+    color: "text-indigo-500",
+    bg: "bg-indigo-500/10",
+    selectedBg: "bg-indigo-50",
+    selectedBorder: "border-indigo-400",
+  },
+  other: {
     icon: Sparkles,
     color: "text-pink-500",
     bg: "bg-pink-500/10",
     selectedBg: "bg-pink-50",
     selectedBorder: "border-pink-400",
+  },
+  generalenquiries: {
+    icon: Sparkles,
+    color: "text-pink-500",
+    bg: "bg-pink-500/10",
+    selectedBg: "bg-pink-50",
+    selectedBorder: "border-pink-400",
+  },
+};
+
+const DEFAULT_DEPARTMENT_STYLE = {
+  icon: Tag,
+  color: "text-slate-500",
+  bg: "bg-slate-500/10",
+  selectedBg: "bg-slate-50",
+  selectedBorder: "border-slate-400",
+};
+
+export function getDepartmentStyle(key: string, name: string) {
+  const normalizedKey = (key || "").toLowerCase().replace(/\s+/g, "");
+  const normalizedName = (name || "").toLowerCase().replace(/\s+/g, "");
+  return (
+    DEPARTMENT_STYLES_PRESET[normalizedKey] ||
+    DEPARTMENT_STYLES_PRESET[normalizedName] ||
+    DEFAULT_DEPARTMENT_STYLE
+  );
+}
+
+const fallbackDepartments: Department[] = [
+  {
+    id: "Software",
+    name: "Technical Support",
+    description: "App issues, errors, bugs",
+    categoryKey: "Software",
+  },
+  {
+    id: "Access",
+    name: "Account Access",
+    description: "Login, password, 2FA",
+    categoryKey: "Access",
+  },
+  {
+    id: "Network",
+    name: "Connectivity",
+    description: "Internet, Wi-Fi, VPN",
+    categoryKey: "Network",
+  },
+  {
+    id: "Service",
+    name: "Service Request",
+    description: "Request services or assistance",
+    categoryKey: "Service",
+  },
+  {
+    id: "Hardware",
+    name: "Product Support",
+    description: "Features and how-tos",
+    categoryKey: "Hardware",
+  },
+  {
+    id: "Other",
+    name: "General Enquiries",
+    description: "Other queries",
     categoryKey: "Other",
   },
 ];
@@ -200,6 +292,39 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
   const [step, setStep] = useState(preselectedCategory ? 2 : 1);
   const user = useAppSelector((state) => state.auth.user);
 
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [loadingDepts, setLoadingDepts] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    async function fetchDepts() {
+      try {
+        const list = await getDepartments();
+        if (active) {
+          if (list && list.length > 0) {
+            setDepartments(list);
+          } else {
+            console.log("Departments list is empty, falling back to predefined defaults");
+            setDepartments(fallbackDepartments);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load departments dynamically:", err);
+        if (active) {
+          setDepartments(fallbackDepartments);
+        }
+      } finally {
+        if (active) {
+          setLoadingDepts(false);
+        }
+      }
+    }
+    fetchDepts();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -230,6 +355,13 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
   const watchTitle = watch("title");
   const watchDescription = watch("description");
   const watchPriority = watch("priority");
+
+  const getSelectedDepartmentName = () => {
+    const cat = getValues("category") || watchCategory;
+    if (!cat) return "";
+    const dept = departments.find((d) => d.id === cat || d.name === cat || d.categoryKey === cat);
+    return dept ? dept.name || dept.title || dept.id : cat;
+  };
 
   const isUploading = attachments.some((a) => a.status === "uploading");
   const trimmedTitle = watchTitle?.trim() || "";
@@ -335,10 +467,17 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
       const now = new Date();
       const hoursToAdd = SLA_HOURS_MAP[data.priority] || 48;
       const slaDeadline = new Date(now.getTime() + hoursToAdd * 60 * 60 * 1000);
+      const selectedDept = departments.find(
+        (d) =>
+          d.id === data.category || d.name === data.category || d.categoryKey === data.category,
+      );
+      const deptName = selectedDept
+        ? selectedDept.name || selectedDept.title || selectedDept.id
+        : data.category;
       const payload = {
         subject: data.title,
         description: data.description,
-        category: data.category,
+        category: deptName,
         priority: data.priority,
         ticketSequenceId: `TK-${now.getFullYear()}-${Math.floor(Math.random() * 10000)
           .toString()
@@ -349,7 +488,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         requesterEmail: user?.email || "user@example.com",
         companyId: user?.companyId || null,
         companyName: user?.companyName || null,
-        department: "General",
+        department: deptName || "General",
         status: "open",
         createdAt: serializeTimestamp(now),
         updatedAt: serializeTimestamp(now),
@@ -398,35 +537,43 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
   };
 
   // ── STEP 1: Category ──────────────────────────────────────────────────────
-  const step1Content = (
+  const step1Content = loadingDepts ? (
+    <div className="flex items-center justify-center py-20">
+      <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+    </div>
+  ) : (
     <div className="animate-slide-up">
       <div className="grid grid-cols-2 gap-4">
-        {newCategoriesList.map((c) => {
-          const IconComponent = c.icon;
-          const isSelected = watchCategory === c.categoryKey;
+        {departments.map((dept) => {
+          const style = getDepartmentStyle(dept.categoryKey || dept.id, dept.name);
+          const IconComponent = style.icon;
+          const isSelected =
+            watchCategory === dept.id ||
+            watchCategory === dept.name ||
+            watchCategory === dept.categoryKey;
           return (
             <button
-              key={c.categoryKey}
+              key={dept.id}
               type="button"
-              onClick={() => setValue("category", c.categoryKey, { shouldValidate: true })}
+              onClick={() => setValue("category", dept.id, { shouldValidate: true })}
               className={`rounded-2xl p-5 text-left border-2 transition-all flex flex-col gap-4 cursor-pointer ${
                 isSelected
-                  ? `${c.selectedBorder} ${c.selectedBg} shadow-sm`
+                  ? `${style.selectedBorder} ${style.selectedBg} shadow-sm`
                   : "border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm"
               }`}
             >
               <div
-                className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${c.bg} ${c.color}`}
+                className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 ${style.bg} ${style.color}`}
               >
                 <IconComponent className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[14px] font-bold text-slate-800 leading-snug">{c.title}</p>
-                <p className="mt-1 text-[12px] text-slate-400 leading-normal">{c.desc}</p>
+                <p className="text-[14px] font-bold text-slate-800 leading-snug">{dept.name}</p>
+                <p className="mt-1 text-[12px] text-slate-400 leading-normal">{dept.description}</p>
               </div>
               {isSelected && (
                 <div className="ml-auto mt-auto">
-                  <CheckCircle2 className={`h-5 w-5 ${c.color}`} />
+                  <CheckCircle2 className={`h-5 w-5 ${style.color}`} />
                 </div>
               )}
             </button>
@@ -652,14 +799,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
           </p>
         </div>
         <div className="divide-y divide-slate-50 px-5">
-          <Row
-            k="Category"
-            v={
-              newCategoriesList.find((c) => c.categoryKey === getValues("category"))?.title ||
-              getValues("category") ||
-              ""
-            }
-          />
+          <Row k="Category" v={getSelectedDepartmentName() || ""} />
           <Row
             k="Priority"
             v={priorities.find((p) => p.key === getValues("priority"))?.label || ""}
@@ -711,10 +851,8 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
             Estimated response: under 30 minutes
           </p>
           <p className="mt-1 text-[12.5px] text-green-600/80">
-            Your ticket will be auto-routed to the{" "}
-            {newCategoriesList.find((c) => c.categoryKey === getValues("category"))?.title ||
-              getValues("category")}{" "}
-            team immediately after submission.
+            Your ticket will be auto-routed to the {getSelectedDepartmentName()} team immediately
+            after submission.
           </p>
         </div>
       </div>
@@ -794,7 +932,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
     },
     2: {
       heading: "Tell us more",
-      sub: `${newCategoriesList.find((c) => c.categoryKey === watchCategory)?.title || "Issue"} · Provide the details below.`,
+      sub: `${getSelectedDepartmentName() || "Issue"} · Provide the details below.`,
     },
     3: { heading: "Review & submit", sub: "Confirm details before raising the ticket." },
   }[step]!;
