@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   User as FirebaseUser,
   deleteUser,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
 } from "firebase/auth";
 import {
   doc,
@@ -160,6 +161,13 @@ export async function sendPasswordReset(email: string): Promise<void> {
 
   // 2. Send the password reset email using Firebase Auth.
   await sendPasswordResetEmail(auth, trimmedEmail);
+}
+
+/**
+ * Confirms a password reset using the out-of-band code sent via email.
+ */
+export async function confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
+  await firebaseConfirmPasswordReset(auth, oobCode, newPassword);
 }
 
 /**
