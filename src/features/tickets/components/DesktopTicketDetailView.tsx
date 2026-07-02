@@ -188,11 +188,16 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       });
 
       const isResolved = newStatus === "resolved";
+      const isClosed = newStatus === "closed";
       const statusText = newStatus.replace("_", " ");
       const statusNotif: NotificationPayload = {
-        title: isResolved ? "Ticket resolved" : "Ticket status updated",
+        title: isResolved
+          ? "Ticket resolved"
+          : isClosed
+            ? "Ticket closed"
+            : "Ticket status updated",
         body: `Your ticket "${ticket.subject}" status has been updated to "${statusText}".`,
-        tone: isResolved ? "success" : "warning",
+        tone: isResolved || isClosed ? "success" : "warning",
         createdAt: new Date().toISOString(),
         userId: ticket.createdBy || "",
         read: false,
