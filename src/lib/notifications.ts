@@ -12,6 +12,7 @@ export interface NotificationItem {
   body: string;
   time: string;
   createdAt: string;
+  ticketId?: string;
 }
 
 export interface NotificationGroup {
@@ -74,6 +75,7 @@ export function groupNotifications(notifications: DbNotification[]): Notificatio
       body: n.body,
       time: timeStr || "1m",
       createdAt: n.createdAt,
+      ticketId: n.ticketId,
     };
   });
 

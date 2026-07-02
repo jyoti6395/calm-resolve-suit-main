@@ -36,6 +36,7 @@ interface NotificationPayload {
   createdAt: string;
   userId: string;
   read: boolean;
+  ticketId?: string;
 }
 
 async function saveNotification(recipientId: string, payload: NotificationPayload) {
@@ -198,6 +199,7 @@ export function TicketDetailView({ id }: { id: string }) {
         createdAt: new Date().toISOString(),
         userId: ticket.createdBy || "",
         read: false,
+        ticketId: ticket.id,
       };
 
       if (ticket.createdBy) {
@@ -267,6 +269,7 @@ export function TicketDetailView({ id }: { id: string }) {
           createdAt: new Date().toISOString(),
           userId: recipientId,
           read: false,
+          ticketId: id,
         };
         await saveNotification(recipientId, replyNotif);
       }

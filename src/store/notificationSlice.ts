@@ -1,5 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { collection, query, where, onSnapshot, deleteDoc, doc } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  deleteDoc,
+  doc,
+  writeBatch,
+} from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { sanitizeQuerySnapshot } from "../lib/formatters";
 import type { RootState, AppDispatch } from "./index";
@@ -12,6 +20,7 @@ export interface DbNotification {
   createdAt: string;
   userId: string;
   read?: boolean;
+  ticketId?: string;
 }
 
 export interface NotificationState {
@@ -181,8 +190,33 @@ export const clearAllNotifications =
 
     if (notifications.length === 0) return;
 
-    const promises = notifications.map((notif) => dispatch(deleteNotification(notif.id)));
-    await Promise.all(promises);
+    // Optimistically clear local Redux state immediately
+    dispatch(clearNotificationState());
+
+    try {
+      const batch = writeBatch(db);
+      notifications.forEach((notif) => {
+        const rootDocRef = doc(db, "notifications", notif.id);
+        batch.delete(rootDocRef);
+      });
+      await batch.commit();
+    } catch (err) {
+      console.warn(
+        "Failed to clear all from root notifications, trying subcollection fallback...",
+        err,
+      );
+      try {
+        const batch = writeBatch(db);
+        notifications.forEach((notif) => {
+          const subDocRef = doc(db, "users", user.uid, "notifications", notif.id);
+          batch.delete(subDocRef);
+        });
+        await batch.commit();
+      } catch (subErr) {
+        console.error("Failed to clear notifications in both locations:", subErr);
+        throw subErr;
+      }
+    }
   };
 
 export default notificationSlice.reducer;

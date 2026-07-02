@@ -44,6 +44,15 @@ import { serializeTimestamp } from "@/lib/formatters";
 import { SLA_HOURS_MAP } from "@/constants/ticket";
 import { Progress } from "@/components/ui/progress";
 
+function generateUniqueSequenceId(year: number): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // 32 characters (no easily confused ones)
+  let randomPart = "";
+  for (let i = 0; i < 6; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `TK-${year}-${randomPart}`;
+}
+
 const priorities = [
   {
     key: "low",
@@ -479,9 +488,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         description: data.description,
         category: deptName,
         priority: data.priority,
-        ticketSequenceId: `TK-${now.getFullYear()}-${Math.floor(Math.random() * 10000)
-          .toString()
-          .padStart(4, "0")}`,
+        ticketSequenceId: generateUniqueSequenceId(now.getFullYear()),
         createdBy: user?.uid || null,
         requesterId: user?.uid || null,
         requesterName: user?.displayName || "Unknown User",
@@ -510,6 +517,7 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         createdAt: serializeTimestamp(now),
         userId: user?.uid || "",
         read: false,
+        ticketId: docRef.id,
       };
       try {
         await addDoc(collection(db, "notifications"), notificationPayload);

@@ -13,7 +13,11 @@ import {
   deleteNotification,
   clearAllNotifications,
 } from "@/store/notificationSlice";
-import { groupNotifications, getNotificationToneStyles } from "@/lib/notifications";
+import {
+  groupNotifications,
+  getNotificationToneStyles,
+  type NotificationItem,
+} from "@/lib/notifications";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -34,6 +38,14 @@ function Notifications() {
   const navigate = useNavigate();
   const { notifications, loading, preferences } = useAppSelector((state) => state.notifications);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  const handleNotificationClick = (it: NotificationItem) => {
+    if (it.ticketId) {
+      navigate({ to: "/tickets/$id", params: { id: it.ticketId } });
+    } else {
+      navigate({ to: "/tickets", search: { status: "all" } });
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = dispatch(startNotificationSyncListener());
@@ -124,6 +136,7 @@ function Notifications() {
                 groups={groups}
                 preferences={preferences}
                 dispatch={dispatch}
+                onNotificationClick={handleNotificationClick}
               />
             </div>
           </div>
@@ -162,6 +175,7 @@ function Notifications() {
           groups={groups}
           preferences={preferences}
           dispatch={dispatch}
+          onNotificationClick={handleNotificationClick}
         />
       </div>
       <BottomNav />
@@ -196,6 +210,7 @@ function MobileNotificationsContent({
   groups,
   preferences,
   dispatch,
+  onNotificationClick,
 }: {
   loading: boolean;
   notifications: ReturnType<
@@ -206,6 +221,7 @@ function MobileNotificationsContent({
   groups: ReturnType<typeof groupNotifications>;
   preferences: Record<string, boolean>;
   dispatch: ReturnType<typeof useAppDispatch>;
+  onNotificationClick: (it: NotificationItem) => void;
 }) {
   const handleClearOne = async (id: string) => {
     try {
@@ -247,7 +263,8 @@ function MobileNotificationsContent({
                   return (
                     <div
                       key={it.id}
-                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-card border border-border"
+                      onClick={() => onNotificationClick(it)}
+                      className="flex items-start gap-3 p-3.5 rounded-2xl bg-card border border-border cursor-pointer hover:bg-muted/30 active:bg-muted/40 transition-colors"
                     >
                       <div
                         className={`h-10 w-10 rounded-xl ${tone.bg} flex items-center justify-center shrink-0`}
@@ -261,7 +278,10 @@ function MobileNotificationsContent({
                             <span className="text-[11px] text-muted-foreground">{it.time}</span>
                             <button
                               type="button"
-                              onClick={() => handleClearOne(it.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleClearOne(it.id);
+                              }}
                               className="h-5 w-5 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
                               aria-label="Clear notification"
                             >
@@ -292,6 +312,7 @@ function DesktopNotificationsContent({
   groups,
   preferences,
   dispatch,
+  onNotificationClick,
 }: {
   loading: boolean;
   notifications: ReturnType<
@@ -302,6 +323,7 @@ function DesktopNotificationsContent({
   groups: ReturnType<typeof groupNotifications>;
   preferences: Record<string, boolean>;
   dispatch: ReturnType<typeof useAppDispatch>;
+  onNotificationClick: (it: NotificationItem) => void;
 }) {
   const handleClearOne = async (id: string) => {
     try {
@@ -343,7 +365,8 @@ function DesktopNotificationsContent({
                   return (
                     <div
                       key={it.id}
-                      className="flex items-start gap-4 p-5 border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors group relative"
+                      onClick={() => onNotificationClick(it)}
+                      className="flex items-start gap-4 p-5 border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors group relative cursor-pointer"
                     >
                       <div
                         className={`h-11 w-11 rounded-xl ${tone.bg} flex items-center justify-center shrink-0`}
@@ -361,8 +384,11 @@ function DesktopNotificationsContent({
                             </span>
                             <button
                               type="button"
-                              onClick={() => handleClearOne(it.id)}
-                              className="h-7 w-7 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-all cursor-pointer shrink-0 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleClearOne(it.id);
+                              }}
+                              className="h-7 w-7 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-all cursor-pointer shrink-0"
                               aria-label="Clear notification"
                             >
                               <X className="h-4 w-4" />
