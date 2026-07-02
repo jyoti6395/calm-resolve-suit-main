@@ -853,7 +853,7 @@ function Dashboard() {
         <RecentTicketsList tickets={filteredRecentTickets} />
       </div>
 
-      {/* {isCustomer && (
+      {isCustomer && (
         <Link
           to="/tickets/new"
           className="fixed z-50 bottom-24 right-5 h-14 px-5 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated hover:shadow-glow flex items-center gap-2 transition-all"
@@ -861,7 +861,7 @@ function Dashboard() {
         >
           <Plus className="h-5 w-5" /> Raise
         </Link>
-      )} */}
+      )}
 
       <BottomNav />
     </MobileShell>
