@@ -37,15 +37,24 @@ interface NotificationPayload {
   userId: string;
   read: boolean;
   ticketId?: string;
+  type?: string;
+  recipientId?: string;
+  message?: string;
 }
 
 async function saveNotification(recipientId: string, payload: NotificationPayload) {
+  const fullPayload = {
+    ...payload,
+    recipientId: recipientId,
+    message: payload.body,
+    type: payload.type || "ticket",
+  };
   try {
-    await addDoc(collection(db, "notifications"), payload);
+    await addDoc(collection(db, "notifications"), fullPayload);
   } catch (err) {
     console.warn("Failed to write notification to root, trying subcollection...", err);
     try {
-      await addDoc(collection(db, "users", recipientId, "notifications"), payload);
+      await addDoc(collection(db, "users", recipientId, "notifications"), fullPayload);
     } catch (subErr) {
       console.warn(
         "Failed to save notification in both locations (muted permission error):",
@@ -242,6 +251,21 @@ export function TicketDetailView({ id }: { id: string }) {
         });
 
         toast.info("Ticket claimed by you as the assigned specialist.");
+
+        // Send notification to the customer
+        const customerId = ticket.createdBy;
+        if (customerId) {
+          const claimNotif: NotificationPayload = {
+            title: "Technician assigned",
+            body: `${user.displayName || user.email || "Technician"} has claimed and been assigned to your ticket: "${ticket.subject || "unnamed"}".`,
+            tone: "primary",
+            createdAt: new Date().toISOString(),
+            userId: customerId,
+            read: false,
+            ticketId: id,
+          };
+          await saveNotification(customerId, claimNotif);
+        }
       } catch (assignErr) {
         console.warn("Failed to auto-assign ticket before message send:", assignErr);
       }

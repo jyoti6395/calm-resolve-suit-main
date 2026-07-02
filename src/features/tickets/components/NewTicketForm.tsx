@@ -513,9 +513,12 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
       const notificationPayload = {
         title: "Ticket raised",
         body: `Your ticket ${payload.ticketSequenceId} has been successfully raised.`,
+        message: `Your ticket ${payload.ticketSequenceId} has been successfully raised.`,
         tone: "success" as const,
         createdAt: serializeTimestamp(now),
         userId: user?.uid || "",
+        recipientId: user?.uid || "",
+        type: "ticket" as const,
         read: false,
         ticketId: docRef.id,
       };
