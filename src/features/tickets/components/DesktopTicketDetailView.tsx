@@ -27,6 +27,7 @@ import {
   MessageCircle,
   Image as ImageIcon,
   FileText,
+  Loader2,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -131,6 +132,8 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null);
+  const [previewObjectUrl, setPreviewObjectUrl] = useState<string | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
   const isFirstLoad = useRef(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -386,6 +389,72 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       error: `Could not download ${filename} directly, opening...`,
     });
   };
+
+  useEffect(() => {
+    if (!previewFile) {
+      setPreviewObjectUrl(null);
+      return;
+    }
+
+    let active = true;
+    let url = "";
+
+    const fetchBlob = async () => {
+      setLoadingPreview(true);
+      try {
+        let downloadUrl = previewFile.url;
+        const storageUrl = import.meta.env.VITE_FIREBASE_STORAGE_URL;
+
+        if (import.meta.env.DEV && storageUrl && previewFile.url.startsWith(storageUrl)) {
+          downloadUrl = previewFile.url.replace(storageUrl, "/storage-proxy");
+        }
+
+        const response = await fetch(downloadUrl);
+        if (!response.ok) throw new Error("Fetch failed");
+
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("text/html")) {
+          throw new Error("Response was HTML, likely router fallback");
+        }
+
+        const originalBlob = await response.blob();
+
+        // Determine correct type from filename
+        let mimeType = originalBlob.type;
+        const ext = previewFile.name.split(".").pop()?.toLowerCase();
+        if (ext === "pdf") mimeType = "application/pdf";
+        else if (ext === "txt") mimeType = "text/plain";
+        else if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext || "")) {
+          mimeType = `image/${ext === "jpg" ? "jpeg" : ext}`;
+        }
+
+        const typedBlob = new Blob([originalBlob], { type: mimeType });
+        url = URL.createObjectURL(typedBlob);
+
+        if (active) {
+          setPreviewObjectUrl(url);
+        }
+      } catch (err) {
+        console.error("Failed to load inline preview blob:", err);
+        if (active) {
+          setPreviewObjectUrl(previewFile.url);
+        }
+      } finally {
+        if (active) {
+          setLoadingPreview(false);
+        }
+      }
+    };
+
+    fetchBlob();
+
+    return () => {
+      active = false;
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [previewFile]);
 
   const isPreviewImage =
     !!previewFile?.name.match(/\.(jpeg|jpg|gif|png|webp)$/i) ||
@@ -714,15 +783,20 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
           <DialogTitle className="sr-only">File Preview</DialogTitle>
           <DialogDescription className="sr-only">Full size attachment preview</DialogDescription>
           <div className="relative w-full h-full flex items-center justify-center p-4">
-            {isPreviewImage ? (
+            {loadingPreview ? (
+              <div className="flex flex-col items-center justify-center p-8 bg-slate-900/80 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-sm min-w-[200px]">
+                <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-3" />
+                <p className="text-sm font-medium text-slate-300">Loading preview...</p>
+              </div>
+            ) : isPreviewImage ? (
               <img
-                src={previewFile?.url || ""}
+                src={previewObjectUrl || ""}
                 alt={previewFile?.name || "Attachment"}
                 className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl select-none"
               />
             ) : isPreviewPdf ? (
               <iframe
-                src={previewFile?.url || ""}
+                src={previewObjectUrl || ""}
                 title={previewFile?.name || "PDF Document"}
                 className="w-full h-[80vh] rounded-lg border-none bg-white shadow-2xl"
               />
