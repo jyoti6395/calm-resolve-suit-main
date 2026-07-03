@@ -17,7 +17,6 @@ import { sanitizeQuerySnapshot, serializeTimestamp } from "@/lib/formatters";
 import { MessageInputForm } from "@/features/tickets/components/MessageInputForm";
 import type { Ticket, Message } from "@/types/store";
 import { toast } from "sonner";
-import { downloadFile } from "@/lib/utils";
 import {
   Clock,
   Check,
@@ -378,16 +377,6 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return name.slice(0, 2).toUpperCase();
-  };
-
-  const handleDownload = async (e: React.MouseEvent, url: string, filename: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toast.promise(downloadFile(url, filename), {
-      loading: `Downloading ${filename}...`,
-      success: `${filename} downloaded successfully!`,
-      error: `Could not download ${filename} directly, opening...`,
-    });
   };
 
   useEffect(() => {

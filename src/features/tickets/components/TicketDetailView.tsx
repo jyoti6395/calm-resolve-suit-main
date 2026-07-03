@@ -19,7 +19,6 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { MessageInputForm } from "@/features/tickets/components/MessageInputForm";
 import type { Ticket, Message } from "@/types/store";
 import { toast } from "sonner";
-import { downloadFile } from "@/lib/utils";
 import {
   Clock,
   Check,
@@ -385,16 +384,6 @@ export function TicketDetailView({ id }: { id: string }) {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const handleDownload = async (e: React.MouseEvent, url: string, filename: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toast.promise(downloadFile(url, filename), {
-      loading: `Downloading ${filename}...`,
-      success: `${filename} downloaded successfully!`,
-      error: `Could not download ${filename} directly, opening...`,
-    });
-  };
-
   useEffect(() => {
     if (!previewFile) {
       setPreviewObjectUrl(null);
@@ -748,20 +737,6 @@ export function TicketDetailView({ id }: { id: string }) {
           <DialogTitle className="sr-only">File Preview</DialogTitle>
           <DialogDescription className="sr-only">Full size attachment preview</DialogDescription>
           <div className="relative w-full h-full flex items-center justify-center p-4">
-            {previewFile && (isPreviewImage || isPreviewPdf) && (
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  handleDownload(e, previewFile.url, previewFile.name);
-                }}
-                className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-900 text-[13px] font-bold text-white shadow-lg cursor-pointer backdrop-blur-sm transition-all active:scale-[0.98] border border-white/10"
-              >
-                <Download className="h-4 w-4" />
-                Download
-              </button>
-            )}
-
             {loadingPreview ? (
               <div className="flex flex-col items-center justify-center p-8 bg-slate-900/80 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-sm min-w-[200px]">
                 <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-3" />
