@@ -17,6 +17,7 @@ import { sanitizeQuerySnapshot, serializeTimestamp } from "@/lib/formatters";
 import { MessageInputForm } from "@/features/tickets/components/MessageInputForm";
 import type { Ticket, Message } from "@/types/store";
 import { toast } from "sonner";
+import { downloadFile } from "@/lib/utils";
 import {
   Clock,
   Check,
@@ -28,6 +29,7 @@ import {
   FileText,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 interface NotificationPayload {
   title: string;
@@ -128,6 +130,7 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const isFirstLoad = useRef(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -224,7 +227,7 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
     }
   };
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, imageUrl?: string) => {
     if (!user) return;
 
     if (user.role === "technician" && ticket && ticket.assignedToId !== user.uid) {
@@ -275,6 +278,7 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       senderName: user.displayName || user.email || "Technician",
       type: "public",
       createdAt: serializeTimestamp(new Date()),
+      ...(imageUrl && { imageUrl }),
     };
 
     try {
@@ -288,9 +292,12 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       const recipientId = user.uid === ticket?.createdBy ? currentAssignedToId : ticket?.createdBy;
 
       if (recipientId) {
+        const bodyText = payload.content
+          ? `${payload.senderName}: ${payload.content}`
+          : `${payload.senderName} sent an image attachment`;
         const replyNotif: NotificationPayload = {
           title: `New reply on ${ticket?.subject || "ticket"}`,
-          body: `${payload.senderName}: ${payload.content}`,
+          body: bodyText,
           tone: "primary",
           createdAt: new Date().toISOString(),
           userId: recipientId,
@@ -368,6 +375,16 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return name.slice(0, 2).toUpperCase();
+  };
+
+  const handleDownload = async (e: React.MouseEvent, url: string, filename: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toast.promise(downloadFile(url, filename), {
+      loading: `Downloading ${filename}...`,
+      success: `${filename} downloaded successfully!`,
+      error: `Could not download ${filename} directly, opening...`,
+    });
   };
 
   if (!ticket) {
@@ -455,8 +472,7 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
                       <a
                         key={idx}
                         href={file.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={(e) => handleDownload(e, file.url, file.name)}
                         className="flex items-center gap-3 p-2.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-[0.99] transition-all border border-white/10 group cursor-pointer"
                       >
                         <div className="h-8.5 w-8.5 rounded-lg bg-white/10 flex items-center justify-center text-white shrink-0">
@@ -633,9 +649,21 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
                                   : "bg-white text-slate-800 rounded-2xl rounded-tl-sm border border-slate-200"
                               }`}
                             >
-                              <p className="text-[14.5px] leading-relaxed whitespace-pre-wrap break-words">
-                                {msg.content}
-                              </p>
+                              {msg.imageUrl && (
+                                <div className="mb-2 rounded-xl overflow-hidden max-w-full">
+                                  <img
+                                    src={msg.imageUrl}
+                                    alt="Attachment"
+                                    className="w-full h-auto max-h-[300px] object-cover cursor-pointer hover:opacity-95 transition-opacity rounded-xl"
+                                    onClick={() => setPreviewImageUrl(msg.imageUrl || null)}
+                                  />
+                                </div>
+                              )}
+                              {msg.content && (
+                                <p className="text-[14.5px] leading-relaxed whitespace-pre-wrap break-words">
+                                  {msg.content}
+                                </p>
+                              )}
                             </div>
                             <div
                               className={`flex items-center gap-1 mt-1 text-[10px] font-medium ${isMe ? "text-slate-400 mr-1" : "text-slate-400 ml-1"}`}
@@ -656,10 +684,30 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
 
           {/* Chat Input */}
           <div className="p-0 bg-white border-t border-slate-100 shrink-0">
-            <MessageInputForm onSendMessage={handleSendMessage} />
+            <MessageInputForm
+              ticketId={id}
+              userId={user?.uid || ""}
+              onSendMessage={handleSendMessage}
+            />
           </div>
         </div>
       </div>
+
+      <Dialog open={!!previewImageUrl} onOpenChange={(open) => !open && setPreviewImageUrl(null)}>
+        <DialogContent className="max-w-4xl p-0 border-none bg-transparent shadow-none flex items-center justify-center text-white">
+          <DialogTitle className="sr-only">Image Preview</DialogTitle>
+          <DialogDescription className="sr-only">
+            Full size chat attachment preview
+          </DialogDescription>
+          <div className="relative max-w-full max-h-[90vh] flex items-center justify-center p-4">
+            <img
+              src={previewImageUrl || ""}
+              alt="Full size attachment"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl select-none"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

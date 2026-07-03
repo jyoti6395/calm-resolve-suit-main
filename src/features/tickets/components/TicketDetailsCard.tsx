@@ -1,11 +1,23 @@
 import type { Ticket } from "@/types/store";
 import { User, Calendar, Tag, AlertCircle, Image as ImageIcon, FileText } from "lucide-react";
+import { downloadFile } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface TicketDetailsCardProps {
   ticket: Ticket;
 }
 
 export function TicketDetailsCard({ ticket }: TicketDetailsCardProps) {
+  const handleDownload = async (e: React.MouseEvent, url: string, filename: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toast.promise(downloadFile(url, filename), {
+      loading: `Downloading ${filename}...`,
+      success: `${filename} downloaded successfully!`,
+      error: `Could not download ${filename} directly, opening...`,
+    });
+  };
+
   return (
     <div className="mb-6 p-4 rounded-xl bg-card border border-border">
       <h2 className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
@@ -41,8 +53,7 @@ export function TicketDetailsCard({ ticket }: TicketDetailsCardProps) {
                   <a
                     key={idx}
                     href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={(e) => handleDownload(e, file.url, file.name)}
                     className="flex items-center gap-2 p-1.5 rounded-lg bg-secondary hover:bg-secondary/80 active:scale-[0.99] transition-all border border-border/60 text-[12.5px] font-semibold text-foreground truncate cursor-pointer"
                   >
                     <FileIcon className="h-4 w-4 text-muted-foreground shrink-0" />

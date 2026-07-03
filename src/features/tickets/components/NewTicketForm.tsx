@@ -415,7 +415,10 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
       }
 
       const storageRef = ref(storage, `tickets/attachments/${user.uid}/${id}/${file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const metadata = {
+        contentDisposition: `attachment; filename="${file.name}"`,
+      };
+      const uploadTask = uploadBytesResumable(storageRef, file, metadata);
 
       setAttachments((prev) =>
         prev.map((item) => (item.id === id ? { ...item, uploadTask } : item)),

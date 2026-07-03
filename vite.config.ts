@@ -6,6 +6,15 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [TanStackRouterVite(), react(), tailwindcss(), tsconfigPaths()],
+  server: {
+    proxy: {
+      "/storage-proxy": {
+        target: "https://firebasestorage.googleapis.com",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/storage-proxy/, ""),
+      },
+    },
+  },
   build: {
     outDir: "dist",
   },

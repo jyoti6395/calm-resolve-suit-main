@@ -56,6 +56,7 @@ export interface Message {
   createdAt: string;
   isSending?: boolean;
   attachments?: string[];
+  imageUrl?: string;
 }
 
 // Ensure formatting utility type-signatures use proper unknown/strict abstractions instead of 'any':
