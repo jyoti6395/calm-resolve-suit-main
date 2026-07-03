@@ -17,6 +17,7 @@ import { sanitizeQuerySnapshot, serializeTimestamp } from "@/lib/formatters";
 import { MessageInputForm } from "@/features/tickets/components/MessageInputForm";
 import type { Ticket, Message } from "@/types/store";
 import { toast } from "sonner";
+import { downloadFile } from "@/lib/utils";
 import {
   Clock,
   Check,
@@ -30,6 +31,7 @@ import {
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { PdfPreviewer } from "@/components/PdfPreviewer";
 
 interface NotificationPayload {
   title: string;
@@ -784,11 +786,30 @@ export function DesktopTicketDetailView({ id }: { id: string }) {
                 className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl select-none"
               />
             ) : isPreviewPdf ? (
-              <iframe
-                src={previewObjectUrl || ""}
-                title={previewFile?.name || "PDF Document"}
-                className="w-full h-[80vh] rounded-lg border-none bg-white shadow-2xl"
-              />
+              <div className="w-full max-w-4xl bg-slate-900 border border-slate-800/80 p-4 rounded-2xl shadow-2xl flex flex-col items-center">
+                <div className="w-full flex items-center justify-between pb-3 border-b border-slate-800 mb-3 shrink-0">
+                  <h3 className="text-sm font-bold text-white truncate max-w-[70%]">
+                    {previewFile?.name}
+                  </h3>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (previewFile) {
+                        toast.promise(downloadFile(previewFile.url, previewFile.name), {
+                          loading: `Downloading ${previewFile.name}...`,
+                          success: `${previewFile.name} downloaded successfully!`,
+                          error: `Could not download ${previewFile.name} directly, opening...`,
+                        });
+                      }
+                    }}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-bold transition-all cursor-pointer bg-transparent border-none"
+                  >
+                    Download
+                  </button>
+                </div>
+                <PdfPreviewer url={previewObjectUrl || ""} name={previewFile?.name || ""} />
+              </div>
             ) : (
               <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl flex flex-col items-center justify-center max-w-sm text-center shadow-2xl">
                 <FileText className="h-16 w-16 text-slate-400 mb-4" />
