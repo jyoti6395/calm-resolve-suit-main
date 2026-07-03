@@ -33,3 +33,5 @@ dist-ssr
 
 # Temporary Testing Scripts
 temp_testing_scripts/
+# Environment files
+.env

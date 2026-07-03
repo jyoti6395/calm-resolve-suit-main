@@ -20,13 +20,23 @@ export function getUserRoles(role: string | null | undefined): UserRoles {
 
 export async function downloadFile(url: string, filename: string): Promise<void> {
   let downloadUrl = url;
-  if (url.startsWith("https://firebasestorage.googleapis.com")) {
-    downloadUrl = url.replace("https://firebasestorage.googleapis.com", "/storage-proxy");
+  const storageUrl = import.meta.env.VITE_FIREBASE_STORAGE_URL;
+
+  // Use storage proxy only in development and when storage URL is set
+  if (import.meta.env.DEV && storageUrl && url.startsWith(storageUrl)) {
+    downloadUrl = url.replace(storageUrl, "/storage-proxy");
   }
 
   try {
     const response = await fetch(downloadUrl);
     if (!response.ok) throw new Error("Network response was not ok");
+
+    // Detect SPA fallback returning index.html instead of actual file binary
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("text/html")) {
+      throw new Error("Response was HTML, likely an SPA router fallback");
+    }
+
     const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");

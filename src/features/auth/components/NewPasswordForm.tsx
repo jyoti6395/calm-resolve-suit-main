@@ -51,9 +51,11 @@ export function NewPasswordForm() {
       setTimeout(() => {
         nav({ to: "/login" }); // Redirect to login after success
       }, 3000);
-    } catch (err: any) {
+    } catch (err) {
       console.error("Password reset error:", err);
-      setError(err.message || "Failed to reset password. The link might be expired.");
+      const message =
+        err instanceof Error ? err.message : "Failed to reset password. The link might be expired.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -79,7 +81,7 @@ export function NewPasswordForm() {
             Choose a strong password you haven't used before.
           </p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="px-6 mt-8 space-y-3">
           {error && (
             <div className="p-3 mb-4 rounded-xl bg-destructive/10 border border-destructive/20 flex items-start gap-3">
@@ -91,43 +93,57 @@ export function NewPasswordForm() {
           {success && (
             <div className="p-3 mb-4 rounded-xl bg-success/10 border border-success/20 flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
-              <p className="text-sm text-success">Password reset successfully! Redirecting to login...</p>
+              <p className="text-sm text-success">
+                Password reset successfully! Redirecting to login...
+              </p>
             </div>
           )}
 
-          <Field 
-            icon={Lock} 
-            type="password" 
-            placeholder="New password" 
+          <Field
+            icon={Lock}
+            type="password"
+            placeholder="New password"
             value={password}
-            onChange={(e: any) => setPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
             disabled={loading || success}
             required
           />
-          <Field 
-            icon={Lock} 
-            type="password" 
-            placeholder="Confirm new password" 
+          <Field
+            icon={Lock}
+            type="password"
+            placeholder="Confirm new password"
             value={confirmPassword}
-            onChange={(e: any) => setConfirmPassword(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setConfirmPassword(e.target.value)
+            }
             disabled={loading || success}
             required
           />
-          
+
           {!success && (
             <>
               <div className="grid grid-cols-3 gap-1.5 pt-1">
-                <span className={`h-1 rounded-full ${password.length > 0 ? "bg-success" : "bg-muted"}`} />
-                <span className={`h-1 rounded-full ${password.length > 5 ? "bg-success" : "bg-muted"}`} />
-                <span className={`h-1 rounded-full ${password.length > 8 ? "bg-success" : "bg-muted"}`} />
+                <span
+                  className={`h-1 rounded-full ${password.length > 0 ? "bg-success" : "bg-muted"}`}
+                />
+                <span
+                  className={`h-1 rounded-full ${password.length > 5 ? "bg-success" : "bg-muted"}`}
+                />
+                <span
+                  className={`h-1 rounded-full ${password.length > 8 ? "bg-success" : "bg-muted"}`}
+                />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                {password.length === 0 ? "Enter a password" : password.length < 6 ? "Too short" : "Strength: Good"}
+                {password.length === 0
+                  ? "Enter a password"
+                  : password.length < 6
+                    ? "Too short"
+                    : "Strength: Good"}
               </p>
             </>
           )}
 
-          <button 
+          <button
             type="submit"
             disabled={loading || success}
             className="h-14 w-full mt-4 rounded-2xl bg-gradient-brand text-primary-foreground font-semibold shadow-elevated disabled:opacity-50 flex items-center justify-center"
