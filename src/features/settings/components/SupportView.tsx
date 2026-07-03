@@ -167,12 +167,12 @@ export function SupportView() {
                 </p>
               </div>
             </div>
-            <button
+            {/* <button
               onClick={() => navigate({ to: "/tickets/new" })}
               className="h-10 px-4 rounded-xl bg-gradient-brand text-primary-foreground font-semibold shadow-sm hover:shadow-glow active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-[13px] cursor-pointer"
             >
               <Plus className="h-4 w-4" /> Create Ticket
-            </button>
+            </button> */}
           </div>
 
           {/* Main Layout Area */}
@@ -205,7 +205,7 @@ export function SupportView() {
                   <p className="text-[12px] font-bold  tracking-wider text-slate-500 mb-4 pl-2">
                     Quick Actions
                   </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <button
                       onClick={() => navigate({ to: "/tickets/new" })}
                       className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 hover:border-primary/50 hover:shadow-soft transition-all text-left cursor-pointer group shadow-sm"
@@ -240,7 +240,7 @@ export function SupportView() {
                       </div>
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={scrollToContact}
                       className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-200 hover:border-primary/50 hover:shadow-soft transition-all text-left cursor-pointer group shadow-sm"
                     >
@@ -255,7 +255,7 @@ export function SupportView() {
                           Reach our technical team
                         </span>
                       </div>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 

@@ -133,7 +133,7 @@ export function TicketDetailView({ id }: { id: string }) {
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null);
   const isFirstLoad = useRef(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -391,6 +391,12 @@ export function TicketDetailView({ id }: { id: string }) {
     });
   };
 
+  const isPreviewImage =
+    !!previewFile?.name.match(/\.(jpeg|jpg|gif|png|webp)$/i) ||
+    !!previewFile?.url.includes("photo") ||
+    (!!previewFile && !previewFile.name.includes("."));
+  const isPreviewPdf = !!previewFile?.name.toLowerCase().endsWith(".pdf");
+
   return (
     <MobileShell scrollable={false}>
       <div className="h-full flex flex-col justify-between w-full bg-background">
@@ -447,11 +453,14 @@ export function TicketDetailView({ id }: { id: string }) {
                           file.type === "photo" || file.name.match(/\.(jpeg|jpg|gif|png|webp)$/i);
                         const FileIcon = isImage ? ImageIcon : FileText;
                         return (
-                          <a
+                          <button
                             key={idx}
-                            href={file.url}
-                            onClick={(e) => handleDownload(e, file.url, file.name)}
-                            className="flex items-center gap-3 p-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-[0.99] transition-all border border-white/10 group cursor-pointer"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setPreviewFile({ url: file.url, name: file.name });
+                            }}
+                            className="flex items-center gap-3 p-2 rounded-xl bg-white/10 hover:bg-white/15 active:scale-[0.99] transition-all border border-white/10 group cursor-pointer w-full text-left"
                           >
                             <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center text-white shrink-0">
                               <FileIcon className="h-4 w-4" />
@@ -460,9 +469,9 @@ export function TicketDetailView({ id }: { id: string }) {
                               {file.name}
                             </span>
                             <span className="text-[10px] text-white/50 font-medium mr-1 select-none">
-                              Download
+                              Preview
                             </span>
-                          </a>
+                          </button>
                         );
                       })}
                     </div>
@@ -626,7 +635,9 @@ export function TicketDetailView({ id }: { id: string }) {
                           src={msg.imageUrl}
                           alt="Attachment"
                           className="w-full h-auto max-h-[250px] object-cover cursor-pointer hover:opacity-95 transition-opacity rounded-xl"
-                          onClick={() => setPreviewImageUrl(msg.imageUrl || null)}
+                          onClick={() =>
+                            setPreviewFile({ url: msg.imageUrl || "", name: "Attachment" })
+                          }
                         />
                       </div>
                     )}
@@ -660,18 +671,42 @@ export function TicketDetailView({ id }: { id: string }) {
         />
       </div>
 
-      <Dialog open={!!previewImageUrl} onOpenChange={(open) => !open && setPreviewImageUrl(null)}>
-        <DialogContent className="max-w-4xl p-0 border-none bg-transparent shadow-none flex items-center justify-center text-white">
-          <DialogTitle className="sr-only">Image Preview</DialogTitle>
-          <DialogDescription className="sr-only">
-            Full size chat attachment preview
-          </DialogDescription>
-          <div className="relative max-w-full max-h-[90vh] flex items-center justify-center p-4">
-            <img
-              src={previewImageUrl || ""}
-              alt="Full size attachment"
-              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl select-none"
-            />
+      <Dialog open={!!previewFile} onOpenChange={(open) => !open && setPreviewFile(null)}>
+        <DialogContent
+          className={`${isPreviewPdf ? "max-w-5xl h-[90vh]" : "max-w-4xl"} p-0 border-none bg-transparent shadow-none flex items-center justify-center text-white`}
+        >
+          <DialogTitle className="sr-only">File Preview</DialogTitle>
+          <DialogDescription className="sr-only">Full size attachment preview</DialogDescription>
+          <div className="relative w-full h-full flex items-center justify-center p-4">
+            {isPreviewImage ? (
+              <img
+                src={previewFile?.url || ""}
+                alt={previewFile?.name || "Attachment"}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl select-none"
+              />
+            ) : isPreviewPdf ? (
+              <iframe
+                src={previewFile?.url || ""}
+                title={previewFile?.name || "PDF Document"}
+                className="w-full h-[80vh] rounded-lg border-none bg-white shadow-2xl"
+              />
+            ) : (
+              <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl flex flex-col items-center justify-center max-w-sm text-center shadow-2xl">
+                <FileText className="h-16 w-16 text-slate-400 mb-4" />
+                <h4 className="text-[16px] font-bold text-white mb-2">{previewFile?.name}</h4>
+                <p className="text-[13px] text-slate-400 mb-6">
+                  Preview is not supported for this file type in-app.
+                </p>
+                <a
+                  href={previewFile?.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all text-[13.5px] font-bold text-white shadow-md cursor-pointer"
+                >
+                  Open in New Tab
+                </a>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

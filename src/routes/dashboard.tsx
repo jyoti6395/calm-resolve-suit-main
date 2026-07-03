@@ -558,7 +558,7 @@ function Dashboard() {
             {/* RIGHT: Sidebar */}
             <div className="space-y-5 sticky top-6">
               {/* Quick Create Card */}
-              <div className="rounded-[1.5rem] bg-gradient-hero text-white p-6 shadow-lg relative overflow-hidden">
+              {/* <div className="rounded-[1.5rem] bg-gradient-hero text-white p-6 shadow-lg relative overflow-hidden">
                 <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
                 <div className="relative">
                   <div className="flex items-center gap-3 mb-4">
@@ -582,7 +582,7 @@ function Dashboard() {
                     Create New Request
                   </Link>
                 </div>
-              </div>
+              </div> */}
 
               {/* Notification Feed */}
               <div className="rounded-[1.5rem] bg-white border border-slate-100 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.05)] p-6">
