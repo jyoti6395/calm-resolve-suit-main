@@ -160,8 +160,12 @@ export async function sendPasswordReset(email: string): Promise<void> {
   }
 
   // 2. Send the password reset email using Firebase Auth.
+  const origin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://calm-resolve-suit-main.pages.dev";
   await sendPasswordResetEmail(auth, trimmedEmail, {
-    url: "https://calm-resolve-suit-main.pages.dev/reset-password",
+    url: `${origin}/reset-password`,
   });
 }
 
