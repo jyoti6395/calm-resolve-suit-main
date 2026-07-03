@@ -391,6 +391,17 @@ export function TicketDetailView({ id }: { id: string }) {
       return;
     }
 
+    const isImage =
+      !!previewFile.name.match(/\.(jpeg|jpg|gif|png|webp)$/i) ||
+      previewFile.url.includes("photo") ||
+      !previewFile.name.includes(".");
+
+    if (isImage) {
+      setPreviewObjectUrl(previewFile.url);
+      setLoadingPreview(false);
+      return;
+    }
+
     let active = true;
     let url = "";
 
