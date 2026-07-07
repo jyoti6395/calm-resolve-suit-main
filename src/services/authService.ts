@@ -71,6 +71,12 @@ export async function logIn(email: string, password: string): Promise<FirebaseUs
     const profile = userDocSnap.data() as UserProfile;
     const role = profile.role || "customer";
 
+    // Inactive account check
+    if (profile.status === "inactive") {
+      await signOut(auth);
+      throw new Error("Your account is inactive. Please contact the administrator");
+    }
+
     // Technician login is temporarily disabled
     if (role === "technician") {
       await signOut(auth);

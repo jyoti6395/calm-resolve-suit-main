@@ -86,7 +86,7 @@ export const initializeAuthListener = () => (dispatch: any) => {
         // 3. Security Rejection Fence
         if (profileData.status === "inactive") {
           await signOut(auth);
-          throw new Error("This account is inactive. Please contact your administrator.");
+          throw new Error("Your account is inactive. Please contact the administrator");
         }
 
         const role = profileData.role || "customer";

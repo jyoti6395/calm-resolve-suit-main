@@ -44,6 +44,10 @@ function useLoginForm() {
     } catch (error: unknown) {
       const err = error as { code?: string; message?: string };
       console.error("Login error:", err);
+      if (err.message === "Your account is inactive. Please contact the administrator") {
+        setError("Your account is inactive. Please contact the administrator");
+        return;
+      }
       switch (err.code) {
         case "auth/invalid-credential":
         case "auth/user-not-found":
