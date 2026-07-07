@@ -18,13 +18,13 @@ export function DesktopHeader() {
               <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive ring-2 ring-background" />
             </Button>
           </Link>
-          <Button
+          {/* <Button
             variant="ghost"
             size="icon"
             className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
           >
             <HelpCircle className="h-5 w-5" />
-          </Button>
+          </Button> */}
         </div>
       </div>
     </header>

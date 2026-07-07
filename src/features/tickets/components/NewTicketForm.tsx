@@ -653,24 +653,26 @@ export function NewTicketForm({ preselectedCategory }: { preselectedCategory?: s
         <label className="block text-[12px] font-bold uppercase tracking-wider text-slate-400 mb-3">
           Priority
         </label>
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {priorities.map((p) => (
             <button
               key={p.key}
               type="button"
               onClick={() => setValue("priority", p.key)}
-              className={`rounded-xl p-3.5 text-left border-2 transition-all cursor-pointer ${
+              className={`rounded-xl p-3.5 text-left border-2 transition-all cursor-pointer whitespace-normal break-words ${
                 watchPriority === p.key
                   ? `${p.border} ${p.selectedBg}`
                   : "border-slate-100 bg-white hover:border-slate-200"
               }`}
             >
               <p
-                className={`text-[13px] font-extrabold ${watchPriority === p.key ? p.color : "text-slate-700"}`}
+                className={`text-[13px] font-extrabold whitespace-normal break-words ${watchPriority === p.key ? p.color : "text-slate-700"}`}
               >
                 {p.label}
               </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">{p.hint}</p>
+              <p className="text-[11px] text-slate-400 mt-0.5 whitespace-normal break-words">
+                {p.hint}
+              </p>
             </button>
           ))}
         </div>

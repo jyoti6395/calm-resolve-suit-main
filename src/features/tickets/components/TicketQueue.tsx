@@ -606,8 +606,8 @@ export function TicketQueue({
 
       <Link
         to="/tickets/new"
-        className="fixed z-50 bottom-24 right-5 h-14 w-14 rounded-full bg-gradient-brand text-primary-foreground shadow-elevated hover:shadow-glow hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer min-h-[48px]"
-        style={{ left: "calc(50% + 220px - 76px)" }}
+        className="fixed z-50 bottom-24 right-5 h-14 w-14 px-4 rounded-full bg-gradient-brand text-primary-foreground shadow-elevated hover:shadow-glow hover:scale-105 active:scale-95 transition-all flex items-center justify-center cursor-pointer min-h-[48px]"
+        style={{ left: "min(calc(50% + 220px - 76px), calc(100% - 76px))" }}
       >
         <Plus className="h-6 w-6" />
       </Link>
