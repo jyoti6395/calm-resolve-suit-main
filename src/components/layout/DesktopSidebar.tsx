@@ -36,6 +36,23 @@ function getInitials(displayName?: string | null, email?: string | null): string
   return "AP";
 }
 
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function getFirstName(displayName?: string | null, email?: string | null): string {
+  if (displayName) {
+    return displayName.trim().split(" ")[0];
+  }
+  if (email) {
+    return email.split("@")[0];
+  }
+  return "User";
+}
+
 export function DesktopSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useAppSelector((state) => state.auth);
@@ -58,6 +75,8 @@ export function DesktopSidebar() {
   }, [collapsed]);
 
   const initials = getInitials(user?.displayName, user?.email);
+  const firstName = getFirstName(user?.displayName, user?.email);
+  const greeting = getGreeting();
 
   return (
     <aside
@@ -80,8 +99,8 @@ export function DesktopSidebar() {
               <span className="text-[17px] font-bold text-foreground tracking-tight leading-none mb-1">
                 AdviseTech
               </span>
-              <span className="text-[10px] font-bold text-muted-foreground tracking-wider leading-none uppercase">
-                User Console
+              <span className="text-[10px] font-bold text-muted-foreground tracking-wider leading-none">
+                {greeting}, {firstName}
               </span>
             </div>
           )}
