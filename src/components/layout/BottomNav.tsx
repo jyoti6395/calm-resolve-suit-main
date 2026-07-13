@@ -22,8 +22,8 @@ export function BottomNav() {
   });
 
   return (
-    <nav className="fixed bottom-0 bg-white w-full max-w-[440px] z-40 pb-[env(safe-area-inset-bottom)]">
-      <div className=" glass px-2 py-2 flex items-center justify-between">
+    <nav className="w-full bg-white border-t border-border shrink-0 z-40 pb-[env(safe-area-inset-bottom)]">
+      <div className="glass px-2 py-2 flex items-center justify-between">
         {visibleItems.map(({ to, icon: Icon, label }) => {
           const active = path === to || (to !== "/dashboard" && path.startsWith(to));
           return (

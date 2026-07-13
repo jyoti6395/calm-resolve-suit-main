@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -168,7 +167,7 @@ function Notifications() {
   // ─── MOBILE LAYOUT — completely unchanged ─────────────────────────────────
   return (
     <MobileShell>
-      <div className="min-h-screen bg-background pb-32">
+      <div className="min-h-screen bg-background pb-8">
         <MobileNotificationsContent
           loading={loading}
           notifications={notifications}
@@ -178,7 +177,6 @@ function Notifications() {
           onNotificationClick={handleNotificationClick}
         />
       </div>
-      <BottomNav />
       <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
         <AlertDialogContent className="rounded-2xl sm:rounded-3xl max-w-sm">
           <AlertDialogHeader>

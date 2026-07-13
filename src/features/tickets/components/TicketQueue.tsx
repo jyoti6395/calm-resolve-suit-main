@@ -25,7 +25,6 @@ import {
   getPriorityBadgeClass,
 } from "@/lib/formatters";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import type { Ticket } from "@/types/store";
 
@@ -354,7 +353,7 @@ export function TicketQueue({
 
   return (
     <MobileShell>
-      <div className="min-h-screen bg-background pb-24 flex flex-col w-full max-w-md mx-auto">
+      <div className="min-h-screen bg-background pb-8 flex flex-col w-full">
         <div className="px-4 mt-2 shrink-0">
           <form onSubmit={(e) => e.preventDefault()}>
             <label className="flex items-center gap-2 h-12 px-4 rounded-2xl bg-secondary focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 focus-within:bg-card focus-within:shadow-soft transition-all border border-transparent">
@@ -611,8 +610,6 @@ export function TicketQueue({
       >
         <Plus className="h-6 w-6" />
       </Link>
-
-      <BottomNav />
     </MobileShell>
   );
 }

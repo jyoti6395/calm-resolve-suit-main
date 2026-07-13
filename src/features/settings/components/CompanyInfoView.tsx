@@ -1,6 +1,5 @@
 import { MobileShell } from "@/components/layout/MobileShell";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { Building2, ShieldCheck, Mail, Phone, Clock, ArrowLeft } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
@@ -251,7 +250,6 @@ export function CompanyInfoView() {
           </div>
         </div>
       </div>
-      <BottomNav />
     </MobileShell>
   );
 }

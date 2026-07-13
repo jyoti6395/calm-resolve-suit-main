@@ -67,6 +67,18 @@ export function DesktopSidebar() {
   });
 
   useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width >= 768 && width <= 1024) {
+        setCollapsed(true);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, String(collapsed));
     } catch {

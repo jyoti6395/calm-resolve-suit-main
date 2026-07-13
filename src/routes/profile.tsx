@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -394,7 +393,7 @@ function Profile() {
   // ─── MOBILE LAYOUT — completely unchanged ─────────────────────────────────
   return (
     <MobileShell>
-      <div className="min-h-screen bg-background pb-32">
+      <div className="min-h-screen bg-background pb-8">
         <div className="px-5">
           <UserProfileCard onEditClick={() => setIsEditOpen(true)} />
         </div>
@@ -453,7 +452,6 @@ function Profile() {
           </p>
         </div>
       </div>
-      <BottomNav />
       <EditProfileSheet isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} />
       {deleteDialog}
       {logoutDialog}

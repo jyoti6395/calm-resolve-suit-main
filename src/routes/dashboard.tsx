@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState, useEffect } from "react";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { DesktopPageShell } from "@/components/layout/DesktopPageShell";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -722,7 +721,7 @@ function Dashboard() {
 
   return (
     <MobileShell>
-      <div className="min-h-screen bg-background pb-32">
+      <div className="min-h-screen bg-background pb-8">
         {/* Sticky Header */}
         <div className="sticky top-0 z-50 bg-[oklch(0.22_0.12_263)] backdrop-blur-md px-5 pt-[env(safe-area-inset-top,0px)] text-white">
           <div className="relative flex items-center justify-between h-14">
@@ -862,8 +861,6 @@ function Dashboard() {
           <Plus className="h-5 w-5" /> Raise
         </Link>
       )}
-
-      <BottomNav />
     </MobileShell>
   );
 }

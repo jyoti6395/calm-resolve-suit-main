@@ -11,6 +11,7 @@ import { HeaderProvider, useHeader } from "@/components/layout/HeaderContext";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { MobileShell } from "@/components/layout/MobileShell";
 import { DesktopLayout } from "@/components/layout/DesktopLayout";
+import { BottomNav } from "@/components/layout/BottomNav";
 
 function NotFoundComponent() {
   return (
@@ -176,14 +177,15 @@ function RootComponent() {
       <HeaderProvider>
         {isMobile ? (
           // ─── MOBILE LAYOUT (Flutter WebView) ───────────────────────────────
-          // This entire branch is UNCHANGED from the original implementation.
-          // Every pixel of the mobile experience is preserved exactly as-is.
+          // This entire branch is UNCHANGED from the original implementation structure,
+          // but modernized to allow fluid full-width rendering and non-overlapping BottomNav.
           <div className="h-screen w-full bg-background flex justify-center overflow-hidden">
-            <div className="relative w-full max-w-[440px] h-full flex flex-col">
+            <div className="relative w-full h-full flex flex-col">
               <GlobalHeaderRenderer />
               <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 <Outlet />
               </div>
+              {isAuthenticated && <BottomNav />}
             </div>
           </div>
         ) : isAuthenticated ? (

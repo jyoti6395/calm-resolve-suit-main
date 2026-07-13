@@ -12,7 +12,7 @@ export function MobileShell({
   return (
     <div className="h-full w-full bg-background flex justify-center overflow-hidden">
       <div
-        className={`relative w-full max-w-[440px] h-full flex flex-col ${
+        className={`relative w-full h-full flex flex-col ${
           scrollable ? "overflow-y-auto no-scrollbar" : "overflow-hidden"
         } ${className}`}
       >

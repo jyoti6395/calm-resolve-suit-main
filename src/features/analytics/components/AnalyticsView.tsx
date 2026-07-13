@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useAppSelector } from "@/store/hooks";
 import { MobileShell } from "@/components/layout/MobileShell";
-import { BottomNav } from "@/components/layout/BottomNav";
 import { useHeaderSetup } from "@/components/layout/HeaderContext";
 import type { Ticket } from "@/types/store";
 import { useAnalyticsData } from "../hooks/useAnalyticsData";
@@ -48,7 +47,7 @@ export function AnalyticsView({
 
   return (
     <MobileShell>
-      <div className="min-h-screen bg-background pb-32 px-4 flex flex-col w-full max-w-md mx-auto">
+      <div className="min-h-screen bg-background pb-8 px-4 flex flex-col w-full">
         {/* =========================================
             1. SEGMENTED TIME CONSTRAINTS TABS
            ========================================= */}
@@ -91,8 +90,6 @@ export function AnalyticsView({
            ========================================= */}
         <RecentTicketsSection recentTickets={recentTickets} />
       </div>
-
-      <BottomNav />
     </MobileShell>
   );
 }
